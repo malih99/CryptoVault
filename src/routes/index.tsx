@@ -1,6 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import AppShell from "../components/layout/AppShell";
-import DashboardPage from "..//features/dashboard/DashboardPage";
+import DashboardPage from "../features/dashboard/DashboardPage";
 import PortfolioPage from "../features/portfolio/PortfolioPage";
 import StakingPage from "../features/staking/StakingPage";
 import TransactionsPage from "../features/transactions/TransactionsPage";

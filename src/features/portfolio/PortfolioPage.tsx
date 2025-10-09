@@ -1,6 +1,6 @@
-import Card from "../../../components/ui/Card";
-import AssetDonut from "../../../components/charts/AssetDonut";
-import { mockHoldings } from "../../../lib/api/mock";
+import Card from "../../components/ui/Card";
+import AssetDonut from "../../components/charts/AssetDonut";
+import { mockHoldings } from "../../lib/api/mock";
 
 export default function PortfolioPage() {
   const total = mockHoldings.reduce((s, r) => s + r.value, 0);
