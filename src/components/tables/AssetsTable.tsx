@@ -7,14 +7,16 @@ export default function AssetsTable() {
     <Card className="p-5">
       <div className="text-white mb-3">Assets</div>
       <div className="overflow-x-auto">
-        <T>
+        <T className="min-w-[720px]">
           <THEAD>
             <TR>
               <TH className="pl-2">Token</TH>
-              <TH>Price</TH>
+              <TH className="hidden sm:table-cell">Price</TH>
               <TH>Holdings</TH>
               <TH>Value</TH>
-              <TH className="text-right pr-2">24h Change</TH>
+              <TH className="text-right pr-2 hidden md:table-cell">
+                24h Change
+              </TH>
             </TR>
           </THEAD>
           <TBODY>
@@ -31,10 +33,12 @@ export default function AssetsTable() {
                     </div>
                   </div>
                 </TD>
-                <TD>${r.price.toLocaleString()}</TD>
+                <TD className="hidden sm:table-cell">
+                  ${r.price.toLocaleString()}
+                </TD>
                 <TD>{r.qty}</TD>
                 <TD>${r.value.toLocaleString()}</TD>
-                <TD className="text-right pr-2">
+                <TD className="text-right pr-2 hidden md:table-cell">
                   <span
                     className={
                       r.change >= 0 ? "text-emerald-400" : "text-red-400"

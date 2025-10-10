@@ -6,8 +6,9 @@ import AssetsTable from "../../components/tables/AssetsTable";
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-4 gap-4">
+    <div className="mx-auto w-full max-w-[1280px] space-y-6">
+      {/* KPI row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <Stat
           label="Total Value"
           value="$24,580"
@@ -38,29 +39,34 @@ export default function DashboardPage() {
         />
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <Card className="col-span-2 p-5">
+      {/* Chart + Wallet */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <Card className="p-5 xl:col-span-2">
           <div className="flex items-center justify-between mb-3">
-            <div className="text-white">Portfolio Value (30 days)</div>
+            <div className="text-white font-medium">
+              Portfolio Value (30 days)
+            </div>
             <div className="flex gap-2">
-              <span className="px-2 py-1 rounded-lg bg-emerald-700/30 text-emerald-300 text-xs">
-                30D
-              </span>
-              <span className="px-2 py-1 rounded-lg text-xs text-gray-400">
+              <button className="px-2 py-1 rounded-lg text-xs text-gray-400 hover:bg-white/5">
                 7D
-              </span>
-              <span className="px-2 py-1 rounded-lg text-xs text-gray-400">
+              </button>
+              <button className="px-2 py-1 rounded-lg bg-emerald-700/30 text-emerald-300 text-xs">
+                30D
+              </button>
+              <button className="px-2 py-1 rounded-lg text-xs text-gray-400 hover:bg-white/5">
                 90D
-              </span>
+              </button>
             </div>
           </div>
           <PortfolioLine />
         </Card>
+
         <Card className="p-5 grid place-items-center text-gray-400">
           <WalletSummary />
         </Card>
       </div>
 
+      {/* Assets table */}
       <AssetsTable />
     </div>
   );
