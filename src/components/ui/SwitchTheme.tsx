@@ -1,11 +1,20 @@
-// SwitchTheme.tsx
 import { useEffect, useState } from "react";
 import { Sun, Moon } from "lucide-react";
+
 export default function SwitchTheme() {
   const [dark, setDark] = useState(true);
+
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", dark);
+    const html = document.documentElement;
+    if (dark) {
+      html.classList.add("dark");
+      html.classList.remove("light");
+    } else {
+      html.classList.remove("dark");
+      html.classList.add("light");
+    }
   }, [dark]);
+
   return (
     <button
       aria-label="Toggle theme"

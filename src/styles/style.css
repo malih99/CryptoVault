@@ -16,6 +16,25 @@
     --accent: #34d399;
   }
 
+  .light {
+    --bg: #f9fafb;
+    --card: #ffffff;
+    --border: #e5e7eb;
+    --text: #111827;
+    --muted: #6b7280;
+
+    --success: #16a34a;
+    --danger: #dc2626;
+    --warning: #f59e0b;
+    --accent: #059669;
+  }
+
+  body {
+    @apply antialiased;
+    background: var(--bg);
+    color: var(--text);
+  }
+
   html,
   body,
   #root {
@@ -60,15 +79,16 @@
 @layer components {
   .app {
     @apply min-h-screen grid;
-    grid-template-columns: 240px 1fr; /* سایدبار 240px + محتوای اصلی */
+    grid-template-columns: 240px 1fr;
     background: var(--bg);
   }
 
   .app-header {
-    @apply h-16 border-b border-border flex items-center justify-between px-4 sm:px-6;
-    background: var(--card);
+    @apply h-16 border-b flex items-center justify-between px-4 sm:px-6;
     border-radius: 0;
     box-shadow: none;
+    background: var(--card);
+    border-color: var(--border);
   }
 
   main {
