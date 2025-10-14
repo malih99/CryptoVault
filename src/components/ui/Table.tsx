@@ -1,28 +1,40 @@
-export function T({ children, className = "" }: any) {
+import { ReactNode } from "react";
+
+type BaseProps = {
+  children: ReactNode;
+  className?: string;
+};
+
+export function T({ children, className = "" }: BaseProps) {
   return <table className={`w-full ${className}`}>{children}</table>;
 }
-export function TH({ children, className = "" }: any) {
-  return (
-    <th className={`text-left font-medium text-gray-300 py-3 ${className}`}>
-      {children}
-    </th>
-  );
+
+export function THEAD({ children, className = "" }: BaseProps) {
+  return <thead className={`bg-white/5 ${className}`}>{children}</thead>;
 }
-export function TD({ children, className = "" }: any) {
-  return (
-    <td className={`py-4 text-sm text-gray-200 ${className}`}>{children}</td>
-  );
+
+export function TBODY({ children, className = "" }: BaseProps) {
+  return <tbody className={className}>{children}</tbody>;
 }
-export function TR({ children, className = "" }: any) {
+
+export function TR({ children, className = "" }: BaseProps) {
   return (
     <tr className={`border-t border-border hover:bg-white/5 ${className}`}>
       {children}
     </tr>
   );
 }
-export function THEAD({ children }: any) {
-  return <thead className="bg-white/5">{children}</thead>;
+
+export function TH({ children, className = "" }: BaseProps) {
+  return (
+    <th className={`text-left font-medium text-gray-300 py-3 ${className}`}>
+      {children}
+    </th>
+  );
 }
-export function TBODY({ children }: any) {
-  return <tbody>{children}</tbody>;
+
+export function TD({ children, className = "" }: BaseProps) {
+  return (
+    <td className={`py-4 text-sm text-gray-200 ${className}`}>{children}</td>
+  );
 }

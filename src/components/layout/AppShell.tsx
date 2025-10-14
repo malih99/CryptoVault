@@ -4,7 +4,7 @@ import Sidebar from "./Sidebar";
 
 export default function AppShell() {
   return (
-    <div className="app text-gray-100">
+    <div className="app text-gray-100 flex">
       <Sidebar />
       <div className="w-full mr-auto">
         <Header />
