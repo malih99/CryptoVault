@@ -150,10 +150,8 @@
   /* KPI Stat */
   .stat {
     @apply h-[84px] sm:h-[96px] rounded-2xl border px-5 py-4 flex items-center justify-between;
-    /* بوردر تیره‌تر مثل کارت‌ها */
     border-color: var(--border-strong);
 
-    /* بک‌گراند لایه‌ای برای عمق */
     background: linear-gradient(
         180deg,
         rgba(255, 255, 255, 0.02) 0%,
@@ -166,7 +164,6 @@
       ),
       var(--card);
 
-    /* سایهٔ لطیف */
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03),
       0 0 0 1px rgba(0, 0, 0, 0.35), 0 10px 22px -16px rgba(0, 0, 0, 0.42);
 
@@ -204,7 +201,6 @@
     color: var(--muted);
   }
 
-  /* چیپ سمت راست KPI */
   .kpi-chip {
     @apply inline-flex items-center justify-center rounded-lg text-sm px-2 py-1;
     border: 1px solid var(--border-strong);
@@ -214,7 +210,7 @@
         rgba(255, 255, 255, 0.01) 100%
       ),
       rgba(255, 255, 255, 0.02);
-    color: #d1d5db; /* خنثی روشن */
+    color: #d1d5db;
   }
 
   .kpi-chip:hover {
