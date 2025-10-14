@@ -4,18 +4,25 @@ export default function Stat({
   right,
 }: {
   label: string;
-  value: string;
+  value: string | number;
   right?: React.ReactNode;
 }) {
   return (
-    <div className="h-[84px] sm:h-[96px] rounded-2xl border border-border bg-card px-5 py-4 flex items-center justify-between">
+    <div className="stat">
       <div>
-        <div className="text-[13px] sm:text-sm text-gray-400">{label}</div>
-        <div className="text-lg sm:text-xl font-semibold text-white mt-1">
-          {value}
-        </div>
+        <div className="stat__label">{label}</div>
+        <div className="stat__value">{value}</div>
       </div>
-      {right && <div className="text-gray-400 shrink-0">{right}</div>}
+
+      {right && (
+        <div className="stat__right">
+          {typeof right === "string" ? (
+            <div className="kpi-chip">{right}</div>
+          ) : (
+            right
+          )}
+        </div>
+      )}
     </div>
   );
 }

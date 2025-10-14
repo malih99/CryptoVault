@@ -12,30 +12,22 @@ export default function DashboardPage() {
         <Stat
           label="Total Value"
           value="$24,580"
-          right={
-            <div className="border border-border rounded-lg px-2 py-1">$</div>
-          }
+          right={<div className="kpi-chip">$</div>}
         />
         <Stat
           label="24h Change"
           value="+4.2%"
-          right={
-            <div className="border border-border rounded-lg px-2 py-1">📈</div>
-          }
+          right={<div className="kpi-chip">📈</div>}
         />
         <Stat
           label="Assets"
           value="12"
-          right={
-            <div className="border border-border rounded-lg px-2 py-1">📦</div>
-          }
+          right={<div className="kpi-chip">📦</div>}
         />
         <Stat
           label="Staked"
           value="$8,320"
-          right={
-            <div className="border border-border rounded-lg px-2 py-1">⛓</div>
-          }
+          right={<div className="kpi-chip">⛓</div>}
         />
       </div>
 
