@@ -4,17 +4,16 @@ import Header from "./Header";
 import Sidebar from "./Sidebar";
 
 export default function AppShell() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-bg text-gray-100 overflow-hidden">
+    <div className="min-h-screen bg-bg text-gray-100 lg:grid lg:grid-cols-[240px_1fr]">
       {/* Sidebar */}
-      <Sidebar open={sidebarOpen} setOpen={setSidebarOpen} />
-
-      {/* Main Content */}
-      <div className="flex flex-1 flex-col lg:pl-[240px] relative z-0">
-        <Header onOpenSidebar={() => setSidebarOpen(true)} />
-        <main className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pt-6">
+      <Sidebar open={mobileOpen} setOpen={setMobileOpen} />
+      {/* Header + Main */}
+      <div className="flex flex-col">
+        <Header onOpenSidebar={() => setMobileOpen(true)} />
+        <main className="mt-6 px-4 sm:px-6">
           <Outlet />
         </main>
       </div>

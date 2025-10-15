@@ -24,7 +24,6 @@ export default function Sidebar({
   open: boolean;
   setOpen: (v: boolean) => void;
 }) {
-  // جلوگیری از اسکرول موقع باز بودن منو
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => {
