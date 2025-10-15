@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -6,11 +6,10 @@ import {
   Wallet,
   Repeat,
   Settings,
-  Menu,
   X,
 } from "lucide-react";
 
-const items = [
+const navItems = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/portfolio", label: "Portfolio", icon: PieChart },
   { to: "/staking", label: "Staking", icon: Wallet },
@@ -18,64 +17,71 @@ const items = [
   { to: "/settings", label: "Settings", icon: Settings },
 ];
 
-export default function Sidebar() {
-  const [open, setOpen] = useState(true);
+export default function Sidebar({
+  open,
+  setOpen,
+}: {
+  open: boolean;
+  setOpen: (v: boolean) => void;
+}) {
+  // جلوگیری از اسکرول موقع باز بودن منو
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
 
   return (
     <>
-      {/* دکمه برای موبایل */}
-      <button
-        className="sm:hidden fixed top-4 left-4 z-50 h-9 w-9 grid place-items-center rounded-xl border border-border bg-card/80 text-gray-300 hover:bg-white/10"
-        onClick={() => setOpen(!open)}
-      >
-        {open ? <X size={18} /> : <Menu size={18} />}
-      </button>
+      {/* لایه پشت منو (فقط در موبایل) */}
+      <div
+        className={`fixed inset-0 z-30 bg-black/50 backdrop-blur-[2px] transition-opacity lg:hidden ${
+          open
+            ? "opacity-100 pointer-events-auto"
+            : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setOpen(false)}
+      />
 
+      {/* سایدبار */}
       <aside
-        className={`
-          fixed sm:static z-40 h-full transition-all duration-300
-          ${open ? "w-56" : "w-0 sm:w-16"}
-          overflow-hidden sm:overflow-visible
-          bg-bg/70 border-r border-border p-4
-        `}
+        className={`fixed inset-y-0 left-0 z-40 w-64 bg-card/95 border-r border-border backdrop-blur-sm
+        transform transition-transform duration-300 ease-in-out
+        ${open ? "translate-x-0" : "-translate-x-full"}
+        lg:translate-x-0 lg:static lg:w-[240px] lg:h-screen`}
       >
-        <div
-          className={`flex items-center gap-2 mb-6 transition-all ${
-            open ? "opacity-100" : "opacity-0 sm:opacity-100"
-          }`}
-        >
-          <div className="h-8 w-8 rounded-full bg-emerald-500 shrink-0" />
-          <div
-            className={`font-semibold text-sm transition-all ${
-              open ? "opacity-100" : "opacity-0 sm:opacity-100"
-            }`}
-          >
-            CryptoVault
+        {/* لوگو + دکمه بستن */}
+        <div className="flex items-center justify-between px-4 py-4 border-b border-border">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-full bg-emerald-500" />
+            <span className="font-semibold text-sm">CryptoVault</span>
           </div>
+          <button
+            className="lg:hidden h-9 w-9 grid place-items-center rounded-xl border border-border text-gray-300 hover:bg-white/10"
+            onClick={() => setOpen(false)}
+          >
+            <X size={18} />
+          </button>
         </div>
 
-        <nav className="space-y-1">
-          {items.map(({ to, label, icon: Icon }) => (
+        {/* لینک‌ها */}
+        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+          {navItems.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
+              onClick={() => setOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all
-                ${
+                `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
                   isActive
                     ? "bg-white/5 text-white"
                     : "text-gray-300 hover:bg-white/5"
                 }`
               }
             >
-              <Icon size={18} className="shrink-0" />
-              <span
-                className={`transition-all ${
-                  open ? "opacity-100" : "opacity-0 sm:opacity-100"
-                }`}
-              >
-                {label}
-              </span>
+              <Icon size={18} />
+              <span>{label}</span>
             </NavLink>
           ))}
         </nav>
