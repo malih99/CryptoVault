@@ -7,13 +7,12 @@ export default function AppShell() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-bg text-gray-100 lg:grid lg:grid-cols-[240px_1fr]">
-      {/* Sidebar */}
+    <div className="min-h-dvh bg-bg text-gray-100 lg:grid lg:grid-cols-[240px_1fr]">
       <Sidebar open={mobileOpen} setOpen={setMobileOpen} />
-      {/* Header + Main */}
-      <div className="flex flex-col">
+
+      <div className="flex min-h-dvh flex-col">
         <Header onOpenSidebar={() => setMobileOpen(true)} />
-        <main className="mt-6 px-4 sm:px-6">
+        <main className="mt-6 px-4 sm:px-6 pb-16">
           <Outlet />
         </main>
       </div>
