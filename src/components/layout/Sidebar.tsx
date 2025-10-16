@@ -48,7 +48,8 @@ export default function Sidebar({
         className={`fixed inset-y-0 left-0 z-40 w-64 bg-card/95 border-r border-border backdrop-blur-sm
         transform transition-transform duration-300 ease-in-out
         ${open ? "translate-x-0" : "-translate-x-full"}
-        lg:translate-x-0 lg:static lg:w-[240px] lg:h-screen`}
+        /* دسکتاپ: سایدبار چسبان با ارتفاع کامل ویوپورت */
+        lg:translate-x-0 lg:sticky lg:top-0 lg:w-[240px] lg:h-[100dvh]`}
       >
         {/* لوگو + دکمه بستن */}
         <div className="flex items-center justify-between px-4 py-4 border-b border-border">
