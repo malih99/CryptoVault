@@ -4,28 +4,30 @@ import StakePositionCard from "./StakePositionCard";
 export default function StakingPage() {
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         <Card className="p-5">
           <div className="text-gray-300 text-sm">Total Staked</div>
-          <div className="text-2xl text-white mt-2">$5,337.50</div>
-          <div className="text-emerald-400 text-sm mt-1">
+          <div className="mt-2 text-white text-xl sm:text-2xl">$5,337.50</div>
+          <div className="mt-1 text-emerald-400 text-sm">
             4 active positions
           </div>
         </Card>
+
         <Card className="p-5">
           <div className="text-gray-300 text-sm">Total Rewards</div>
-          <div className="text-2xl text-white mt-2">$88.72</div>
-          <div className="text-emerald-400 text-sm mt-1">This month</div>
+          <div className="mt-2 text-white text-xl sm:text-2xl">$88.72</div>
+          <div className="mt-1 text-emerald-400 text-sm">This month</div>
         </Card>
+
         <Card className="p-5">
           <div className="text-gray-300 text-sm">Average APY</div>
-          <div className="text-2xl text-white mt-2">10.9%</div>
-          <div className="text-gray-400 text-sm mt-1">Across all pools</div>
+          <div className="mt-2 text-white text-xl sm:text-2xl">10.9%</div>
+          <div className="mt-1 text-gray-400 text-sm">Across all pools</div>
         </Card>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div className="col-span-2 space-y-4">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <div className="space-y-4 xl:col-span-2">
           <StakePositionCard
             sym="SOL"
             staked="4.5 SOL"
@@ -48,17 +50,20 @@ export default function StakingPage() {
             apy="12.5%"
           />
         </div>
+
         <Card className="p-5">
-          <div className="text-white mb-4">Manage Staking</div>
-          <div className="flex gap-2 mb-4">
-            <button className="px-4 py-2 rounded-lg bg-white text-black">
+          <div className="mb-4 text-white">Manage Staking</div>
+
+          <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button className="w-full px-4 py-2 rounded-lg bg-white text-black">
               Stake
             </button>
-            <button className="px-4 py-2 rounded-lg border border-border">
+            <button className="w-full px-4 py-2 rounded-lg border border-border">
               Unstake
             </button>
           </div>
-          <div className="grid place-items-center h-36 text-gray-400">
+
+          <div className="grid h-36 place-items-center text-gray-400">
             <div className="text-center">
               🔒 Select a token to start staking
             </div>
