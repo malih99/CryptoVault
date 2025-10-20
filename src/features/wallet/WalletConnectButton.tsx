@@ -1,4 +1,3 @@
-// WalletConnectButton.tsx
 import { useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import WalletPopover from "./WalletPopover";
