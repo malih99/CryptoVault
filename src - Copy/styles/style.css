@@ -1,0 +1,444 @@
+/* Tailwind layers */
+@reference "../index.css";
+
+@layer base {
+  :root {
+    /* Design tokens (Dark theme) */
+    --bg: #0b0f1a;
+    --card: #0f1726;
+    --border: #1d2939;
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+    --border-strong: color-mix(in oklab, var(--border) 65%, #000 35%);
+    --card-elev: color-mix(in oklab, var(--card) 94%, transparent);
+
+    --success: #22c55e;
+    --danger: #f87171;
+    --warning: #fbbf24;
+    --accent: #34d399;
+  }
+
+  .light {
+    --bg: #f9fafb;
+    --card: #ffffff;
+    --border: #e5e7eb;
+    --text: #111827;
+    --muted: #6b7280;
+
+    --success: #16a34a;
+    --danger: #dc2626;
+    --warning: #f59e0b;
+    --accent: #059669;
+  }
+
+  body {
+    @apply antialiased;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+  :root {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply antialiased;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  /* ریست‌های سبک */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p {
+    margin: 0;
+  }
+
+  /* اسکرول‌بار ظریف */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+  }
+  *::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 9999px;
+  }
+}
+
+@layer components {
+  .app {
+    @apply min-h-screen grid;
+    grid-template-columns: 240px 1fr;
+    background: var(--bg);
+  }
+
+  .app-header {
+    @apply h-16 border-b flex items-center justify-between px-4 sm:px-6;
+    border-radius: 0;
+    box-shadow: none;
+    background: var(--card);
+    border-color: var(--border);
+  }
+
+  main {
+    @apply w-full px-0;
+  }
+
+  .app-container {
+    @apply p-0;
+  }
+  main {
+    @apply w-full px-0;
+  }
+}
+
+/* ---------------------------------------
+   2) COMPONENTS
+---------------------------------------- */
+@layer components {
+  /* Card */
+  .card {
+    @apply rounded-2xl border;
+    border-color: var(--border-strong);
+
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.02) 0%,
+        rgba(255, 255, 255, 0) 8%
+      ),
+      radial-gradient(
+        120% 120% at 0% 0%,
+        rgba(255, 255, 255, 0.04) 0%,
+        transparent 40%
+      ),
+      var(--card);
+
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03),
+      0 0 0 1px rgba(0, 0, 0, 0.35), 0 12px 24px -16px rgba(0, 0, 0, 0.45);
+  }
+
+  .card:hover {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      0 0 0 1px rgba(0, 0, 0, 0.45), 0 16px 28px -18px rgba(0, 0, 0, 0.55);
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.025) 0%,
+        rgba(255, 255, 255, 0) 10%
+      ),
+      radial-gradient(
+        120% 120% at 0% 0%,
+        rgba(255, 255, 255, 0.05) 0%,
+        transparent 42%
+      ),
+      var(--card);
+    transition: box-shadow 0.2s ease, background 0.2s ease;
+  }
+
+  /* KPI Stat */
+  .stat {
+    @apply h-[84px] sm:h-[96px] rounded-2xl border px-5 py-4 flex items-center justify-between;
+    border-color: var(--border-strong);
+
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.02) 0%,
+        rgba(255, 255, 255, 0) 10%
+      ),
+      radial-gradient(
+        120% 120% at 0% 0%,
+        rgba(255, 255, 255, 0.035) 0%,
+        transparent 40%
+      ),
+      var(--card);
+
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03),
+      0 0 0 1px rgba(0, 0, 0, 0.35), 0 10px 22px -16px rgba(0, 0, 0, 0.42);
+
+    transition: box-shadow 0.2s ease, background 0.2s ease, transform 0.12s ease;
+  }
+
+  .stat:hover {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      0 0 0 1px rgba(0, 0, 0, 0.45), 0 14px 26px -18px rgba(0, 0, 0, 0.52);
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.025) 0%,
+        rgba(255, 255, 255, 0) 12%
+      ),
+      radial-gradient(
+        120% 120% at 0% 0%,
+        rgba(255, 255, 255, 0.045) 0%,
+        transparent 42%
+      ),
+      var(--card);
+  }
+
+  .stat__label {
+    @apply text-[13px] sm:text-sm;
+    color: var(--muted);
+    letter-spacing: 0.01em;
+  }
+
+  .stat__value {
+    @apply text-lg sm:text-xl font-semibold text-white mt-1;
+  }
+
+  .stat__right {
+    @apply shrink-0;
+    color: var(--muted);
+  }
+
+  .kpi-chip {
+    @apply inline-flex items-center justify-center rounded-lg text-sm px-2 py-1;
+    border: 1px solid var(--border-strong);
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.03) 0%,
+        rgba(255, 255, 255, 0.01) 100%
+      ),
+      rgba(255, 255, 255, 0.02);
+    color: #d1d5db;
+  }
+
+  .kpi-chip:hover {
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.04) 0%,
+        rgba(255, 255, 255, 0.015) 100%
+      ),
+      rgba(255, 255, 255, 0.03);
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl text-sm transition-colors select-none;
+    height: 36px;
+    padding-inline: 12px;
+    border: 1px solid transparent;
+  }
+  .btn-ghost {
+    @apply text-gray-300 hover:bg-white/5 active:bg-white/10;
+    border-color: var(--border);
+  }
+  .btn-accent {
+    color: #a7f3d0;
+    border-color: color-mix(in oklab, var(--accent) 60%, transparent);
+  }
+  .btn-accent:hover {
+    background: color-mix(in oklab, var(--accent) 15%, transparent);
+  }
+  .btn-accent:active {
+    background: color-mix(in oklab, var(--accent) 25%, transparent);
+  }
+
+  /* Pills (7D/30D/90D + APY tags) */
+  .pill {
+    @apply px-2 py-1 rounded-lg text-xs;
+    color: var(--muted);
+    border: 1px solid transparent;
+  }
+  .pill--active {
+    color: #86efac;
+    background: rgba(34, 197, 94, 0.18);
+    border-color: rgba(34, 197, 94, 0.25);
+  }
+
+  /* Table */
+  .table-wrap {
+    @apply overflow-x-auto;
+  }
+  .table {
+    @apply w-full min-w-[720px];
+  }
+  .thead {
+    @apply sticky top-0 z-10;
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .tr {
+    @apply border-t hover:bg-white/5;
+    border-color: var(--border);
+  }
+  .th {
+    @apply text-left font-medium py-3 text-sm text-gray-300;
+  }
+  .td {
+    @apply py-4 text-sm text-gray-200;
+  }
+
+  /* Chart container height (for Recharts) */
+  .chart-h {
+    @apply h-56;
+  }
+  @screen sm {
+    .chart-h {
+      @apply h-64;
+    }
+  }
+  @screen xl {
+    .chart-h {
+      @apply h-[280px];
+    }
+  }
+
+  /* Grids */
+  @layer utilities {
+    .grid-kpis {
+      @apply grid grid-cols-1 gap-4;
+    }
+    @screen sm {
+      .grid-kpis {
+        @apply grid-cols-2;
+      }
+    }
+    @screen xl {
+      .grid-kpis {
+        @apply grid-cols-4;
+      }
+    }
+
+    .grid-main {
+      @apply grid grid-cols-1 gap-4;
+    }
+    @screen xl {
+      .grid-main {
+        @apply grid-cols-3;
+      }
+    }
+  }
+
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs;
+  }
+  .badge--success {
+    background: rgba(34, 197, 94, 0.18);
+    color: #86efac;
+  }
+  .badge--danger {
+    background: rgba(248, 113, 113, 0.18);
+    color: #fca5a5;
+  }
+  .badge--muted {
+    background: rgba(255, 255, 255, 0.06);
+    color: #d1d5db;
+  }
+
+  /* Forms (Settings) */
+  .input {
+    @apply h-10 px-3 rounded-xl border bg-transparent text-sm text-gray-200;
+    border-color: var(--border);
+  }
+  .select {
+    @apply h-10 px-3 pr-8 rounded-xl border bg-transparent text-sm text-gray-200;
+    border-color: var(--border);
+  }
+
+  .switch {
+    @apply relative inline-flex h-6 w-10 items-center rounded-full;
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .switch__knob {
+    @apply inline-block h-4 w-4 transform rounded-full bg-white transition;
+    margin-left: 4px;
+  }
+  .switch--on {
+    background: rgba(34, 197, 94, 0.35);
+  }
+  .switch--on .switch__knob {
+    transform: translateX(20px);
+  }
+
+  /* Wallet summary card (right of chart) */
+  .wallet-summary {
+    @apply text-center text-gray-400;
+  }
+  .wallet-summary__icon {
+    @apply text-4xl sm:text-5xl mb-3;
+  }
+}
+
+/* Wallet summary icon */
+.wallet-summary__icon {
+  @apply text-4xl mb-3;
+}
+@screen sm {
+  .wallet-summary__icon {
+    @apply text-5xl;
+  }
+}
+
+/* ---------------------------------------
+   3) UTILITIES (helpers)
+---------------------------------------- */
+@layer utilities {
+  .container-safe {
+    @apply mx-auto w-full max-w-[1280px];
+  }
+  .grid-kpis {
+    @apply grid grid-cols-1 gap-4;
+  }
+  @screen sm {
+    .grid-kpis {
+      @apply grid-cols-2;
+    }
+  }
+  @screen xl {
+    .grid-kpis {
+      @apply grid-cols-4;
+    }
+  }
+
+  .grid-main {
+    @apply grid grid-cols-1 gap-4;
+  }
+  @screen xl {
+    .grid-main {
+      @apply grid-cols-3;
+    }
+  }
+
+  .col-span-2-xl {
+    @apply xl:col-span-2;
+  }
+
+  .hide-sm {
+    @apply hidden;
+  }
+  @screen sm {
+    .hide-sm {
+      @apply table-cell;
+    }
+  }
+
+  .hide-md {
+    @apply hidden;
+  }
+  @screen md {
+    .hide-md {
+      @apply table-cell;
+    }
+  }
+
+  .text-muted {
+    color: var(--muted);
+  }
+  .text-success {
+    color: #86efac;
+  }
+  .text-danger {
+    color: #fca5a5;
+  }
+}
