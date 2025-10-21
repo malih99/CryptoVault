@@ -1,14 +1,11 @@
-import { Menu, Sun, Moon, ChevronDown, Wallet, LogOut } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Menu, Sun, Moon } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import WalletConnectButton from "../../features/wallet/WalletConnectButton";
 
-export default function Header({
-  onOpenSidebar,
-}: {
-  onOpenSidebar: () => void;
-}) {
+type Props = { onOpenSidebar: () => void };
+
+export default function Header({ onOpenSidebar }: Props) {
   const [dark, setDark] = useState(true);
-  const [walletOpen, setWalletOpen] = useState(false);
-  const btnRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     const html = document.documentElement;
@@ -19,7 +16,7 @@ export default function Header({
   return (
     <header
       className="
-        sticky top-0 z-30 h-16
+        sticky top-0 z-40 h-16
         flex items-center justify-between
         px-4 sm:px-6 rounded-2xl
         border border-slate-700/60
@@ -29,89 +26,46 @@ export default function Header({
     >
       {/* Left */}
       <div className="flex items-center gap-2">
+        {/* فقط موبایل */}
         <button
           onClick={onOpenSidebar}
           aria-label="Open sidebar"
           className="
-            lg:hidden h-9 w-9 flex items-center justify-center
+            lg:hidden h-9 w-9 inline-flex items-center justify-center
             rounded-xl border border-slate-700/60
-            text-slate-200 hover:bg-white/10 transition-colors
+            hover:bg-white/10 transition-colors
           "
         >
-          <Menu size={18} />
+          {/* رنگ و ضخامت واضح تا همیشه نمایش داده شود */}
+          <Menu className="text-slate-200" size={18} strokeWidth={1.75} />
         </button>
-        <span className="text-xs sm:text-sm font-medium tracking-wide text-slate-300">
+
+        {/* عنوان خیلی کوچک‌تر طبق طرح */}
+        <span className="text-[11px] sm:text-xs font-medium tracking-wide text-slate-300">
           Crypto Portfolio Dashboard
         </span>
       </div>
 
       {/* Right */}
-      <div className="flex items-center gap-2 sm:gap-3 relative">
-        {/* Theme Switch */}
+      <div className="relative flex items-center gap-2 sm:gap-3">
         <button
           onClick={() => setDark((d) => !d)}
           aria-label="Toggle theme"
           className="
-            h-9 w-9 flex items-center justify-center
+            h-9 w-9 inline-flex items-center justify-center
             rounded-xl border border-slate-700/60
-            text-slate-200 hover:bg-white/10 active:bg-white/20 transition-colors
+            hover:bg-white/10 active:bg-white/20 transition-colors
           "
         >
-          {dark ? <Sun size={16} /> : <Moon size={16} />}
+          {dark ? (
+            <Sun className="text-slate-200" size={16} strokeWidth={1.75} />
+          ) : (
+            <Moon className="text-slate-200" size={16} strokeWidth={1.75} />
+          )}
         </button>
 
-        {/* Wallet Button */}
-        <button
-          ref={btnRef}
-          onClick={() => setWalletOpen((v) => !v)}
-          className="
-            h-9 px-3 inline-flex items-center justify-center gap-2
-            rounded-xl border border-emerald-500/60
-            text-sm font-medium leading-none text-emerald-300
-            hover:bg-emerald-600/10 active:bg-emerald-600/20 transition-colors
-          "
-        >
-          Connect Wallet
-          <ChevronDown size={14} className="opacity-70" />
-        </button>
-
-        {/* Wallet Popover */}
-        {walletOpen && (
-          <div
-            className="
-              absolute right-0 top-12 w-56
-              bg-slate-800 border border-slate-700 rounded-xl
-              shadow-lg overflow-hidden z-40
-            "
-          >
-            <div className="p-3 text-sm text-gray-200 border-b border-slate-700">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-emerald-500/30 flex items-center justify-center">
-                  <Wallet size={16} className="text-emerald-400" />
-                </div>
-                <div>
-                  <div className="text-xs text-slate-400">Connected as</div>
-                  <div className="font-medium text-emerald-300">
-                    0xA3c4...7B9f
-                  </div>
-                </div>
-              </div>
-            </div>
-            <button
-              onClick={() => {
-                setWalletOpen(false);
-                alert("Disconnected!");
-              }}
-              className="
-                flex items-center gap-2 w-full text-left px-4 py-3 text-sm
-                hover:bg-slate-700/50 transition-colors
-              "
-            >
-              <LogOut size={16} />
-              <span>Disconnect</span>
-            </button>
-          </div>
-        )}
+        {/* از کامپوننت خودت استفاده می‌کنیم */}
+        <WalletConnectButton />
       </div>
     </header>
   );
