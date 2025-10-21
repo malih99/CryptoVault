@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import {
+  Menu,
   LayoutDashboard,
   PieChart,
   Wallet,
   Repeat,
   Settings,
-  X,
 } from "lucide-react";
 
 const navItems = [
@@ -58,10 +58,15 @@ export default function Sidebar({
             <span className="font-semibold text-sm">CryptoVault</span>
           </div>
           <button
-            className="lg:hidden h-9 w-9 grid place-items-center rounded-xl border border-border text-gray-300 hover:bg-white/10"
             onClick={() => setOpen(false)}
+            aria-label="Open sidebar"
+            className="
+              lg:hidden h-9 w-9 flex items-center justify-center
+              rounded-xl border border-slate-700/60
+              text-slate-200 hover:bg-white/10 transition-colors
+            "
           >
-            <X size={18} />
+            <Menu size={18} />
           </button>
         </div>
 
