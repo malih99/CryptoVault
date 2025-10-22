@@ -9,43 +9,27 @@ export default function DashboardPage() {
     <div className="mx-auto w-full max-w-[1280px] space-y-6">
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <Stat
-          label="Total Value"
-          value="$24,580"
-          right={<div className="kpi-chip">$</div>}
-        />
-        <Stat
-          label="24h Change"
-          value="+4.2%"
-          right={<div className="kpi-chip">📈</div>}
-        />
-        <Stat
-          label="Assets"
-          value="12"
-          right={<div className="kpi-chip">📦</div>}
-        />
-        <Stat
-          label="Staked"
-          value="$8,320"
-          right={<div className="kpi-chip">⛓</div>}
-        />
+        <Stat label="Total Value" value="$24,580" right="$" />
+        <Stat label="24h Change" value="+4.2%" right="📈" />
+        <Stat label="Assets" value="12" right="📦" />
+        <Stat label="Staked" value="$8,320" right="⛓" />
       </div>
 
       {/* Chart + Wallet */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         <Card className="p-5 xl:col-span-2">
           <div className="flex items-center justify-between mb-3">
-            <div className="text-white font-medium">
+            <div className="text-slate-900 font-medium">
               Portfolio Value (30 days)
             </div>
             <div className="flex gap-2">
-              <button className="px-2 py-1 rounded-lg text-xs text-gray-400 hover:bg-white/5">
+              <button className="px-2 py-1 rounded-lg text-xs text-slate-600 hover:bg-slate-100">
                 7D
               </button>
-              <button className="px-2 py-1 rounded-lg bg-emerald-700/30 text-emerald-300 text-xs">
+              <button className="px-2 py-1 rounded-lg text-xs bg-emerald-50 text-emerald-600 border border-emerald-200">
                 30D
               </button>
-              <button className="px-2 py-1 rounded-lg text-xs text-gray-400 hover:bg-white/5">
+              <button className="px-2 py-1 rounded-lg text-xs text-slate-600 hover:bg-slate-100">
                 90D
               </button>
             </div>
@@ -53,7 +37,7 @@ export default function DashboardPage() {
           <PortfolioLine />
         </Card>
 
-        <Card className="p-5 grid place-items-center text-gray-400">
+        <Card className="p-5 grid place-items-center text-slate-500">
           <WalletSummary />
         </Card>
       </div>

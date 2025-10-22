@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 export default function Stat({
   label,
   value,
@@ -5,19 +7,21 @@ export default function Stat({
 }: {
   label: string;
   value: string | number;
-  right?: React.ReactNode;
+  right?: ReactNode;
 }) {
   return (
-    <div className="stat">
+    <div className="h-[88px] sm:h-[96px] rounded-2xl border border-slate-200 bg-white shadow-sm px-5 py-4 flex items-center justify-between">
       <div>
-        <div className="stat__label">{label}</div>
-        <div className="stat__value">{value}</div>
+        <div className="text-[13px] sm:text-sm text-slate-500">{label}</div>
+        <div className="text-xl font-semibold text-slate-900 mt-1">{value}</div>
       </div>
 
       {right && (
-        <div className="stat__right">
+        <div className="shrink-0">
           {typeof right === "string" ? (
-            <div className="kpi-chip">{right}</div>
+            <span className="inline-flex items-center rounded-lg text-sm px-2 py-1 border border-slate-200 bg-slate-50 text-slate-600">
+              {right}
+            </span>
           ) : (
             right
           )}

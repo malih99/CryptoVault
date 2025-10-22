@@ -5,7 +5,7 @@ import { mockHoldings } from "../../lib/api/mock";
 export default function AssetsTable() {
   return (
     <Card className="p-5">
-      <div className="text-white mb-3">Assets</div>
+      <div className="text-slate-900 font-medium mb-3">Assets</div>
       <div className="overflow-x-auto">
         <T className="min-w-[720px]">
           <THEAD>
@@ -24,12 +24,12 @@ export default function AssetsTable() {
               <TR key={r.sym}>
                 <TD className="pl-2">
                   <div className="flex items-center gap-3">
-                    <div className="h-7 w-7 rounded-full bg-emerald-500 grid place-items-center text-xs font-bold">
+                    <div className="h-7 w-7 rounded-full bg-emerald-500 grid place-items-center text-xs font-bold text-white">
                       {r.sym[0]}
                     </div>
                     <div>
-                      <div className="text-white">{r.sym}</div>
-                      <div className="text-xs text-gray-400">{r.name}</div>
+                      <div className="text-slate-900 font-medium">{r.sym}</div>
+                      <div className="text-xs text-slate-500">{r.name}</div>
                     </div>
                   </div>
                 </TD>
@@ -41,7 +41,7 @@ export default function AssetsTable() {
                 <TD className="text-right pr-2 hidden md:table-cell">
                   <span
                     className={
-                      r.change >= 0 ? "text-emerald-400" : "text-red-400"
+                      r.change >= 0 ? "text-emerald-600" : "text-rose-600"
                     }
                   >
                     {r.change >= 0 ? "↗" : "↘"} {r.change}%

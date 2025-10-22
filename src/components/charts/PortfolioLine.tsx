@@ -17,27 +17,22 @@ export function PortfolioLine() {
           data={mockLine}
           margin={{ top: 12, right: 12, bottom: 8, left: 0 }}
         >
-          {/* خطوط ریز پس‌زمینه */}
           <CartesianGrid
-            stroke="rgba(255,255,255,0.06)"
+            stroke="rgba(15,23,42,0.08)"
             strokeDasharray="3 3"
             vertical
             horizontal
           />
-
-          {/* محور افقی مینیمال مثل تصویر */}
           <XAxis
             dataKey="day"
-            tick={{ fill: "#9CA3AF", fontSize: 10 }}
+            tick={{ fill: "#64748B", fontSize: 11 }} // slate-500
             axisLine={false}
             tickLine={false}
             interval="preserveStartEnd"
           />
-
-          {/* محور عمودی مینیمال */}
           <YAxis
-            width={40}
-            tick={{ fill: "#9CA3AF", fontSize: 10 }}
+            width={44}
+            tick={{ fill: "#64748B", fontSize: 11 }}
             tickFormatter={(v: number) =>
               v >= 1000 ? `$${Math.round(v / 1000)}k` : `$${v}`
             }
@@ -45,33 +40,29 @@ export function PortfolioLine() {
             tickLine={false}
             domain={["dataMin - 500", "dataMax + 500"]}
           />
-
-          {/* Tooltip تیره و مینیمال */}
           <Tooltip
-            cursor={{ stroke: "rgba(255,255,255,0.08)" }}
+            cursor={{ stroke: "rgba(15,23,42,0.08)" }}
             contentStyle={{
-              background: "#0F1726",
-              border: "1px solid #1D2939",
+              background: "#ffffff",
+              border: "1px solid #E2E8F0", // slate-200
               borderRadius: 12,
-              color: "#E5E7EB",
+              color: "#0F172A", // slate-900
               padding: "8px 10px",
+              boxShadow: "0 8px 24px rgba(15,23,42,0.08)",
             }}
-            labelStyle={{ color: "#9CA3AF" }}
+            labelStyle={{ color: "#64748B" }}
             formatter={(v: number) => [`$${v.toLocaleString()}`, "Value"]}
           />
-
-          {/* گرادیان خیلی نرم زیر خط، مثل طرح */}
           <defs>
             <linearGradient id="pv" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#22C55E" stopOpacity={0.18} />
-              <stop offset="100%" stopColor="#22C55E" stopOpacity={0.02} />
+              <stop offset="0%" stopColor="#10B981" stopOpacity={0.2} />
+              <stop offset="100%" stopColor="#10B981" stopOpacity={0.03} />
             </linearGradient>
           </defs>
-
           <Line
             type="monotone"
             dataKey="value"
-            stroke="#22C55E"
+            stroke="#10B981"
             strokeWidth={2}
             dot={false}
             activeDot={{ r: 4 }}

@@ -1,9 +1,19 @@
+import { ReactNode } from "react";
+
 export default function Card({
   children,
   className = "",
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }) {
-  return <div className={`card ${className}`}>{children}</div>;
+  return (
+    <div
+      className={
+        "rounded-2xl border border-slate-200 bg-white shadow-sm " + className
+      }
+    >
+      {children}
+    </div>
+  );
 }
