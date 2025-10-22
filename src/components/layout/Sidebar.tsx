@@ -33,7 +33,6 @@ export default function Sidebar({
 
   return (
     <>
-      {/* لایه پشت منو (فقط در موبایل) */}
       <div
         className={`fixed inset-0 z-30 bg-black/50 backdrop-blur-[2px] transition-opacity lg:hidden ${
           open
@@ -43,34 +42,31 @@ export default function Sidebar({
         onClick={() => setOpen(false)}
       />
 
-      {/* سایدبار */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-card/95 border-r border-border backdrop-blur-sm
-        transform transition-transform duration-300 ease-in-out
-        ${open ? "translate-x-0" : "-translate-x-full"}
-        /* دسکتاپ: سایدبار چسبان با ارتفاع کامل ویوپورت */
-        lg:translate-x-0 lg:sticky lg:top-0 lg:w-[240px] lg:h-[100dvh]`}
+        className={`fixed inset-y-0 left-0 z-40 w-64
+  bg-white border-r border-slate-200 backdrop-blur-0
+  transform transition-transform duration-300 ease-in-out
+  ${open ? "translate-x-0" : "-translate-x-full"}
+  lg:translate-x-0 lg:sticky lg:top-0 lg:w-[240px] lg:h-[100dvh]`}
       >
-        {/* لوگو + دکمه بستن */}
-        <div className="flex items-center justify-between px-4 py-4 border-b border-border">
+        <div className="flex items-center justify-between px-4 py-4 border-b border-slate-200">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-full bg-emerald-500" />
-            <span className="font-semibold text-sm">CryptoVault</span>
+            <span className="font-semibold text-slate-900 text-sm">
+              CryptoVault
+            </span>
           </div>
+
           <button
             onClick={() => setOpen(false)}
-            aria-label="Open sidebar"
-            className="
-              lg:hidden h-9 w-9 flex items-center justify-center
-              rounded-xl border border-slate-700/60
-              text-slate-200 hover:bg-white/10 transition-colors
-            "
+            aria-label="Close sidebar"
+            className="lg:hidden h-9 w-9 flex items-center justify-center rounded-xl
+                 border border-slate-300 text-slate-700 hover:bg-slate-100 transition-colors"
           >
             <Menu size={18} />
           </button>
         </div>
 
-        {/* لینک‌ها */}
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
           {navItems.map(({ to, label, icon: Icon }) => (
             <NavLink
@@ -78,11 +74,12 @@ export default function Sidebar({
               to={to}
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
+                [
+                  "flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors",
                   isActive
-                    ? "bg-white/5 text-white"
-                    : "text-gray-300 hover:bg-white/5"
-                }`
+                    ? "bg-slate-100 text-slate-900"
+                    : "text-slate-700 hover:bg-slate-100",
+                ].join(" ")
               }
             >
               <Icon size={18} />
