@@ -25,7 +25,7 @@ export function PortfolioLine() {
           />
           <XAxis
             dataKey="day"
-            tick={{ fill: "#64748B", fontSize: 11 }} // slate-500
+            tick={{ fill: "#64748B", fontSize: 11 }}
             axisLine={false}
             tickLine={false}
             interval="preserveStartEnd"
@@ -43,15 +43,14 @@ export function PortfolioLine() {
           <Tooltip
             cursor={{ stroke: "rgba(15,23,42,0.08)" }}
             contentStyle={{
-              background: "#ffffff",
-              border: "1px solid #E2E8F0", // slate-200
+              background: "var(--tw-bg-opacity,1) ? 'white' : '#0B1220'",
+              backgroundColor: "var(--recharts-tooltip-bg, #ffffff)",
+              border: "1px solid #E2E8F0",
               borderRadius: 12,
-              color: "#0F172A", // slate-900
+              color: "#0F172A",
               padding: "8px 10px",
               boxShadow: "0 8px 24px rgba(15,23,42,0.08)",
             }}
-            labelStyle={{ color: "#64748B" }}
-            formatter={(v: number) => [`$${v.toLocaleString()}`, "Value"]}
           />
           <defs>
             <linearGradient id="pv" x1="0" y1="0" x2="0" y2="1">
