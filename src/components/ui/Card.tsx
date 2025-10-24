@@ -10,7 +10,9 @@ export default function Card({
   return (
     <div
       className={
-        "rounded-2xl border border-slate-200 bg-white shadow-sm " + className
+        "rounded-2xl border border-slate-200 dark:border-slate-800 " +
+        "bg-white dark:bg-slate-900 shadow-sm " +
+        className
       }
     >
       {children}
