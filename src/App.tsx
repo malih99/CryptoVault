@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { RouterProvider } from "react-router-dom";
 import AppProviders from "./providers/AppProviders";
 import { router } from "./routes/index";
+import { useUI } from "./store/ui.store";
 import "./i18n";
 import { useTranslation } from "react-i18next";
 
