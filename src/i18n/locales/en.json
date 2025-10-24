@@ -1,6 +1,17 @@
 {
   "dashboard": {
     "title": "Crypto Portfolio Dashboard",
+    "recentActivity": "Recent Activity",
+    "quickActions": "Quick Actions",
+    "marketOverview": "Market Overview",
+    "newsAlerts": "News & Alerts",
+    "new": "new",
+    "actions": {
+      "send": "Send",
+      "receive": "Receive",
+      "swap": "Swap",
+      "buy": "Buy"
+    },
     "kpi": {
       "totalValue": "Total Value",
       "change24h": "24h Change",

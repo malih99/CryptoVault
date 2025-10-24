@@ -68,3 +68,66 @@ export const mockTx = [
     status: "confirmed",
   },
 ];
+
+// src/lib/api/mock.ts  (افزودن/به‌روزرسانی)
+export const mockRecentActivity = [
+  {
+    id: 1,
+    type: "receive",
+    title: "Receive SOL",
+    amount: +2.5,
+    time: "2 hours ago",
+  },
+  {
+    id: 2,
+    type: "send",
+    title: "Send USDC",
+    amount: -150,
+    time: "5 hours ago",
+  },
+  {
+    id: 3,
+    type: "swap",
+    title: "Swapped ETH For SOL",
+    amount: +0.05,
+    time: "1 day ago",
+  },
+  {
+    id: 4,
+    type: "receive",
+    title: "Receive BTC",
+    amount: +0.012,
+    time: "2 days ago",
+  },
+];
+
+export const mockMarket = [
+  { sym: "BTC", name: "Bitcoin", price: 68200, change: +2.45 },
+  { sym: "ETH", name: "Ethereum", price: 2450, change: -1.23 },
+  { sym: "SOL", name: "Solana", price: 198.4, change: +5.67 },
+  { sym: "ADA", name: "Cardano", price: 0.52, change: +3.21 },
+];
+
+export const mockNews = [
+  {
+    id: 1,
+    kind: "trend",
+    title: "Bitcoin reaches new all-time high",
+    desc: "BTC surpasses $68,000 with strong institutional support",
+    time: "2 hours ago",
+  },
+  {
+    id: 2,
+    kind: "info",
+    title: "Your Solana stake rewards are ready",
+    desc: "+2.5 SOL earned from staking this week",
+    time: "5 hours ago",
+  },
+  {
+    id: 3,
+    kind: "alert",
+    title: "New device login detected",
+    desc: "A new device accessed your account from New York",
+    time: "1 day ago",
+  },
+];

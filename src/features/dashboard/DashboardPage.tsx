@@ -1,10 +1,13 @@
-// src/features/dashboard/DashboardPage.tsx
 import Card from "../../components/ui/Card";
 import Stat from "../../components/ui/Stat";
 import { PortfolioLine } from "../../components/charts/PortfolioLine";
 import WalletSummary from "../../features/wallet/WalletSummary";
 import AssetsTable from "../../components/tables/AssetsTable";
 import { useTranslation } from "react-i18next";
+import RecentActivity from "./RecentActivity";
+import QuickActions from "./QuickActions";
+import MarketOverview from "./MarketOverview";
+import NewsAlerts from "./NewsAlerts";
 
 export default function DashboardPage() {
   const { t } = useTranslation();
@@ -46,8 +49,20 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* Assets table */}
-      <AssetsTable />
+      {/* Row: Recent / Quick Actions / Market */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+        <RecentActivity />
+        <QuickActions />
+        <MarketOverview />
+      </div>
+
+      {/* Row: Assets table + News */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <div className="xl:col-span-2">
+          <AssetsTable />
+        </div>
+        <NewsAlerts />
+      </div>
     </div>
   );
 }

@@ -1,6 +1,17 @@
 {
   "dashboard": {
     "title": "داشبورد پورتفوی رمزارزی",
+    "recentActivity": "فعالیت‌های اخیر",
+    "quickActions": "اقدامات سریع",
+    "marketOverview": "نمای کلی بازار",
+    "newsAlerts": "خبرها و اعلان‌ها",
+    "new": "جدید",
+    "actions": {
+      "send": "ارسال",
+      "receive": "دریافت",
+      "swap": "سواپ",
+      "buy": "خرید"
+    },
     "kpi": {
       "totalValue": "ارزش کل",
       "change24h": "تغییرات ۲۴ساعته",
