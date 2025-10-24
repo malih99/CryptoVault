@@ -1,0 +1,27 @@
+{
+  "dashboard": {
+    "title": "داشبورد پورتفوی رمزارزی",
+    "kpi": {
+      "totalValue": "ارزش کل",
+      "change24h": "تغییرات ۲۴ساعته",
+      "assets": "دارایی‌ها",
+      "staked": "استیک‌شده"
+    },
+    "portfolioValue": "ارزش پورتفوی (۳۰ روز)",
+    "range": { "7d": "۷روز", "30d": "۳۰روز", "90d": "۹۰روز" },
+    "assets": "دارایی‌ها",
+    "connectWalletTitle": "برای دیدن موجودی کیف پول را وصل کنید",
+    "connectedWallet": "کیف پول متصل",
+    "network": "شبکه",
+    "token": "توکن",
+    "price": "قیمت",
+    "holdings": "موجودی",
+    "value": "ارزش",
+    "change": "تغییر ۲۴ساعته"
+  },
+  "actions": {
+    "openSidebar": "بازکردن منو",
+    "toggleTheme": "تغییر تم",
+    "connectWallet": "اتصال کیف پول"
+  }
+}

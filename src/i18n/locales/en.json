@@ -1,0 +1,27 @@
+{
+  "dashboard": {
+    "title": "Crypto Portfolio Dashboard",
+    "kpi": {
+      "totalValue": "Total Value",
+      "change24h": "24h Change",
+      "assets": "Assets",
+      "staked": "Staked"
+    },
+    "portfolioValue": "Portfolio Value (30 days)",
+    "range": { "7d": "7D", "30d": "30D", "90d": "90D" },
+    "assets": "Assets",
+    "connectWalletTitle": "Connect your wallet to view your balance",
+    "connectedWallet": "Connected wallet",
+    "network": "Network",
+    "token": "Token",
+    "price": "Price",
+    "holdings": "Holdings",
+    "value": "Value",
+    "change": "24h Change"
+  },
+  "actions": {
+    "openSidebar": "Open sidebar",
+    "toggleTheme": "Toggle theme",
+    "connectWallet": "Connect Wallet"
+  }
+}
