@@ -9,20 +9,26 @@ function ThemeEffect() {
   const { theme, locale } = useUI();
   const { i18n } = useTranslation();
 
-  // sync i18n
   useEffect(() => {
     i18n.changeLanguage(locale);
   }, [locale, i18n]);
 
-  // apply theme classes on <html>
   useEffect(() => {
     const html = document.documentElement;
+    const body = document.body;
+
     const prefersDark = window.matchMedia(
       "(prefers-color-scheme: dark)"
     ).matches;
     const dark = theme === "dark" || (theme === "system" && prefersDark);
-    html.classList.toggle("dark", dark);
-    html.classList.toggle("light", !dark);
+
+    // ⚠️ پاک‌سازی همهٔ ریشه‌ها
+    html.classList.remove("dark", "light");
+    body.classList.remove("dark", "light");
+
+    // فقط روی <html> ست کن
+    html.classList.add(dark ? "dark" : "light");
+
     html.setAttribute("lang", locale);
     html.setAttribute("dir", locale === "fa" ? "rtl" : "ltr");
   }, [theme, locale]);
@@ -34,16 +40,8 @@ export default function AppShell() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div
-      className="
-        min-h-screen
-        bg-white dark:bg-slate-950
-        text-slate-900 dark:text-slate-100
-        lg:grid lg:grid-cols-[240px_1fr]
-        [color-scheme:light] dark:[color-scheme:dark]  /* برای اسکرول‌بار/کامپوننت‌های بومی */
-      "
-    >
-      <ThemeEffect /> {/* ✅ تم و زبان اینجا اعمال می‌شود */}
+    <div className="min-h-screen bg-bg text-gray-100 lg:grid lg:grid-cols-[240px_1fr]">
+      <ThemeEffect />
       <Sidebar open={mobileOpen} setOpen={setMobileOpen} />
       <div className="flex min-h-screen flex-col">
         <Header onOpenSidebar={() => setMobileOpen(true)} />
