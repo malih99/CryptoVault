@@ -11,7 +11,7 @@ export default function Card({
     <div
       className={
         "rounded-2xl border border-slate-200 dark:border-slate-800 " +
-        "bg-white dark:bg-slate-900 shadow-sm " +
+        "bg-white dark:bg-slate-900 shadow-sm dark:shadow-none " +
         className
       }
     >

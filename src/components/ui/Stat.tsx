@@ -15,7 +15,7 @@ export default function Stat({
   return (
     <div className="h-[88px] sm:h-[96px] rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm px-5 py-4 flex items-center justify-between">
       <div>
-        <div className="text-[13px] sm:text-sm text-slate-500 dark:text-slate-400">
+        <div className="text-[13px] sm:text-sm text-slate-600 dark:text-slate-400">
           {label}
         </div>
         <div className="text-xl font-semibold text-slate-900 dark:text-slate-100 mt-1">
@@ -28,7 +28,12 @@ export default function Stat({
       {right && (
         <div className="shrink-0">
           {typeof right === "string" ? (
-            <span className="inline-flex items-center rounded-lg text-sm px-2 py-1 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300">
+            <span
+              className="inline-flex items-center rounded-lg text-sm px-2 py-1
+                             border border-slate-200 dark:border-slate-800
+                             bg-slate-100 dark:bg-slate-800/60
+                             text-slate-700 dark:text-slate-300"
+            >
               {right}
             </span>
           ) : (

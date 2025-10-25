@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -9,7 +10,22 @@ import {
 } from "recharts";
 import { mockLine } from "../../lib/api/mock";
 
+function useDark() {
+  const [isDark, set] = useState(false);
+  useEffect(() => {
+    const el = document.documentElement;
+    const apply = () => set(el.classList.contains("dark"));
+    apply();
+    const obs = new MutationObserver(apply);
+    obs.observe(el, { attributes: true, attributeFilter: ["class"] });
+    return () => obs.disconnect();
+  }, []);
+  return isDark;
+}
+
 export function PortfolioLine() {
+  const isDark = useDark(); // ✅ فقط داخل کامپوننت
+
   return (
     <div className="h-56 sm:h-64 xl:h-[280px]">
       <ResponsiveContainer width="100%" height="100%">
@@ -43,13 +59,14 @@ export function PortfolioLine() {
           <Tooltip
             cursor={{ stroke: "rgba(15,23,42,0.08)" }}
             contentStyle={{
-              background: "var(--tw-bg-opacity,1) ? 'white' : '#0B1220'",
-              backgroundColor: "var(--recharts-tooltip-bg, #ffffff)",
-              border: "1px solid #E2E8F0",
+              background: isDark ? "#0B1220" : "#ffffff",
+              border: `1px solid ${isDark ? "#1f2937" : "#E2E8F0"}`,
               borderRadius: 12,
-              color: "#0F172A",
+              color: isDark ? "#F8FAFC" : "#0F172A",
               padding: "8px 10px",
-              boxShadow: "0 8px 24px rgba(15,23,42,0.08)",
+              boxShadow: isDark
+                ? "0 8px 24px rgba(0,0,0,0.2)"
+                : "0 8px 24px rgba(15,23,42,0.08)",
             }}
           />
           <defs>
