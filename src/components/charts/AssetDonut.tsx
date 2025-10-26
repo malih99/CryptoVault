@@ -5,6 +5,12 @@ export default function AssetDonut({
 }: {
   data: { name: string; value: number; color: string }[];
 }) {
+  const isDark = document.documentElement.classList.contains("dark");
+  const tipBg = isDark ? "rgb(15 23 42)" : "#ffffff"; // slate-900 در دارک
+  const tipBorder = isDark ? "rgba(255,255,255,0.08)" : "#e5e7eb";
+  const tipText = isDark ? "#e5e7eb" : "#0f172a";
+  const tipLabel = isDark ? "#9ca3af" : "#475569";
+
   return (
     <div className="h-[260px]">
       <ResponsiveContainer width="100%" height="100%">
@@ -14,19 +20,17 @@ export default function AssetDonut({
               <Cell key={i} fill={d.color} />
             ))}
           </Pie>
-
-          {/* Light tooltip */}
           <Tooltip
-            cursor={{ stroke: "rgba(2,6,23,0.08)" }}
+            cursor={{ stroke: "rgba(255,255,255,0.06)" }}
             contentStyle={{
-              background: "#ffffff",
-              border: "1px solid #e5e7eb",
+              background: tipBg,
+              border: `1px solid ${tipBorder}`,
               borderRadius: 12,
               boxShadow:
-                "0 10px 20px -10px rgba(2,6,23,0.12), 0 2px 6px rgba(2,6,23,0.06)",
-              color: "#0f172a",
+                "0 10px 20px -10px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.25)",
+              color: tipText,
             }}
-            labelStyle={{ color: "#475569" }}
+            labelStyle={{ color: tipLabel }}
             formatter={(v: number, n: string) => [
               `$${Number(v).toLocaleString()}`,
               n,
