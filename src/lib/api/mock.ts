@@ -69,7 +69,6 @@ export const mockTx = [
   },
 ];
 
-// src/lib/api/mock.ts  (افزودن/به‌روزرسانی)
 export const mockRecentActivity = [
   {
     id: 1,
@@ -130,4 +129,121 @@ export const mockNews = [
     desc: "A new device accessed your account from New York",
     time: "1 day ago",
   },
+];
+export const mockTx = [
+  {
+    type: "in",
+    token: "SOL",
+    amount: "+2.5 SOL",
+    value: "$495.50",
+    from: "7xKx...9mPq",
+    hash: "abc123...def456",
+    time: "2025-10-09 14:32:45",
+    status: "confirmed",
+  },
+  {
+    type: "out",
+    token: "USDC",
+    amount: "-150 USDC",
+    value: "$150.00",
+    from: "9Kp2...7hQw",
+    hash: "ghi789...jk012",
+    time: "2025-10-09 12:15:22",
+    status: "confirmed",
+  },
+  {
+    type: "swap",
+    token: "ETH",
+    amount: "+0.05 ETH",
+    value: "$122.50",
+    from: "ETH ⇄ SOL",
+    hash: "mn045...pq678",
+    time: "2025-10-08 18:45:10",
+    status: "confirmed",
+  },
+  {
+    type: "in",
+    token: "BTC",
+    amount: "+0.012 BTC",
+    value: "$818.40",
+    from: "2WsR...a4k9",
+    hash: "stu081...vw234",
+    time: "2025-10-08 09:20:33",
+    status: "confirmed",
+  },
+  {
+    type: "out",
+    token: "SOL",
+    amount: "-1.2 SOL",
+    value: "$238.08",
+    from: "5Lr3...8nHt",
+    hash: "yza567...bc899",
+    time: "2025-10-07 16:55:18",
+    status: "confirmed",
+  },
+  {
+    type: "in",
+    token: "USDC",
+    amount: "+500 USDC",
+    value: "$500.00",
+    from: "USDC ⇄ ETH",
+    hash: "efg213...hij456",
+    time: "2025-10-07 11:30:42",
+    status: "confirmed",
+  },
+  {
+    type: "in",
+    token: "MATIC",
+    amount: "+120 MATIC",
+    value: "$60.00",
+    from: "3Kp0...2vTr",
+    hash: "klm789...nop812",
+    time: "2025-10-06 20:12:55",
+    status: "confirmed",
+  },
+  {
+    type: "out",
+    token: "ETH",
+    amount: "-0.3 ETH",
+    value: "$735.00",
+    from: "6Fp9...55kv",
+    hash: "qr345...tuv878",
+    time: "2025-10-06 14:08:27",
+    status: "pending",
+  },
+];
+
+// --- summary ماهانه برای Monthly Summary ---
+export const mockTxMonthlySummary = [
+  {
+    id: "2025-10",
+    monthLabel: "October 2025",
+    sent: 3,
+    received: 3,
+    swapped: 2,
+    totalVolume: "$4,119.48",
+  },
+  {
+    id: "2025-09",
+    monthLabel: "September 2025",
+    sent: 5,
+    received: 6,
+    swapped: 3,
+    totalVolume: "$7,585.50",
+  },
+  {
+    id: "2025-08",
+    monthLabel: "August 2025",
+    sent: 4,
+    received: 5,
+    swapped: 2,
+    totalVolume: "$5,730.25",
+  },
+];
+
+export const mockTxFeesByMonth = [
+  { month: "Jul", value: 12.45 },
+  { month: "Aug", value: 18.92 },
+  { month: "Sep", value: 15.34 },
+  { month: "Oct", value: 22.18 },
 ];
