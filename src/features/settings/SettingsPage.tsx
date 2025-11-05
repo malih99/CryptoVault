@@ -1,102 +1,7 @@
-import Card from "../../components/ui/Card";
-import { useState } from "react";
-
-/** کوچک‌ترین واحد سوئیچ – بدون نیاز به CSS جدا */
-function Toggle({ defaultChecked = false }: { defaultChecked?: boolean }) {
-  const [checked, setChecked] = useState(defaultChecked);
-
-  return (
-    <label className="inline-flex items-center cursor-pointer">
-      <input
-        type="checkbox"
-        className="sr-only peer"
-        checked={checked}
-        onChange={() => setChecked(!checked)}
-      />
-      <div
-        className="
-          flex h-6 w-10 items-center rounded-full px-1
-          bg-slate-200 dark:bg-slate-700
-          peer-checked:bg-emerald-500
-          peer-checked:justify-end
-          justify-start
-          transition-all
-        "
-      >
-        <div className="h-4 w-4 rounded-full bg-white shadow" />
-      </div>
-    </label>
-  );
-}
-
-/** سکشن عمومی برای Settings (عنوان + توضیح + محتوا) */
-function SettingsSection({
-  title,
-  description,
-  children,
-  className = "",
-}: {
-  title: string;
-  description?: string;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <Card className={`p-5 sm:p-6 ${className}`}>
-      <div className="mb-4">
-        <h2 className="text-sm font-medium text-slate-900 dark:text-slate-100">
-          {title}
-        </h2>
-        {description && (
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            {description}
-          </p>
-        )}
-      </div>
-      <div className="space-y-4">{children}</div>
-    </Card>
-  );
-}
-
-/** ردیف تنظیمات (عنوان/توضیح سمت چپ – کنترل‌ها سمت راست) */
-function SettingRow({
-  label,
-  helper,
-  children,
-  borderTop = true,
-}: {
-  label: string;
-  helper?: string;
-  children: React.ReactNode;
-  borderTop?: boolean;
-}) {
-  return (
-    <div
-      className={`flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between ${
-        borderTop ? "pt-4 border-t border-slate-100 dark:border-slate-800" : ""
-      }`}
-    >
-      <div className="space-y-0.5">
-        <div className="text-sm text-slate-900 dark:text-slate-100">
-          {label}
-        </div>
-        {helper && (
-          <div className="text-xs text-slate-500 dark:text-slate-400">
-            {helper}
-          </div>
-        )}
-      </div>
-      <div className="flex items-center gap-3">{children}</div>
-    </div>
-  );
-}
-
-/** استایل مشترک برای input / select */
-const fieldBase =
-  "h-10 rounded-xl border px-3 text-sm " +
-  "bg-white text-slate-900 border-slate-200 " +
-  "dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700 " +
-  "focus:outline-none focus:ring-1 focus:ring-emerald-500/60";
+import Toggle from "../../components/ui/Toggle";
+import SettingsSection from "./SettingsSection";
+import SettingRow from "./SettingRow";
+import { fieldBase } from "./settingsFieldBase";
 
 export default function SettingsPage() {
   return (
@@ -379,7 +284,7 @@ export default function SettingsPage() {
         </SettingRow>
       </SettingsSection>
 
-      {/* Privacy + Danger Zone */}
+      {/* Privacy */}
       <SettingsSection
         title="Privacy"
         description="Control your privacy and data sharing."
