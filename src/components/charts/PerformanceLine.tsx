@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   LineChart,
   Line,
@@ -8,7 +8,6 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-import Card from "../ui/Card";
 import { mockLine } from "../../lib/api/mock";
 
 const tabs = ["1M", "3M", "1Y", "All"] as const;
@@ -29,37 +28,50 @@ function gen(tab: Tab) {
   }));
 }
 
+function useDark() {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const el = document.documentElement;
+    const apply = () => setIsDark(el.classList.contains("dark"));
+    apply();
+    const obs = new MutationObserver(apply);
+    obs.observe(el, { attributes: true, attributeFilter: ["class"] });
+    return () => obs.disconnect();
+  }, []);
+
+  return isDark;
+}
+
 export default function PerformanceLine() {
   const [tab, setTab] = useState<Tab>("1M");
   const data = useMemo(() => gen(tab), [tab]);
-  const isDark = document.documentElement.classList.contains("dark");
+  const isDark = useDark();
 
   return (
-    <Card className="p-0">
-      <div className="px-5 pt-4">
-        <div className="mb-3 flex items-center gap-2">
-          {tabs.map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`rounded-full px-3 py-1 text-xs border transition-colors
-                ${
-                  t === tab
-                    ? "bg-[rgba(34,197,94,0.18)] text-emerald-300 border-emerald-500/30"
-                    : "text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:bg-white/5"
-                }`}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2">
+        {tabs.map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={`rounded-full px-3 py-1 text-xs border transition-colors
+              ${
+                t === tab
+                  ? "bg-[rgba(34,197,94,0.18)] text-emerald-700 dark:text-emerald-300 border-emerald-500/30"
+                  : "text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5"
+              }`}
+          >
+            {t}
+          </button>
+        ))}
       </div>
 
-      <div className="h-64 px-4 pb-5">
+      <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 8, left: 8, right: 8 }}>
             <CartesianGrid
-              stroke={isDark ? "rgba(255,255,255,0.06)" : "rgba(2,6,23,0.06)"}
+              stroke={isDark ? "rgba(255,255,255,0.06)" : "rgba(15,23,42,0.06)"}
               vertical={false}
             />
             <XAxis dataKey="day" hide />
@@ -90,6 +102,6 @@ export default function PerformanceLine() {
           </LineChart>
         </ResponsiveContainer>
       </div>
-    </Card>
+    </div>
   );
 }

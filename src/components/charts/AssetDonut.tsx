@@ -1,11 +1,28 @@
+import { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+
+function useDark() {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const el = document.documentElement;
+    const apply = () => setIsDark(el.classList.contains("dark"));
+    apply();
+    const obs = new MutationObserver(apply);
+    obs.observe(el, { attributes: true, attributeFilter: ["class"] });
+    return () => obs.disconnect();
+  }, []);
+
+  return isDark;
+}
 
 export default function AssetDonut({
   data,
 }: {
   data: { name: string; value: number; color: string }[];
 }) {
-  const isDark = document.documentElement.classList.contains("dark");
+  const isDark = useDark();
+
   const tipBg = isDark ? "rgb(15 23 42)" : "#ffffff"; // slate-900 در دارک
   const tipBorder = isDark ? "rgba(255,255,255,0.08)" : "#e5e7eb";
   const tipText = isDark ? "#e5e7eb" : "#0f172a";

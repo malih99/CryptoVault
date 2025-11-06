@@ -1,4 +1,5 @@
 import Card from "../../components/ui/Card";
+
 export default function KPIStat({
   label,
   value,
@@ -9,6 +10,7 @@ export default function KPIStat({
   change: string;
 }) {
   const neg = change.trim().startsWith("-");
+
   return (
     <Card className="p-4 sm:p-5 text-center sm:text-left">
       <div className="text-sm text-slate-500 dark:text-slate-400">{label}</div>

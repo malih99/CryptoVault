@@ -8,6 +8,7 @@ import { mockHoldings } from "../../lib/api/mock";
 
 export default function PortfolioPage() {
   const total = mockHoldings.reduce((s, r) => s + r.value, 0);
+
   const palette = ["#f59e0b", "#60a5fa", "#22c55e", "#38bdf8", "#a78bfa"];
   const donut = mockHoldings.slice(0, 5).map((r, i) => ({
     name: r.sym,
@@ -15,19 +16,8 @@ export default function PortfolioPage() {
     color: palette[i % palette.length],
   }));
 
-  const cardBg = getComputedStyle(
-    document.documentElement
-  ).classList?.contains?.("dark")
-    ? "rgb(15 23 42)"
-    : "#ffffff";
-
   return (
-    <section
-      className="mx-auto w-full max-w-[1280px] space-y-6"
-      style={{
-        ["--tw-card" as any]: cardBg,
-      }}
-    >
+    <section className="mx-auto w-full max-w-[1280px] space-y-6 px-3 sm:px-0">
       {/* ===== Portfolio Overview ===== */}
       <Card className="p-5 sm:p-6">
         <h2 className="mb-3 text-sm font-medium text-slate-900 dark:text-slate-200">
@@ -42,13 +32,13 @@ export default function PortfolioPage() {
             borderColor: "rgba(16,185,129,0.35)",
           }}
         >
-          <div className="text-sm text-emerald-300/90 dark:text-emerald-300">
+          <div className="text-sm text-emerald-900 dark:text-emerald-200">
             Total Portfolio Value
           </div>
-          <div className="mt-1 text-2xl font-semibold text-emerald-50 sm:text-3xl">
+          <div className="mt-1 text-2xl font-semibold text-emerald-800 sm:text-3xl dark:text-emerald-50">
             ${total.toLocaleString()}
           </div>
-          <div className="mt-1 text-sm text-emerald-400">
+          <div className="mt-1 text-sm text-emerald-700 dark:text-emerald-300">
             + $4,892.20 (24.87%)
           </div>
         </div>
@@ -97,46 +87,62 @@ export default function PortfolioPage() {
 
       {/* ===== Profit/Loss Breakdown Footer Summary ===== */}
       <Card className="p-0 overflow-hidden">
-        <div className="flex items-center justify-between gap-4 bg-white/40 px-5 py-3 dark:bg-white/5">
-          <div className="text-xs text-slate-500">Total Invested</div>
+        <div className="flex flex-wrap items-center justify-between gap-4 bg-white/40 px-5 py-3 dark:bg-white/5">
+          <div className="text-xs text-slate-500 dark:text-slate-400">
+            Total Invested
+          </div>
           <div className="text-sm font-medium text-slate-900 dark:text-white">
             ${Math.round(total * 0.72).toLocaleString()}
           </div>
-          <div className="text-xs text-slate-500">Current Value</div>
+          <div className="text-xs text-slate-500 dark:text-slate-400">
+            Current Value
+          </div>
           <div className="text-sm font-medium text-slate-900 dark:text-white">
             ${total.toLocaleString()}
           </div>
-          <div className="text-xs text-slate-500">Profit/Loss</div>
-          <div className="text-sm text-emerald-400">+$4,792</div>
+          <div className="text-xs text-slate-500 dark:text-slate-400">
+            Profit/Loss
+          </div>
+          <div className="text-sm text-emerald-500 dark:text-emerald-400">
+            +$4,792
+          </div>
         </div>
       </Card>
 
       {/* ===== Portfolio Analysis (۳ کارت) ===== */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <Card className="p-5">
-          <div className="text-sm text-slate-500">Total Profit/Loss</div>
-          <div className="mt-2 text-xl font-semibold text-emerald-400">
+          <div className="text-sm text-slate-500 dark:text-slate-400">
+            Total Profit/Loss
+          </div>
+          <div className="mt-2 text-xl font-semibold text-emerald-500 dark:text-emerald-400">
             +$4,892.20
           </div>
-          <div className="mt-1 text-xs text-emerald-300/80">
+          <div className="mt-1 text-xs text-emerald-700/80 dark:text-emerald-300/80">
             +24.87% since inception
           </div>
         </Card>
         <Card className="p-5">
-          <div className="text-sm text-slate-500">Best Performer</div>
+          <div className="text-sm text-slate-500 dark:text-slate-400">
+            Best Performer
+          </div>
           <div className="mt-2 text-xl font-semibold text-slate-900 dark:text-white">
             Bitcoin (BTC)
           </div>
-          <div className="mt-1 text-xs text-emerald-300/80">
+          <div className="mt-1 text-xs text-emerald-700/80 dark:text-emerald-300/80">
             +102.45% return
           </div>
         </Card>
         <Card className="p-5">
-          <div className="text-sm text-slate-500">Portfolio Diversity</div>
+          <div className="text-sm text-slate-500 dark:text-slate-400">
+            Portfolio Diversity
+          </div>
           <div className="mt-2 text-xl font-semibold text-slate-900 dark:text-white">
             Well Balanced
           </div>
-          <div className="mt-1 text-xs text-slate-400">5 assets</div>
+          <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            5 assets
+          </div>
         </Card>
       </div>
 

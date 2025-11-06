@@ -16,6 +16,7 @@ export default function AssetRow({
   color: string;
 }) {
   const pos = pnl >= 0;
+
   return (
     <Card className="px-4 py-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -28,15 +29,22 @@ export default function AssetRow({
             <div className="text-sm font-medium text-slate-900 dark:text-slate-100">
               {name}
             </div>
-            <div className="text-xs text-slate-500">{sym}</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">
+              {sym}
+            </div>
           </div>
         </div>
-        <div className="flex flex-1 items-center justify-between sm:justify-end gap-6">
-          <div className="text-xs text-slate-500">Invested</div>
+
+        <div className="flex flex-1 items-center justify-between gap-6 sm:justify-end">
+          <div className="text-xs text-slate-500 dark:text-slate-400">
+            Invested
+          </div>
           <div className="text-sm font-medium text-slate-900 dark:text-white">
             ${invested.toLocaleString()}
           </div>
-          <div className="text-xs text-slate-500">Current Value</div>
+          <div className="text-xs text-slate-500 dark:text-slate-400">
+            Current Value
+          </div>
           <div className="text-sm font-medium text-slate-900 dark:text-white">
             ${current.toLocaleString()}
           </div>
