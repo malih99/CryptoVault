@@ -1,4 +1,3 @@
-// src/features/dashboard/QuickActions.tsx
 import Card from "../../components/ui/Card";
 import { Send, Download, RefreshCcw, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";

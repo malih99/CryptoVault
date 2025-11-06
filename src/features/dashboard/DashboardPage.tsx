@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Card from "../../components/ui/Card";
 import Stat from "../../components/ui/Stat";
 import { PortfolioLine } from "../../components/charts/PortfolioLine";
@@ -9,8 +10,20 @@ import QuickActions from "./QuickActions";
 import MarketOverview from "./MarketOverview";
 import NewsAlerts from "./NewsAlerts";
 
+type RangeKey = "7d" | "30d" | "90d";
+
 export default function DashboardPage() {
   const { t } = useTranslation();
+  const [range, setRange] = useState<RangeKey>("30d");
+
+  const pillBase =
+    "px-2 py-1 rounded-lg text-xs transition-colors " +
+    "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60";
+  const pillActive =
+    "bg-emerald-50 dark:bg-emerald-400/10 text-emerald-700 dark:text-emerald-300 " +
+    "border border-emerald-200 dark:border-emerald-800";
+  const pillInactive =
+    "border border-transparent text-slate-600 dark:text-slate-300";
 
   return (
     <div className="mx-auto w-full max-w-[1280px] space-y-6 px-3 sm:px-0">
@@ -30,18 +43,36 @@ export default function DashboardPage() {
               {t("dashboard.portfolioValue")}
             </div>
             <div className="flex gap-2">
-              <button className="px-2 py-1 rounded-lg text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60">
+              <button
+                type="button"
+                onClick={() => setRange("7d")}
+                className={
+                  pillBase + " " + (range === "7d" ? pillActive : pillInactive)
+                }
+              >
                 {t("dashboard.range.7d")}
               </button>
-              <button className="px-2 py-1 rounded-lg text-xs bg-emerald-50 dark:bg-emerald-400/10 text-emerald-600 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+              <button
+                type="button"
+                onClick={() => setRange("30d")}
+                className={
+                  pillBase + " " + (range === "30d" ? pillActive : pillInactive)
+                }
+              >
                 {t("dashboard.range.30d")}
               </button>
-              <button className="px-2 py-1 rounded-lg text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60">
+              <button
+                type="button"
+                onClick={() => setRange("90d")}
+                className={
+                  pillBase + " " + (range === "90d" ? pillActive : pillInactive)
+                }
+              >
                 {t("dashboard.range.90d")}
               </button>
             </div>
           </div>
-          <PortfolioLine />
+          <PortfolioLine range={range} />
         </Card>
 
         <Card className="p-5 grid place-items-center text-slate-500 dark:text-slate-400">

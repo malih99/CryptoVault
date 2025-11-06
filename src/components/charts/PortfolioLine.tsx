@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -9,6 +9,8 @@ import {
   CartesianGrid,
 } from "recharts";
 import { mockLine } from "../../lib/api/mock";
+
+type RangeKey = "7d" | "30d" | "90d";
 
 function useDark() {
   const [isDark, set] = useState(false);
@@ -23,18 +25,34 @@ function useDark() {
   return isDark;
 }
 
-export function PortfolioLine() {
-  const isDark = useDark(); // ✅ فقط داخل کامپوننت
+export function PortfolioLine({ range }: { range: RangeKey }) {
+  const isDark = useDark();
+
+  const data = useMemo(() => {
+    const total = mockLine.length;
+
+    if (range === "7d") {
+      return mockLine.slice(Math.max(0, total - 7));
+    }
+    if (range === "30d") {
+      return mockLine.slice(Math.max(0, total - 30));
+    }
+
+    // 90d یا هر مقدار دیگر → فعلاً کل دیتا
+    return mockLine;
+  }, [range]);
 
   return (
     <div className="h-56 sm:h-64 xl:h-[280px]">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
-          data={mockLine}
+          data={data}
           margin={{ top: 12, right: 12, bottom: 8, left: 0 }}
         >
           <CartesianGrid
-            stroke="rgba(15,23,42,0.08)"
+            stroke={
+              isDark ? "rgba(148,163,184,0.22)" : "rgba(148,163,184,0.18)"
+            }
             strokeDasharray="3 3"
             vertical
             horizontal
