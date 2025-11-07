@@ -21,7 +21,7 @@ export default function StakePositionCard({
 }) {
   return (
     <Card className="p-5">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3 min-w-0">
           <div className="grid h-8 w-8 place-items-center rounded-full bg-emerald-500 font-bold text-black/90">
             {sym[0]}
@@ -39,7 +39,7 @@ export default function StakePositionCard({
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-4">
+      <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-5">
         <div>
           <div className="text-xs text-slate-500 dark:text-slate-400">
             Staked
@@ -63,17 +63,17 @@ export default function StakePositionCard({
           </div>
         </div>
 
-        <div className="col-span-2 sm:col-span-2 flex items-stretch gap-2">
+        <div className="col-span-2 flex items-stretch gap-2 sm:col-span-2">
           <button
             onClick={onStakeMore}
-            className="w-full rounded-xl border px-4 py-2 text-slate-700 border-slate-200 hover:bg-slate-50
+            className="w-full rounded-xl border px-4 py-2 text-sm text-slate-700 border-slate-200 hover:bg-slate-50
                        dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-800"
           >
             Stake More
           </button>
           <button
             onClick={onUnstake}
-            className="w-full rounded-xl border px-4 py-2 text-slate-700 border-slate-200 hover:bg-slate-50
+            className="w-full rounded-xl border px-4 py-2 text-sm text-slate-700 border-slate-200 hover:bg-slate-50
                        dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-800"
           >
             Unstake
