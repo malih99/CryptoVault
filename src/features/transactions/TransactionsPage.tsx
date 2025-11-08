@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import Card from "../../components/ui/Card";
 import TxFilter from "./TxFilter";
 import TxTable from "../../components/tables/TxTable";
@@ -8,21 +9,109 @@ import {
   mockTxMonthlySummary,
   mockTxFeesByMonth,
 } from "../../lib/api/mock";
+import type { TxRecord } from "./types";
 
 function parseUsd(value: string) {
   return Number(value.replace(/[$,]/g, "")) || 0;
 }
 
+type TxTypeFilter = "all" | "in" | "out" | "swap";
+
 export default function TransactionsPage() {
-  const totalTx = mockTx.length;
-  const totalVolume = mockTx.reduce((sum, tx) => sum + parseUsd(tx.value), 0);
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState<TxTypeFilter>("all");
+  const [tokenFilter, setTokenFilter] = useState<string>("all");
+
+  const availableTokens = useMemo(
+    () => Array.from(new Set(mockTx.map((t) => t.token))).sort(),
+    []
+  );
+
+  const filteredTx: TxRecord[] = useMemo(
+    () =>
+      mockTx.filter((tx) => {
+        const q = search.trim().toLowerCase();
+        if (
+          q &&
+          !(
+            tx.token.toLowerCase().includes(q) ||
+            tx.hash.toLowerCase().includes(q)
+          )
+        ) {
+          return false;
+        }
+
+        if (typeFilter !== "all" && tx.type !== typeFilter) {
+          return false;
+        }
+
+        if (tokenFilter !== "all" && tx.token !== tokenFilter) {
+          return false;
+        }
+
+        return true;
+      }),
+    [search, typeFilter, tokenFilter]
+  );
+
+  const totalTx = filteredTx.length;
+  const totalVolume = filteredTx.reduce(
+    (sum, tx) => sum + parseUsd(tx.value),
+    0
+  );
   const avgTx = totalTx ? totalVolume / totalTx : 0;
 
-  const confirmed = mockTx.filter((t) => t.status === "confirmed").length;
+  const confirmed = filteredTx.filter((t) => t.status === "confirmed").length;
   const successRate = totalTx ? (confirmed / totalTx) * 100 : 0;
 
+  const handleExport = () => {
+    if (!filteredTx.length) return;
+
+    const header = [
+      "type",
+      "token",
+      "amount",
+      "value",
+      "from",
+      "hash",
+      "time",
+      "status",
+    ];
+
+    const escape = (v: string) => `"${v.replace(/"/g, '""')}"`; // برای safe بودن CSV
+
+    const rows = filteredTx.map((tx) =>
+      [
+        tx.type,
+        tx.token,
+        tx.amount,
+        tx.value,
+        tx.from,
+        tx.hash,
+        tx.time,
+        tx.status,
+      ]
+        .map(escape)
+        .join(",")
+    );
+
+    const csv = [header.join(","), ...rows].join("\n");
+
+    const blob = new Blob([csv], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "transactions.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
-    <section className="space-y-6">
+    <section className="mx-auto w-full max-w-[1280px] space-y-6 px-3 sm:px-0">
       {/* Header */}
       <div>
         <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
@@ -73,16 +162,23 @@ export default function TransactionsPage() {
       </div>
 
       {/* Analytics row (breakdown, top tokens, fee analysis) */}
-      <TxAnalytics tx={mockTx} feesByMonth={mockTxFeesByMonth} />
+      <TxAnalytics tx={filteredTx} feesByMonth={mockTxFeesByMonth} />
 
       {/* Filters */}
-      <TxFilter />
+      <TxFilter
+        search={search}
+        onSearchChange={setSearch}
+        typeFilter={typeFilter}
+        onTypeChange={setTypeFilter}
+        tokenFilter={tokenFilter}
+        onTokenChange={setTokenFilter}
+        onExport={handleExport}
+        availableTokens={availableTokens}
+      />
 
-      {/* Monthly summary cards */}
       <TxMonthlySummary months={mockTxMonthlySummary} />
 
-      {/* Table / Cards */}
-      <TxTable />
+      <TxTable rows={filteredTx} />
     </section>
   );
 }
