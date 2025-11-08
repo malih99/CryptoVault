@@ -1,17 +1,36 @@
 import Card from "../../components/ui/Card";
 import { T, THEAD, TBODY, TR, TH, TD } from "../../components/ui/Table";
-import { mockTx } from "../../lib/api/mock";
+import type { TxRecord } from "../../features/transactions/types";
 
-export default function TxTable() {
+type Props = {
+  rows: TxRecord[];
+};
+
+export default function TxTable({ rows }: Props) {
+  const isEmpty = rows.length === 0;
+
+  if (isEmpty) {
+    return (
+      <Card className="p-4 sm:p-5">
+        <div className="mb-2 text-sm font-medium text-slate-900 dark:text-slate-50">
+          Transactions
+        </div>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          No transactions match your current filters.
+        </p>
+      </Card>
+    );
+  }
+
   return (
     <Card className="p-4 sm:p-5">
       <div className="mb-3 text-sm font-medium text-slate-900 dark:text-slate-50">
         Transactions
       </div>
 
-      {/* Mobile & Tablet (xs–md): cards */}
+      {/* Mobile & Tablet: cards */}
       <div className="grid gap-3 lg:hidden">
-        {mockTx.map((r, i) => (
+        {rows.map((r, i) => (
           <div
             key={i}
             className="
@@ -117,7 +136,7 @@ export default function TxTable() {
             </TR>
           </THEAD>
           <TBODY>
-            {mockTx.map((r, i) => (
+            {rows.map((r, i) => (
               <TR key={i}>
                 <TD
                   className={
