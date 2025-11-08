@@ -1,19 +1,8 @@
 import Card from "../../components/ui/Card";
-import type { mockTxFeesByMonth as feesType } from "../../lib/api/mock";
-
-type Tx = {
-  type: "in" | "out" | "swap";
-  token: string;
-  amount: string;
-  value: string;
-  from: string;
-  hash: string;
-  time: string;
-  status: string;
-};
+import type { TxRecord } from "./types";
 
 type Props = {
-  tx: Tx[];
+  tx: TxRecord[];
   feesByMonth: { month: string; value: number }[];
 };
 
