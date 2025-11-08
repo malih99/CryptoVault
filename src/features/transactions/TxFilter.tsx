@@ -1,4 +1,34 @@
-export default function TxFilter() {
+import type { ChangeEvent } from "react";
+
+type TxTypeFilter = "all" | "in" | "out" | "swap";
+
+type Props = {
+  search: string;
+  onSearchChange: (value: string) => void;
+  typeFilter: TxTypeFilter;
+  onTypeChange: (value: TxTypeFilter) => void;
+  tokenFilter: string;
+  onTokenChange: (value: string) => void;
+  onExport: () => void;
+  availableTokens: string[];
+};
+
+export default function TxFilter({
+  search,
+  onSearchChange,
+  typeFilter,
+  onTypeChange,
+  tokenFilter,
+  onTokenChange,
+  onExport,
+  availableTokens,
+}: Props) {
+  const handleTypeChange = (e: ChangeEvent<HTMLSelectElement>) =>
+    onTypeChange(e.target.value as TxTypeFilter);
+
+  const handleTokenChange = (e: ChangeEvent<HTMLSelectElement>) =>
+    onTokenChange(e.target.value);
+
   return (
     <div
       className="
@@ -6,6 +36,7 @@ export default function TxFilter() {
         lg:grid-cols-[1fr_auto_auto_auto]
       "
     >
+      {/* Search */}
       <input
         placeholder="Search by token or transaction hash..."
         className="
@@ -16,8 +47,11 @@ export default function TxFilter() {
           dark:placeholder:text-slate-500
         "
         aria-label="Search transactions"
+        value={search}
+        onChange={(e) => onSearchChange(e.target.value)}
       />
 
+      {/* Type filter */}
       <select
         className="
           w-full rounded-xl border border-slate-200 bg-white/60
@@ -26,14 +60,16 @@ export default function TxFilter() {
           dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100
         "
         aria-label="Filter by type"
-        defaultValue="All Types"
+        value={typeFilter}
+        onChange={handleTypeChange}
       >
-        <option>All Types</option>
-        <option>Sent</option>
-        <option>Received</option>
-        <option>Swapped</option>
+        <option value="all">All types</option>
+        <option value="out">Sent</option>
+        <option value="in">Received</option>
+        <option value="swap">Swapped</option>
       </select>
 
+      {/* Token filter */}
       <select
         className="
           w-full rounded-xl border border-slate-200 bg-white/60
@@ -42,16 +78,21 @@ export default function TxFilter() {
           dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100
         "
         aria-label="Filter by token"
-        defaultValue="All Tokens"
+        value={tokenFilter}
+        onChange={handleTokenChange}
       >
-        <option>All Tokens</option>
-        <option>BTC</option>
-        <option>ETH</option>
-        <option>SOL</option>
-        <option>USDC</option>
+        <option value="all">All tokens</option>
+        {availableTokens.map((sym) => (
+          <option key={sym} value={sym}>
+            {sym}
+          </option>
+        ))}
       </select>
 
+      {/* Export */}
       <button
+        type="button"
+        onClick={onExport}
         className="
           w-full rounded-xl border border-slate-200 bg-white text-sm
           px-3 py-2 font-medium text-slate-900
