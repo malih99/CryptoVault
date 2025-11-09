@@ -1,19 +1,36 @@
 import { useState } from "react";
 
+type ToggleProps = {
+  defaultChecked?: boolean;
+  checked?: boolean;
+  onChange?: (value: boolean) => void;
+};
+
 export default function Toggle({
   defaultChecked = false,
-}: {
-  defaultChecked?: boolean;
-}) {
-  const [checked, setChecked] = useState(defaultChecked);
+  checked,
+  onChange,
+}: ToggleProps) {
+  const isControlled = typeof checked === "boolean";
+  const [internal, setInternal] = useState(defaultChecked);
+
+  const value = isControlled ? checked : internal;
+
+  const handleChange = () => {
+    const next = !value;
+    if (!isControlled) {
+      setInternal(next);
+    }
+    onChange?.(next);
+  };
 
   return (
     <label className="inline-flex items-center cursor-pointer">
       <input
         type="checkbox"
         className="sr-only peer"
-        checked={checked}
-        onChange={() => setChecked(!checked)}
+        checked={value}
+        onChange={handleChange}
       />
       <div
         className="
