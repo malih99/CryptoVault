@@ -4,10 +4,51 @@ import type { TxRecord } from "../../features/transactions/types";
 
 type Props = {
   rows: TxRecord[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
 };
 
-export default function TxTable({ rows }: Props) {
+export default function TxTable({
+  rows,
+  page,
+  pageSize,
+  total,
+  totalPages,
+  onPageChange,
+  onPageSizeChange,
+}: Props) {
   const isEmpty = rows.length === 0;
+
+  const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const to = Math.min(total, page * pageSize);
+
+  const handleCopyHash = (hash: string) => {
+    if (typeof navigator === "undefined") return;
+
+    if ("clipboard" in navigator) {
+      navigator.clipboard.writeText(hash).catch(() => {
+        // ignore
+      });
+    } else {
+      // fallback ساده
+      const textarea = document.createElement("textarea");
+      textarea.value = hash;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand("copy");
+      } catch {
+        // ignore
+      }
+      document.body.removeChild(textarea);
+    }
+  };
 
   if (isEmpty) {
     return (
@@ -95,7 +136,16 @@ export default function TxTable({ rows }: Props) {
                 </div>
               </div>
               <div className="col-span-2 space-y-0.5">
-                <div className="text-slate-500 dark:text-slate-400">Hash</div>
+                <div className="flex items-center justify-between">
+                  <div className="text-slate-500 dark:text-slate-400">Hash</div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopyHash(r.hash)}
+                    className="text-[11px] text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200"
+                  >
+                    Copy
+                  </button>
+                </div>
                 <div className="truncate text-slate-900 dark:text-slate-50">
                   {r.hash}
                 </div>
@@ -161,7 +211,18 @@ export default function TxTable({ rows }: Props) {
                 </TD>
                 <TD>{r.value}</TD>
                 <TD className="max-w-[280px] truncate">{r.from}</TD>
-                <TD className="max-w-[220px] truncate">{r.hash}</TD>
+                <TD className="max-w-[220px]">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate">{r.hash}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleCopyHash(r.hash)}
+                      className="text-[11px] text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </TD>
                 <TD>{r.time}</TD>
                 <TD>
                   <span
@@ -178,6 +239,60 @@ export default function TxTable({ rows }: Props) {
             ))}
           </TBODY>
         </T>
+      </div>
+
+      {/* Pagination footer */}
+      <div className="mt-4 flex flex-col items-center justify-between gap-3 border-t border-slate-100 pt-3 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400 sm:flex-row">
+        <div>
+          Showing{" "}
+          <span className="font-medium text-slate-700 dark:text-slate-200">
+            {from}
+          </span>
+          {"–"}
+          <span className="font-medium text-slate-700 dark:text-slate-200">
+            {to}
+          </span>{" "}
+          of{" "}
+          <span className="font-medium text-slate-700 dark:text-slate-200">
+            {total}
+          </span>{" "}
+          transactions
+        </div>
+
+        <div className="flex items-center gap-2">
+          <select
+            className="h-8 rounded-lg border border-slate-200 bg-white px-2 text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+            value={pageSize}
+            onChange={(e) => onPageSizeChange(Number(e.target.value) || 10)}
+          >
+            <option value={5}>5 / page</option>
+            <option value={10}>10 / page</option>
+            <option value={20}>20 / page</option>
+            <option value={50}>50 / page</option>
+          </select>
+
+          <div className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-1 py-0.5 dark:border-slate-700">
+            <button
+              type="button"
+              disabled={page === 1}
+              onClick={() => onPageChange(page - 1)}
+              className="rounded-md px-2 py-1 text-[11px] disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              Prev
+            </button>
+            <span className="px-2 text-[11px] sm:text-xs">
+              Page {page} of {totalPages}
+            </span>
+            <button
+              type="button"
+              disabled={page === totalPages}
+              onClick={() => onPageChange(page + 1)}
+              className="rounded-md px-2 py-1 text-[11px] disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </div>
     </Card>
   );

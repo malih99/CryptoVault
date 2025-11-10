@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Card from "../../components/ui/Card";
 import TxFilter from "./TxFilter";
 import TxTable from "../../components/tables/TxTable";
@@ -21,6 +21,10 @@ export default function TransactionsPage() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<TxTypeFilter>("all");
   const [tokenFilter, setTokenFilter] = useState<string>("all");
+
+  // 🔢 وضعیت صفحه‌بندی
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   const availableTokens = useMemo(
     () => Array.from(new Set(mockTx.map((t) => t.token))).sort(),
@@ -54,6 +58,11 @@ export default function TransactionsPage() {
     [search, typeFilter, tokenFilter]
   );
 
+  // وقتی فیلترها یا pageSize عوض می‌شن، برگرد به صفحه اول
+  useEffect(() => {
+    setPage(1);
+  }, [search, typeFilter, tokenFilter, pageSize]);
+
   const totalTx = filteredTx.length;
   const totalVolume = filteredTx.reduce(
     (sum, tx) => sum + parseUsd(tx.value),
@@ -63,6 +72,13 @@ export default function TransactionsPage() {
 
   const confirmed = filteredTx.filter((t) => t.status === "confirmed").length;
   const successRate = totalTx ? (confirmed / totalTx) * 100 : 0;
+
+  const totalPages = Math.max(1, Math.ceil(totalTx / pageSize));
+
+  const paginatedTx = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filteredTx.slice(start, start + pageSize);
+  }, [filteredTx, page, pageSize]);
 
   const handleExport = () => {
     if (!filteredTx.length) return;
@@ -178,7 +194,15 @@ export default function TransactionsPage() {
 
       <TxMonthlySummary months={mockTxMonthlySummary} />
 
-      <TxTable rows={filteredTx} />
+      <TxTable
+        rows={paginatedTx}
+        page={page}
+        pageSize={pageSize}
+        total={totalTx}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
+      />
     </section>
   );
 }

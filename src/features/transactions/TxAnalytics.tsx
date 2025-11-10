@@ -7,7 +7,6 @@ type Props = {
 };
 
 export default function TxAnalytics({ tx, feesByMonth }: Props) {
-  // Breakdown by type
   const counts = tx.reduce(
     (acc, t) => {
       if (t.type === "in") acc.received += 1;
