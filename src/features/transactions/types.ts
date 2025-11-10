@@ -1,3 +1,5 @@
+export type TxTypeFilter = "all" | "in" | "out" | "swap";
+
 export type TxRecord = {
   type: "in" | "out" | "swap";
   token: string;
