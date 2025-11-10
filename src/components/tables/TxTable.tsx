@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Card from "../../components/ui/Card";
 import { T, THEAD, TBODY, TR, TH, TD } from "../../components/ui/Table";
 import type { TxRecord } from "../../features/transactions/types";
@@ -23,30 +24,43 @@ export default function TxTable({
 }: Props) {
   const isEmpty = rows.length === 0;
 
+  const [copiedHash, setCopiedHash] = useState<string | null>(null);
+
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(total, page * pageSize);
 
   const handleCopyHash = (hash: string) => {
     if (typeof navigator === "undefined") return;
 
+    const doSetCopied = () => {
+      setCopiedHash(hash);
+      // بعد از ۱.۵ ثانیه برگرده به حالت عادی
+      setTimeout(() => {
+        setCopiedHash((prev) => (prev === hash ? null : prev));
+      }, 1500);
+    };
+
     if ("clipboard" in navigator) {
-      navigator.clipboard.writeText(hash).catch(() => {
-        // ignore
-      });
+      navigator.clipboard
+        .writeText(hash)
+        .then(doSetCopied)
+        .catch(() => {
+          // ignore
+        });
     } else {
-      // fallback ساده
-      const textarea = document.createElement("textarea");
-      textarea.value = hash;
-      textarea.style.position = "fixed";
-      textarea.style.opacity = "0";
-      document.body.appendChild(textarea);
-      textarea.select();
       try {
+        const textarea = document.createElement("textarea");
+        textarea.value = hash;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
         document.execCommand("copy");
+        document.body.removeChild(textarea);
+        doSetCopied();
       } catch {
         // ignore
       }
-      document.body.removeChild(textarea);
     }
   };
 
@@ -71,103 +85,117 @@ export default function TxTable({
 
       {/* Mobile & Tablet: cards */}
       <div className="grid gap-3 lg:hidden">
-        {rows.map((r, i) => (
-          <div
-            key={i}
-            className="
-              grid grid-cols-1 gap-2 rounded-xl border
-              border-slate-200 bg-slate-50/80 px-3 py-3
-              dark:border-slate-800 dark:bg-slate-900
-            "
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+        {rows.map((r, i) => {
+          const isCopied = copiedHash === r.hash;
+          return (
+            <div
+              key={i}
+              className="
+                grid grid-cols-1 gap-2 rounded-xl border
+                border-slate-200 bg-slate-50/80 px-3 py-3
+                dark:border-slate-800 dark:bg-slate-900
+              "
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`
+                      inline-flex h-7 w-7 items-center justify-center rounded-lg text-sm
+                      ${
+                        r.type === "in"
+                          ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300"
+                          : r.type === "swap"
+                          ? "bg-amber-50 text-amber-700 dark:bg-amber-900 dark:text-amber-300"
+                          : "bg-rose-50 text-rose-700 dark:bg-rose-900 dark:text-rose-300"
+                      }
+                    `}
+                  >
+                    {r.type === "in" ? "↙" : r.type === "swap" ? "⇄" : "↗"}
+                  </span>
+                  <div className="text-sm text-slate-900 dark:text-slate-50">
+                    {r.token}
+                  </div>
+                </div>
                 <span
                   className={`
-                    inline-flex h-7 w-7 items-center justify-center rounded-lg text-sm
+                    text-sm font-medium
                     ${
-                      r.type === "in"
-                        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300"
-                        : r.type === "swap"
-                        ? "bg-amber-50 text-amber-700 dark:bg-amber-900 dark:text-amber-300"
-                        : "bg-rose-50 text-rose-700 dark:bg-rose-900 dark:text-rose-300"
+                      r.amount.startsWith("-")
+                        ? "text-rose-600 dark:text-rose-300"
+                        : "text-emerald-600 dark:text-emerald-300"
                     }
                   `}
                 >
-                  {r.type === "in" ? "↙" : r.type === "swap" ? "⇄" : "↗"}
+                  {r.amount}
                 </span>
-                <div className="text-sm text-slate-900 dark:text-slate-50">
-                  {r.token}
-                </div>
               </div>
-              <span
-                className={`
-                  text-sm font-medium
-                  ${
-                    r.amount.startsWith("-")
-                      ? "text-rose-600 dark:text-rose-300"
-                      : "text-emerald-600 dark:text-emerald-300"
-                  }
-                `}
-              >
-                {r.amount}
-              </span>
-            </div>
 
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="space-y-0.5">
-                <div className="text-slate-500 dark:text-slate-400">Value</div>
-                <div className="text-slate-900 dark:text-slate-50">
-                  {r.value}
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="space-y-0.5">
+                  <div className="text-slate-500 dark:text-slate-400">
+                    Value
+                  </div>
+                  <div className="text-slate-900 dark:text-slate-50">
+                    {r.value}
+                  </div>
+                </div>
+                <div className="space-y-0.5">
+                  <div className="text-slate-500 dark:text-slate-400">Time</div>
+                  <div className="text-slate-900 dark:text-slate-50">
+                    {r.time}
+                  </div>
+                </div>
+                <div className="col-span-2 space-y-0.5">
+                  <div className="text-slate-500 dark:text-slate-400">
+                    From/To
+                  </div>
+                  <div className="truncate text-slate-900 dark:text-slate-50">
+                    {r.from}
+                  </div>
+                </div>
+                <div className="col-span-2 space-y-0.5">
+                  <div className="flex items-center justify-between">
+                    <div className="text-slate-500 dark:text-slate-400">
+                      Hash
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleCopyHash(r.hash)}
+                      className={`flex items-center justify-center rounded-md p-1 ${
+                        isCopied
+                          ? "text-emerald-600 dark:text-emerald-300"
+                          : "text-slate-400 hover:text-emerald-600 dark:text-slate-500 dark:hover:text-emerald-300"
+                      }`}
+                      aria-label={
+                        isCopied ? "Hash copied" : "Copy transaction hash"
+                      }
+                    >
+                      {isCopied ? <CheckIcon /> : <CopyIcon />}
+                    </button>
+                  </div>
+                  <div className="truncate text-slate-900 dark:text-slate-50">
+                    {r.hash}
+                  </div>
                 </div>
               </div>
-              <div className="space-y-0.5">
-                <div className="text-slate-500 dark:text-slate-400">Time</div>
-                <div className="text-slate-900 dark:text-slate-50">
-                  {r.time}
-                </div>
-              </div>
-              <div className="col-span-2 space-y-0.5">
-                <div className="text-slate-500 dark:text-slate-400">
-                  From/To
-                </div>
-                <div className="truncate text-slate-900 dark:text-slate-50">
-                  {r.from}
-                </div>
-              </div>
-              <div className="col-span-2 space-y-0.5">
-                <div className="flex items-center justify-between">
-                  <div className="text-slate-500 dark:text-slate-400">Hash</div>
-                  <button
-                    type="button"
-                    onClick={() => handleCopyHash(r.hash)}
-                    className="text-[11px] text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200"
-                  >
-                    Copy
-                  </button>
-                </div>
-                <div className="truncate text-slate-900 dark:text-slate-50">
-                  {r.hash}
-                </div>
-              </div>
-            </div>
 
-            <div className="flex justify-end">
-              <span
-                className={`
-                  rounded-full px-2 py-1 text-[11px]
-                  ${
-                    r.status === "confirmed"
-                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/70 dark:text-emerald-300"
-                      : "bg-amber-50 text-amber-700 dark:bg-amber-900/70 dark:text-amber-300"
-                  }
-                `}
-              >
-                {r.status}
-              </span>
+              <div className="flex justify-end">
+                <span
+                  className={`
+                    rounded-full px-2 py-1 text-[11px]
+                    ${
+                      r.status === "confirmed"
+                        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/70 dark:text-emerald-300"
+                        : "bg-amber-50 text-amber-700 dark:bg-amber-900/70 dark:text-amber-300"
+                    }
+                  `}
+                >
+                  {r.status}
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Desktop (lg+): full table */}
@@ -186,57 +214,67 @@ export default function TxTable({
             </TR>
           </THEAD>
           <TBODY>
-            {rows.map((r, i) => (
-              <TR key={i}>
-                <TD
-                  className={
-                    r.type === "in"
-                      ? "font-medium text-emerald-600 dark:text-emerald-300"
-                      : r.type === "swap"
-                      ? "font-medium text-amber-600 dark:text-amber-300"
-                      : "font-medium text-rose-600 dark:text-rose-300"
-                  }
-                >
-                  {r.type === "in" ? "↙" : r.type === "swap" ? "⇄" : "↗"}
-                </TD>
-                <TD>{r.token}</TD>
-                <TD
-                  className={
-                    r.amount.startsWith("-")
-                      ? "text-rose-600 dark:text-rose-300"
-                      : "text-emerald-600 dark:text-emerald-300"
-                  }
-                >
-                  {r.amount}
-                </TD>
-                <TD>{r.value}</TD>
-                <TD className="max-w-[280px] truncate">{r.from}</TD>
-                <TD className="max-w-[220px]">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="truncate">{r.hash}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleCopyHash(r.hash)}
-                      className="text-[11px] text-emerald-600 hover:text-emerald-700 dark:text-emerald-300 dark:hover:text-emerald-200"
-                    >
-                      Copy
-                    </button>
-                  </div>
-                </TD>
-                <TD>{r.time}</TD>
-                <TD>
-                  <span
-                    className={`rounded-full px-2 py-1 text-xs ${
-                      r.status === "confirmed"
-                        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/70 dark:text-emerald-300"
-                        : "bg-amber-50 text-amber-700 dark:bg-amber-900/70 dark:text-amber-300"
-                    }`}
+            {rows.map((r, i) => {
+              const isCopied = copiedHash === r.hash;
+              return (
+                <TR key={i}>
+                  <TD
+                    className={
+                      r.type === "in"
+                        ? "font-medium text-emerald-600 dark:text-emerald-300"
+                        : r.type === "swap"
+                        ? "font-medium text-amber-600 dark:text-amber-300"
+                        : "font-medium text-rose-600 dark:text-rose-300"
+                    }
                   >
-                    {r.status}
-                  </span>
-                </TD>
-              </TR>
-            ))}
+                    {r.type === "in" ? "↙" : r.type === "swap" ? "⇄" : "↗"}
+                  </TD>
+                  <TD>{r.token}</TD>
+                  <TD
+                    className={
+                      r.amount.startsWith("-")
+                        ? "text-rose-600 dark:text-rose-300"
+                        : "text-emerald-600 dark:text-emerald-300"
+                    }
+                  >
+                    {r.amount}
+                  </TD>
+                  <TD>{r.value}</TD>
+                  <TD className="max-w-[280px] truncate">{r.from}</TD>
+                  <TD className="max-w-[260px]">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate">{r.hash}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleCopyHash(r.hash)}
+                        className={`flex h-7 w-7 items-center justify-center rounded-md ${
+                          isCopied
+                            ? "text-emerald-600 dark:text-emerald-300 bg-emerald-50/60 dark:bg-emerald-900/30"
+                            : "text-slate-400 hover:text-emerald-600 hover:bg-slate-100 dark:text-slate-500 dark:hover:text-emerald-300 dark:hover:bg-slate-800"
+                        }`}
+                        aria-label={
+                          isCopied ? "Hash copied" : "Copy transaction hash"
+                        }
+                      >
+                        {isCopied ? <CheckIcon /> : <CopyIcon />}
+                      </button>
+                    </div>
+                  </TD>
+                  <TD>{r.time}</TD>
+                  <TD>
+                    <span
+                      className={`rounded-full px-2 py-1 text-xs ${
+                        r.status === "confirmed"
+                          ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/70 dark:text-emerald-300"
+                          : "bg-amber-50 text-amber-700 dark:bg-amber-900/70 dark:text-amber-300"
+                      }`}
+                    >
+                      {r.status}
+                    </span>
+                  </TD>
+                </TR>
+              );
+            })}
           </TBODY>
         </T>
       </div>
@@ -295,5 +333,69 @@ export default function TxTable({
         </div>
       </div>
     </Card>
+  );
+}
+
+/** آیکون کپی ساده (SVG) */
+function CopyIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className="h-4 w-4"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <rect
+        x="7"
+        y="3"
+        width="10"
+        height="12"
+        rx="2"
+        ry="2"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <rect
+        x="3"
+        y="7"
+        width="10"
+        height="10"
+        rx="2"
+        ry="2"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+    </svg>
+  );
+}
+
+/** آیکون تیک برای حالت کپی‌شده */
+function CheckIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className="h-4 w-4"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <circle
+        cx="10"
+        cy="10"
+        r="8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M6 10.5L8.5 13l5.5-6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
