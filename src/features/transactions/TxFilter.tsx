@@ -1,6 +1,7 @@
 import type { ChangeEvent } from "react";
 
 type TxTypeFilter = "all" | "in" | "out" | "swap";
+type TxStatusFilter = "all" | "confirmed" | "pending";
 
 type Props = {
   search: string;
@@ -9,6 +10,8 @@ type Props = {
   onTypeChange: (value: TxTypeFilter) => void;
   tokenFilter: string;
   onTokenChange: (value: string) => void;
+  statusFilter: TxStatusFilter;
+  onStatusChange: (value: TxStatusFilter) => void;
   onExport: () => void;
   availableTokens: string[];
 };
@@ -20,6 +23,8 @@ export default function TxFilter({
   onTypeChange,
   tokenFilter,
   onTokenChange,
+  statusFilter,
+  onStatusChange,
   onExport,
   availableTokens,
 }: Props) {
@@ -29,11 +34,14 @@ export default function TxFilter({
   const handleTokenChange = (e: ChangeEvent<HTMLSelectElement>) =>
     onTokenChange(e.target.value);
 
+  const handleStatusChange = (e: ChangeEvent<HTMLSelectElement>) =>
+    onStatusChange(e.target.value as TxStatusFilter);
+
   return (
     <div
       className="
         grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3
-        lg:grid-cols-[1fr_auto_auto_auto]
+        lg:grid-cols-[minmax(0,2.2fr)_auto_auto_auto_auto]
       "
     >
       {/* Search */}
@@ -87,6 +95,23 @@ export default function TxFilter({
             {sym}
           </option>
         ))}
+      </select>
+
+      {/* Status filter */}
+      <select
+        className="
+          w-full rounded-xl border border-slate-200 bg-white/60
+          px-3 py-2 text-sm text-slate-900
+          outline-none focus:border-emerald-500
+          dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100
+        "
+        aria-label="Filter by status"
+        value={statusFilter}
+        onChange={handleStatusChange}
+      >
+        <option value="all">All statuses</option>
+        <option value="confirmed">Confirmed</option>
+        <option value="pending">Pending</option>
       </select>
 
       {/* Export */}

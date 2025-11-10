@@ -16,13 +16,15 @@ function parseUsd(value: string) {
 }
 
 type TxTypeFilter = "all" | "in" | "out" | "swap";
+type TxStatusFilter = "all" | "confirmed" | "pending";
 
 export default function TransactionsPage() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<TxTypeFilter>("all");
   const [tokenFilter, setTokenFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<TxStatusFilter>("all");
 
-  // 🔢 وضعیت صفحه‌بندی
+  // 🔢 Pagination
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -53,15 +55,19 @@ export default function TransactionsPage() {
           return false;
         }
 
+        if (statusFilter !== "all" && tx.status !== statusFilter) {
+          return false;
+        }
+
         return true;
       }),
-    [search, typeFilter, tokenFilter]
+    [search, typeFilter, tokenFilter, statusFilter]
   );
 
   // وقتی فیلترها یا pageSize عوض می‌شن، برگرد به صفحه اول
   useEffect(() => {
     setPage(1);
-  }, [search, typeFilter, tokenFilter, pageSize]);
+  }, [search, typeFilter, tokenFilter, statusFilter, pageSize]);
 
   const totalTx = filteredTx.length;
   const totalVolume = filteredTx.reduce(
@@ -188,6 +194,8 @@ export default function TransactionsPage() {
         onTypeChange={setTypeFilter}
         tokenFilter={tokenFilter}
         onTokenChange={setTokenFilter}
+        statusFilter={statusFilter}
+        onStatusChange={setStatusFilter}
         onExport={handleExport}
         availableTokens={availableTokens}
       />
