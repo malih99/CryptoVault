@@ -11,7 +11,7 @@ type Props = {
   totalPages: number;
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
-  onSelectTx?: (tx: TxRecord) => void; // 🆕
+  onSelectTx?: (tx: TxRecord) => void;
 };
 
 export default function TxTable({
@@ -198,9 +198,16 @@ export default function TxTable({
                   <button
                     type="button"
                     onClick={() => onSelectTx(r)}
-                    className="text-[11px] font-medium text-emerald-600 hover:underline dark:text-emerald-300"
+                    className="
+                      inline-flex items-center gap-1 rounded-lg border
+                      border-slate-200 bg-white px-2 py-1 text-[11px] font-medium
+                      text-slate-700 hover:bg-slate-50
+                      dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800
+                    "
+                    aria-label="View transaction details"
                   >
-                    View details
+                    <EyeIcon className="h-3.5 w-3.5" />
+                    <span className="hidden xs:inline sm:inline">Details</span>
                   </button>
                 )}
               </div>
@@ -289,9 +296,16 @@ export default function TxTable({
                       <button
                         type="button"
                         onClick={() => onSelectTx(r)}
-                        className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                        className="
+                          inline-flex items-center gap-1 rounded-lg border
+                          border-slate-200 bg-white px-2 py-1 text-xs
+                          text-slate-700 hover:bg-slate-50
+                          dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800
+                        "
+                        aria-label="View transaction details"
                       >
-                        View
+                        <EyeIcon className="h-3.5 w-3.5" />
+                        <span className="hidden md:inline">View</span>
                       </button>
                     </TD>
                   )}
@@ -302,7 +316,7 @@ export default function TxTable({
         </T>
       </div>
 
-      {/* Pagination footer همون قبلی که داشتی */}
+      {/* Pagination footer */}
       <div className="mt-4 flex flex-col items-center justify-between gap-3 border-t border-slate-100 pt-3 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400 sm:flex-row">
         <div>
           Showing{" "}
@@ -418,6 +432,33 @@ function CheckIcon() {
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/** آیکون چشم برای View details */
+function EyeIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M2.5 12c1.7-3.3 4.5-5.5 9.5-5.5S19.3 8.7 21 12c-1.7 3.3-4.5 5.5-9.5 5.5S4.2 15.3 2.5 12Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <circle
+        cx="12"
+        cy="12"
+        r="2.8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
       />
     </svg>
   );
