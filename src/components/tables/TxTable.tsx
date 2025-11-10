@@ -11,6 +11,7 @@ type Props = {
   totalPages: number;
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
+  onSelectTx?: (tx: TxRecord) => void; // 🆕
 };
 
 export default function TxTable({
@@ -21,6 +22,7 @@ export default function TxTable({
   totalPages,
   onPageChange,
   onPageSizeChange,
+  onSelectTx,
 }: Props) {
   const isEmpty = rows.length === 0;
 
@@ -34,7 +36,6 @@ export default function TxTable({
 
     const doSetCopied = () => {
       setCopiedHash(hash);
-      // بعد از ۱.۵ ثانیه برگرده به حالت عادی
       setTimeout(() => {
         setCopiedHash((prev) => (prev === hash ? null : prev));
       }, 1500);
@@ -44,9 +45,7 @@ export default function TxTable({
       navigator.clipboard
         .writeText(hash)
         .then(doSetCopied)
-        .catch(() => {
-          // ignore
-        });
+        .catch(() => {});
     } else {
       try {
         const textarea = document.createElement("textarea");
@@ -79,8 +78,10 @@ export default function TxTable({
 
   return (
     <Card className="p-4 sm:p-5">
-      <div className="mb-3 text-sm font-medium text-slate-900 dark:text-slate-50">
-        Transactions
+      <div className="mb-3 flex items-center justify-between">
+        <div className="text-sm font-medium text-slate-900 dark:text-slate-50">
+          Transactions
+        </div>
       </div>
 
       {/* Mobile & Tablet: cards */}
@@ -179,7 +180,7 @@ export default function TxTable({
                 </div>
               </div>
 
-              <div className="flex justify-end">
+              <div className="mt-1 flex items-center justify-between">
                 <span
                   className={`
                     rounded-full px-2 py-1 text-[11px]
@@ -192,6 +193,16 @@ export default function TxTable({
                 >
                   {r.status}
                 </span>
+
+                {onSelectTx && (
+                  <button
+                    type="button"
+                    onClick={() => onSelectTx(r)}
+                    className="text-[11px] font-medium text-emerald-600 hover:underline dark:text-emerald-300"
+                  >
+                    View details
+                  </button>
+                )}
               </div>
             </div>
           );
@@ -211,6 +222,7 @@ export default function TxTable({
               <TH>Hash</TH>
               <TH>Time</TH>
               <TH>Status</TH>
+              {onSelectTx && <TH className="text-right">Details</TH>}
             </TR>
           </THEAD>
           <TBODY>
@@ -272,6 +284,17 @@ export default function TxTable({
                       {r.status}
                     </span>
                   </TD>
+                  {onSelectTx && (
+                    <TD className="text-right">
+                      <button
+                        type="button"
+                        onClick={() => onSelectTx(r)}
+                        className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                      >
+                        View
+                      </button>
+                    </TD>
+                  )}
                 </TR>
               );
             })}
@@ -279,7 +302,7 @@ export default function TxTable({
         </T>
       </div>
 
-      {/* Pagination footer */}
+      {/* Pagination footer همون قبلی که داشتی */}
       <div className="mt-4 flex flex-col items-center justify-between gap-3 border-t border-slate-100 pt-3 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400 sm:flex-row">
         <div>
           Showing{" "}
@@ -336,7 +359,7 @@ export default function TxTable({
   );
 }
 
-/** آیکون کپی ساده (SVG) */
+/** آیکون کپی */
 function CopyIcon() {
   return (
     <svg
@@ -371,7 +394,7 @@ function CopyIcon() {
   );
 }
 
-/** آیکون تیک برای حالت کپی‌شده */
+/** آیکون تیک */
 function CheckIcon() {
   return (
     <svg
