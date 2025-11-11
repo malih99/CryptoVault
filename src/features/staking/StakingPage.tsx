@@ -2,19 +2,19 @@ import { useMemo, useState } from "react";
 import Card from "../../components/ui/Card";
 import StakePositionCard from "./StakePositionCard";
 
-import StakingRewardsChart, {
-  RewardsHistoryPoint,
-} from "./StakingRewardsChart";
+import StakingRewardsChart from "./StakingRewardsChart";
+import type { RewardsHistoryPoint } from "./StakingRewardsChart";
 
-import StakingManagePanel, { SelectedPool } from "./StakingManagePanel";
+import StakingManagePanel from "./StakingManagePanel";
+import type { SelectedPool } from "./StakingManagePanel";
 
 import StakingCalculator from "./StakingCalculator";
 
-import StakingOpportunities, {
-  StakingOpportunity,
-} from "./StakingOpportunities";
+import StakingOpportunities from "./StakingOpportunities";
+import type { StakingOpportunity } from "./StakingOpportunities";
 
-import StakingAPYComparison, { StakingApyRow } from "./StakingAPYComparison";
+import StakingAPYComparison from "./StakingAPYComparison";
+import type { StakingApyRow } from "./StakingAPYComparison";
 
 type StakingPosition = {
   sym: string;
