@@ -1,12 +1,5 @@
 import Card from "../../components/ui/Card";
-
-export type StakingOpportunity = {
-  sym: string;
-  name: string;
-  min: string;
-  lock: string;
-  apy: string;
-};
+import type { StakingOpportunity } from "./types";
 
 type Props = {
   opportunities: StakingOpportunity[];

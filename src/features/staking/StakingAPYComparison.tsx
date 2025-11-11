@@ -1,14 +1,5 @@
 import Card from "../../components/ui/Card";
-
-export type StakingApyRow = {
-  token: string;
-  sym: string;
-  cur: string;
-  avg30: string;
-  minStake: string;
-  lock: string;
-  status: "Active" | "Available";
-};
+import type { StakingApyRow } from "./types";
 
 export default function StakingAPYComparison({
   rows,

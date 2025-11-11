@@ -9,8 +9,7 @@ import {
   YAxis,
   CartesianGrid,
 } from "recharts";
-
-export type RewardsHistoryPoint = { d: string; v: number };
+import type { RewardsHistoryPoint } from "./types";
 
 function useDark() {
   const [isDark, setIsDark] = useState(false);
