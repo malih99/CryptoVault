@@ -1,12 +1,6 @@
 import { useEffect, useState } from "react";
 import Card from "../../components/ui/Card";
-
-export type SelectedPool = {
-  sym: string;
-  apy: string;
-  lock: string;
-  source: "position" | "opportunity";
-};
+import type { SelectedPool } from "./types";
 
 type Props = {
   mode: "stake" | "unstake";
@@ -24,10 +18,14 @@ export default function StakingManagePanel({
   currentStakedValue,
 }: Props) {
   const [amount, setAmount] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {
-    // هر بار توکن یا مود عوض بشه، فیلد خالی بشه
+    // هر بار توکن یا مود عوض بشه، state ریست بشه
     setAmount("");
+    setError(null);
+    setSuccess(null);
   }, [selected, mode]);
 
   const isStake = mode === "stake";
@@ -39,6 +37,37 @@ export default function StakingManagePanel({
     const raw = safeCurrentAmount * ratio;
     const next = Number(raw.toFixed(4)); // تا ۴ رقم اعشار
     setAmount(next ? String(next) : "");
+    setError(null);
+    setSuccess(null);
+  };
+
+  const handleSubmit = () => {
+    setError(null);
+    setSuccess(null);
+
+    if (!selected) {
+      setError("No token selected.");
+      return;
+    }
+
+    const numeric = Number(amount);
+    if (!numeric || numeric <= 0) {
+      setError("Enter a valid amount greater than 0.");
+      return;
+    }
+
+    if (!isStake && numeric > safeCurrentAmount) {
+      setError("You cannot unstake more than your available staked amount.");
+      return;
+    }
+
+    // اینجا در دنیای واقعی call به backend/chain انجام می‌شه
+    setSuccess(
+      isStake
+        ? `Successfully staked ${numeric} ${selected.sym} (demo).`
+        : `Successfully requested to unstake ${numeric} ${selected.sym} (demo).`
+    );
+    setAmount("");
   };
 
   return (
@@ -134,7 +163,11 @@ export default function StakingManagePanel({
               type="number"
               min={0}
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={(e) => {
+                setAmount(e.target.value);
+                setError(null);
+                setSuccess(null);
+              }}
               placeholder={isStake ? "Enter amount" : "Enter amount to unstake"}
               className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-slate-900
                          focus:outline-none focus:ring-1 focus:ring-emerald-500/70
@@ -169,12 +202,25 @@ export default function StakingManagePanel({
             </div>
           )}
 
+          {/* پیام خطا / موفقیت */}
+          {error && (
+            <p className="text-[11px] text-rose-500 dark:text-rose-400">
+              {error}
+            </p>
+          )}
+          {!error && success && (
+            <p className="text-[11px] text-emerald-600 dark:text-emerald-400">
+              {success}
+            </p>
+          )}
+
           <button
             type="button"
+            onClick={handleSubmit}
             className="mt-2 inline-flex w-full items-center justify-center rounded-xl
                        bg-emerald-600 px-4 py-2 text-sm font-medium text-white
                        hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={!amount}
+            disabled={!amount || !selected}
           >
             {isStake ? "Confirm Stake" : "Confirm Unstake"}
           </button>
