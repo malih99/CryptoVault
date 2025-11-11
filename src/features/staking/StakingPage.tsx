@@ -167,6 +167,7 @@ export default function StakingPage() {
   const [mode, setMode] = useState<"stake" | "unstake">("stake");
   const [selected, setSelected] = useState<SelectedPool | null>(null);
 
+  // KPI ها از روی positions محاسبه می‌شن
   const { totalStakedUsd, totalRewardsUsd, avgApy } = useMemo(() => {
     const totalStakedUsd = positions.reduce(
       (sum, p) => sum + parseUsd(p.value),
@@ -220,6 +221,7 @@ export default function StakingPage() {
       ? parseFloat(selected.apy)
       : undefined;
 
+  // پوزیشن فعلی کاربر برای توکن انتخاب‌شده
   const currentPosition = useMemo(
     () =>
       selected ? positions.find((p) => p.sym === selected.sym) : undefined,
