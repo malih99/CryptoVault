@@ -23,18 +23,16 @@ export default function StakingOpportunityDetailsModal({
       <Card className="relative z-10 w-full max-w-md p-5 sm:p-6">
         {/* Header */}
         <div className="mb-4 flex items-start justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <div className="grid h-9 w-9 place-items-center rounded-full bg-slate-200 text-sm font-semibold text-slate-800 dark:bg-slate-800 dark:text-slate-100">
-                {opportunity.sym[0]}
+          <div className="flex items-center gap-3">
+            <div className="grid h-9 w-9 place-items-center rounded-full bg-slate-200 text-sm font-semibold text-slate-800 dark:bg-slate-800 dark:text-slate-100">
+              {opportunity.sym[0]}
+            </div>
+            <div>
+              <div className="text-sm font-semibold text-slate-900 dark:text-slate-50">
+                {opportunity.name}
               </div>
-              <div>
-                <div className="text-sm font-semibold text-slate-900 dark:text-slate-50">
-                  {opportunity.name}
-                </div>
-                <div className="text-xs text-slate-500 dark:text-slate-400">
-                  {opportunity.sym} staking opportunity
-                </div>
+              <div className="text-xs text-slate-500 dark:text-slate-400">
+                {opportunity.sym} staking opportunity
               </div>
             </div>
           </div>
@@ -86,23 +84,57 @@ export default function StakingOpportunityDetailsModal({
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-1.5">
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-[11px] text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={() => onStart(opportunity)}
-            className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-[11px] font-medium text-white hover:bg-emerald-700"
           >
-            Start Staking
+            <RocketIcon className="h-3.5 w-3.5" />
+            <span>Start staking</span>
           </button>
         </div>
       </Card>
     </div>
+  );
+}
+
+function RocketIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className={className}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M10.5 2.5c2.7 0 4.5 1.8 4.5 4.5 0 2-1.2 3.8-2.8 5.4l-2.2 2.2-2.2-2.2C6.2 10.8 5 9 5 7c0-2.7 1.8-4.5 4.5-4.5Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <circle
+        cx="10.5"
+        cy="7"
+        r="1.4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M6 14l-2 2M8 15l-1 3M12 15l1 3"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      />
+    </svg>
   );
 }
