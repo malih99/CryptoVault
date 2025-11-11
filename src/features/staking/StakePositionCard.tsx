@@ -22,7 +22,7 @@ export default function StakePositionCard({
   return (
     <Card className="p-5">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex min-w-0 items-center gap-3">
           <div className="grid h-8 w-8 place-items-center rounded-full bg-emerald-500 font-bold text-black/90">
             {sym[0]}
           </div>
@@ -30,10 +30,10 @@ export default function StakePositionCard({
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="w-fit rounded-full bg-emerald-100 text-emerald-700 px-2 py-1 text-xs dark:bg-emerald-900/50 dark:text-emerald-300">
+          <span className="w-fit rounded-full bg-emerald-100 px-2 py-1 text-xs text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
             {apy} APY
           </span>
-          <span className="w-fit rounded-full bg-slate-100 text-slate-700 px-2 py-1 text-xs dark:bg-slate-800 dark:text-slate-300">
+          <span className="w-fit rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-700 dark:bg-slate-800 dark:text-slate-300">
             {lock}
           </span>
         </div>
@@ -65,21 +65,69 @@ export default function StakePositionCard({
 
         <div className="col-span-2 flex items-stretch gap-2 sm:col-span-2">
           <button
+            type="button"
             onClick={onStakeMore}
-            className="w-full rounded-xl border px-4 py-2 text-sm text-slate-700 border-slate-200 hover:bg-slate-50
-                       dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-800"
+            disabled={!onStakeMore}
+            className="inline-flex w-full items-center justify-center gap-1 rounded-xl
+                       bg-emerald-600 px-4 py-2 text-sm font-medium text-white
+                       hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            Stake More
+            <StakeIcon className="h-4 w-4" />
+            <span>Stake more</span>
           </button>
           <button
+            type="button"
             onClick={onUnstake}
-            className="w-full rounded-xl border px-4 py-2 text-sm text-slate-700 border-slate-200 hover:bg-slate-50
-                       dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-800"
+            disabled={!onUnstake}
+            className="inline-flex w-full items-center justify-center gap-1 rounded-xl
+                       border border-slate-200 px-4 py-2 text-sm text-slate-700
+                       hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60
+                       dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
           >
-            Unstake
+            <UnstakeIcon className="h-4 w-4" />
+            <span>Unstake</span>
           </button>
         </div>
       </div>
     </Card>
+  );
+}
+
+function StakeIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className={className}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M10 4v12M4 10h12"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function UnstakeIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className={className}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M10 4v10M6.5 7.5L10 4l3.5 3.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

@@ -11,6 +11,7 @@ import {
   mockTxFeesByMonth,
 } from "../../lib/api/mock";
 import type { TxRecord } from "./types";
+import TxQuickFilters from "./TxQuickFilters";
 
 function parseUsd(value: string) {
   return Number(value.replace(/[$,]/g, "")) || 0;
@@ -201,6 +202,13 @@ export default function TransactionsPage() {
           onStatusChange={setStatusFilter}
           onExport={handleExport}
           availableTokens={availableTokens}
+        />
+
+        <TxQuickFilters
+          typeFilter={typeFilter}
+          statusFilter={statusFilter}
+          onTypeChange={setTypeFilter}
+          onStatusChange={setStatusFilter}
         />
 
         <TxMonthlySummary months={mockTxMonthlySummary} />

@@ -7,8 +7,8 @@ export default function StakingCalculator({
   initialApy?: number;
 }) {
   const [amount, setAmount] = useState(1000);
-  const [duration, setDuration] = useState(12); // months
-  const [apy, setApy] = useState(initialApy ?? 10); // percent
+  const [duration, setDuration] = useState(12);
+  const [apy, setApy] = useState(initialApy ?? 10);
 
   useEffect(() => {
     if (typeof initialApy === "number" && !Number.isNaN(initialApy)) {

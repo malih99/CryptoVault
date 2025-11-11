@@ -18,7 +18,6 @@ export default function StakingManagePanel({ mode, setMode, selected }: Props) {
   const [amount, setAmount] = useState("");
 
   useEffect(() => {
-    // هر بار توکن یا مود عوض بشه، فیلد خالی بشه
     setAmount("");
   }, [selected, mode]);
 

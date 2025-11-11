@@ -1,20 +1,20 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Card from "../../components/ui/Card";
 import StakePositionCard from "./StakePositionCard";
 
-import StakingRewardsChart from "./StakingRewardsChart";
-import type { RewardsHistoryPoint } from "./StakingRewardsChart";
+import StakingRewardsChart, {
+  RewardsHistoryPoint,
+} from "./StakingRewardsChart";
 
-import StakingManagePanel from "./StakingManagePanel";
-import type { SelectedPool } from "./StakingManagePanel";
+import StakingManagePanel, { SelectedPool } from "./StakingManagePanel";
 
 import StakingCalculator from "./StakingCalculator";
 
-import StakingOpportunities from "./StakingOpportunities";
-import type { StakingOpportunity } from "./StakingOpportunities";
+import StakingOpportunities, {
+  StakingOpportunity,
+} from "./StakingOpportunities";
 
-import StakingAPYComparison from "./StakingAPYComparison";
-import type { StakingApyRow } from "./StakingAPYComparison";
+import StakingAPYComparison, { StakingApyRow } from "./StakingAPYComparison";
 
 type StakingPosition = {
   sym: string;
@@ -153,13 +153,37 @@ const apyRows: StakingApyRow[] = [
   },
 ];
 
-export default function StakingPage() {
-  const totalStaked = 5337.5;
-  const totalRewards = 88.72;
-  const avgApy = 10.9;
+function parseUsd(value: string): number {
+  // "$1,020" یا "+$12.45"
+  return Number(value.replace(/[^0-9.]/g, "")) || 0;
+}
 
+function parsePercent(v: string): number {
+  // "7.2%" -> 7.2
+  return Number(v.replace(/[^0-9.]/g, "")) || 0;
+}
+
+export default function StakingPage() {
   const [mode, setMode] = useState<"stake" | "unstake">("stake");
   const [selected, setSelected] = useState<SelectedPool | null>(null);
+
+  const { totalStakedUsd, totalRewardsUsd, avgApy } = useMemo(() => {
+    const totalStakedUsd = positions.reduce(
+      (sum, p) => sum + parseUsd(p.value),
+      0
+    );
+    const totalRewardsUsd = positions.reduce(
+      (sum, p) => sum + parseUsd(p.rewards),
+      0
+    );
+    const avgApy =
+      positions.length > 0
+        ? positions.reduce((sum, p) => sum + parsePercent(p.apy), 0) /
+          positions.length
+        : 0;
+
+    return { totalStakedUsd, totalRewardsUsd, avgApy };
+  }, []);
 
   const handleStakeMore = (p: StakingPosition) => {
     setMode("stake");
@@ -196,8 +220,33 @@ export default function StakingPage() {
       ? parseFloat(selected.apy)
       : undefined;
 
+  const currentPosition = useMemo(
+    () =>
+      selected ? positions.find((p) => p.sym === selected.sym) : undefined,
+    [selected]
+  );
+
+  const currentStakedAmount = currentPosition
+    ? Number(currentPosition.staked.split(" ")[0]) || 0
+    : 0;
+
+  const currentStakedValue = currentPosition
+    ? parseUsd(currentPosition.value)
+    : 0;
+
   return (
     <section className="mx-auto w-full max-w-[1280px] space-y-6 px-3 sm:px-0">
+      {/* Header */}
+      <div>
+        <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
+          Staking
+        </h1>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          Stake your assets to earn passive rewards and compare APYs across
+          pools.
+        </p>
+      </div>
+
       {/* Rewards History */}
       <StakingRewardsChart data={rewardsHistory} />
 
@@ -207,8 +256,8 @@ export default function StakingPage() {
           <div className="text-sm text-slate-500 dark:text-slate-400">
             Total Staked
           </div>
-          <div className="mt-2 text-xl sm:text-2xl text-slate-900 dark:text-white">
-            ${totalStaked.toLocaleString()}
+          <div className="mt-2 text-xl text-slate-900 dark:text-white sm:text-2xl">
+            ${totalStakedUsd.toLocaleString()}
           </div>
           <div className="mt-1 text-sm text-emerald-600 dark:text-emerald-400">
             {positions.length} active positions
@@ -219,8 +268,8 @@ export default function StakingPage() {
           <div className="text-sm text-slate-500 dark:text-slate-400">
             Total Rewards
           </div>
-          <div className="mt-2 text-xl sm:text-2xl text-slate-900 dark:text-white">
-            ${totalRewards.toFixed(2)}
+          <div className="mt-2 text-xl text-slate-900 dark:text-white sm:text-2xl">
+            ${totalRewardsUsd.toFixed(2)}
           </div>
           <div className="mt-1 text-sm text-emerald-600 dark:text-emerald-400">
             This month
@@ -231,8 +280,8 @@ export default function StakingPage() {
           <div className="text-sm text-slate-500 dark:text-slate-400">
             Average APY
           </div>
-          <div className="mt-2 text-xl sm:text-2xl text-slate-900 dark:text-white">
-            {avgApy}%
+          <div className="mt-2 text-xl text-slate-900 dark:text-white sm:text-2xl">
+            {avgApy.toFixed(1)}%
           </div>
           <div className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Across all pools
@@ -260,6 +309,8 @@ export default function StakingPage() {
             mode={mode}
             setMode={setMode}
             selected={selected}
+            currentStakedAmount={currentStakedAmount}
+            currentStakedValue={currentStakedValue}
           />
           <StakingCalculator initialApy={initialApy} />
         </div>
