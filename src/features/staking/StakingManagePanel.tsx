@@ -20,37 +20,27 @@ export default function StakingManagePanel({
   mode,
   setMode,
   selected,
-  currentStakedAmount = 0,
-  currentStakedValue = 0,
+  currentStakedAmount,
+  currentStakedValue,
 }: Props) {
   const [amount, setAmount] = useState("");
-  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
+    // هر بار توکن یا مود عوض بشه، فیلد خالی بشه
     setAmount("");
-    setSubmitted(false);
   }, [selected, mode]);
 
   const isStake = mode === "stake";
+
   const numericAmount = Number(amount || 0);
-  const hasPosition = !!currentStakedAmount && selected?.source === "position";
-
-  const isTooMuchUnstake =
-    !isStake && hasPosition && numericAmount > currentStakedAmount;
-
-  const canSubmit =
+  const hasPosition =
     !!selected &&
-    !!amount &&
-    !Number.isNaN(numericAmount) &&
-    numericAmount > 0 &&
-    !isTooMuchUnstake;
+    typeof currentStakedAmount === "number" &&
+    currentStakedAmount > 0;
+  const exceedsBalance =
+    !isStake && hasPosition && numericAmount > (currentStakedAmount ?? 0);
 
-  const handleSubmit = () => {
-    if (!canSubmit || !selected) return;
-    // فقط برای دمو: یه state ساده به عنوان فیدبک
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 2000);
-  };
+  const canSubmit = !!amount && !exceedsBalance;
 
   return (
     <Card className="p-5">
@@ -90,9 +80,7 @@ export default function StakingManagePanel({
 
       {!selected ? (
         <div className="grid h-36 place-items-center text-slate-500 dark:text-slate-400">
-          <div className="text-center">
-            🔒 Select a token from your positions or opportunities to {mode}.
-          </div>
+          <div className="text-center">🔒 Select a token to {mode}</div>
         </div>
       ) : (
         <div className="space-y-3 text-sm">
@@ -106,7 +94,7 @@ export default function StakingManagePanel({
                 <div className="text-slate-900 dark:text-white">
                   {selected.sym}{" "}
                   <span className="text-xs text-slate-500 dark:text-slate-400">
-                    · {selected.lock}
+                    {selected.lock}
                   </span>
                 </div>
                 <div className="text-xs text-slate-500 dark:text-slate-400">
@@ -115,6 +103,19 @@ export default function StakingManagePanel({
                     ? "My positions"
                     : "Opportunity"}
                 </div>
+                {hasPosition && (
+                  <div className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                    Currently staked:{" "}
+                    <span className="font-medium text-slate-700 dark:text-slate-200">
+                      {currentStakedAmount} {selected.sym}
+                    </span>
+                    {currentStakedValue != null && currentStakedValue > 0 && (
+                      <span className="ml-1 text-slate-400 dark:text-slate-500">
+                        (~${currentStakedValue.toLocaleString()})
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
             <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
@@ -127,64 +128,44 @@ export default function StakingManagePanel({
             <span className="text-xs text-slate-500 dark:text-slate-400">
               {isStake ? "Amount to stake" : "Amount to unstake"}
             </span>
-            <div className="flex gap-2">
-              <input
-                type="number"
-                min={0}
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder={
-                  isStake ? "Enter amount" : "Enter amount to unstake"
-                }
-                className="h-10 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-slate-900
-                           focus:outline-none focus:ring-1 focus:ring-emerald-500/70
-                           dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-              />
-              {!isStake && hasPosition && (
-                <button
-                  type="button"
-                  onClick={() => setAmount(String(currentStakedAmount))}
-                  className="h-10 rounded-xl border border-slate-200 px-3 text-xs font-medium text-slate-700
-                             hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-                >
-                  Max
-                </button>
-              )}
-            </div>
-          </label>
-
-          <div className="flex flex-col gap-1 text-[11px] text-slate-500 dark:text-slate-400">
-            {hasPosition && (
-              <div>
-                Currently staked:{" "}
-                <span className="font-medium text-slate-700 dark:text-slate-200">
-                  {currentStakedAmount} {selected.sym}
+            <input
+              type="number"
+              min={0}
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder={isStake ? "Enter amount" : "Enter amount to unstake"}
+              className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-slate-900
+                         focus:outline-none focus:ring-1 focus:ring-emerald-500/70
+                         dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            />
+            {!isStake && hasPosition && (
+              <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                <span>
+                  You can unstake up to{" "}
+                  <span className="font-medium text-slate-700 dark:text-slate-200">
+                    {currentStakedAmount} {selected.sym}
+                  </span>
+                  {currentStakedValue != null && currentStakedValue > 0 && (
+                    <span className="ml-1 text-slate-400 dark:text-slate-500">
+                      (~${currentStakedValue.toLocaleString()})
+                    </span>
+                  )}
                 </span>
-                {currentStakedValue > 0 && (
-                  <span> ({`$${currentStakedValue.toLocaleString()}`})</span>
-                )}
               </div>
             )}
-            {selected.lock !== "Flexible" && mode === "unstake" && (
-              <div>
-                Unstaking may take up to{" "}
-                <span className="font-medium">{selected.lock}</span>.
-              </div>
+            {!isStake && exceedsBalance && (
+              <p className="text-[11px] text-amber-600 dark:text-amber-400">
+                Amount exceeds your staked balance.
+              </p>
             )}
-            {isTooMuchUnstake && (
-              <div className="text-rose-500">
-                You can&apos;t unstake more than your currently staked amount.
-              </div>
-            )}
-          </div>
+          </label>
 
           <button
             type="button"
-            onClick={handleSubmit}
-            disabled={!canSubmit}
             className="mt-1 inline-flex w-full items-center justify-center rounded-xl
                        bg-emerald-600 px-4 py-2 text-sm font-medium text-white
                        hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={!canSubmit}
           >
             {isStake ? "Confirm Stake" : "Confirm Unstake"}
           </button>
@@ -192,14 +173,6 @@ export default function StakingManagePanel({
           <p className="text-xs text-slate-500 dark:text-slate-400">
             This is a demo UI. No real blockchain transactions will be sent.
           </p>
-
-          {submitted && (
-            <p className="text-xs text-emerald-600 dark:text-emerald-400">
-              {isStake
-                ? "Stake transaction submitted (demo)."
-                : "Unstake transaction submitted (demo)."}
-            </p>
-          )}
         </div>
       )}
     </Card>
