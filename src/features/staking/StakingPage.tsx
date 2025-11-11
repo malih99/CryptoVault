@@ -22,7 +22,6 @@ import type {
 } from "./types";
 
 function parseUsd(value: string): number {
-  // "$1,020" یا "+$12.45"
   return Number(value.replace(/[^0-9.]/g, "")) || 0;
 }
 
