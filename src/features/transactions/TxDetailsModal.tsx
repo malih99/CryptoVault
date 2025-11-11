@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type { TxRecord } from "./types";
 import Card from "../../components/ui/Card";
 
@@ -21,6 +22,53 @@ function typeColor(type: TxRecord["type"]) {
 }
 
 export default function TxDetailsModal({ tx, onClose }: Props) {
+  const [copied, setCopied] = useState<null | "from" | "hash">(null);
+
+  // ESC برای بستن
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [onClose]);
+
+  const handleCopy = (value: string, field: "from" | "hash") => {
+    if (typeof navigator === "undefined") return;
+
+    const doSetCopied = () => {
+      setCopied(field);
+      setTimeout(() => {
+        setCopied((prev) => (prev === field ? null : prev));
+      }, 1500);
+    };
+
+    if ("clipboard" in navigator) {
+      navigator.clipboard
+        .writeText(value)
+        .then(doSetCopied)
+        .catch(() => {});
+    } else {
+      try {
+        const textarea = document.createElement("textarea");
+        textarea.value = value;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+        doSetCopied();
+      } catch {
+        // ignore
+      }
+    }
+  };
+
   return (
     <div
       className="
@@ -90,20 +138,74 @@ export default function TxDetailsModal({ tx, onClose }: Props) {
           </div>
         </div>
 
-        {/* From / Hash / Status */}
+        {/* From / Hash */}
         <div className="space-y-3 text-xs">
+          {/* From / To */}
           <div>
-            <div className="mb-1 text-slate-500 dark:text-slate-400">
-              From / To
+            <div className="mb-1 flex items-center justify-between">
+              <span className="text-slate-500 dark:text-slate-400">
+                From / To
+              </span>
+              <button
+                type="button"
+                onClick={() => handleCopy(tx.from, "from")}
+                className={`
+                  inline-flex items-center gap-1 rounded-lg px-2 py-1
+                  ${
+                    copied === "from"
+                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
+                      : "text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+                  }
+                `}
+              >
+                {copied === "from" ? (
+                  <>
+                    <CheckIcon className="h-3.5 w-3.5" />
+                    <span>Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <CopyIcon className="h-3.5 w-3.5" />
+                    <span>Copy</span>
+                  </>
+                )}
+              </button>
             </div>
             <div className="rounded-xl bg-slate-50 px-3 py-2 font-mono text-[11px] text-slate-900 dark:bg-slate-900 dark:text-slate-50">
               {tx.from}
             </div>
           </div>
 
+          {/* Hash */}
           <div>
-            <div className="mb-1 text-slate-500 dark:text-slate-400">
-              Transaction Hash
+            <div className="mb-1 flex items-center justify-between">
+              <span className="text-slate-500 dark:text-slate-400">
+                Transaction Hash
+              </span>
+              <button
+                type="button"
+                onClick={() => handleCopy(tx.hash, "hash")}
+                className={`
+                  inline-flex items-center gap-1 rounded-lg px-2 py-1
+                  ${
+                    copied === "hash"
+                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
+                      : "text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+                  }
+                `}
+              >
+                {copied === "hash" ? (
+                  <>
+                    <CheckIcon className="h-3.5 w-3.5" />
+                    <span>Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <CopyIcon className="h-3.5 w-3.5" />
+                    <span>Copy</span>
+                  </>
+                )}
+              </button>
             </div>
             <div className="rounded-xl bg-slate-50 px-3 py-2 font-mono text-[11px] text-slate-900 dark:bg-slate-900 dark:text-slate-50">
               {tx.hash}
@@ -111,6 +213,7 @@ export default function TxDetailsModal({ tx, onClose }: Props) {
           </div>
         </div>
 
+        {/* Footer */}
         <div className="mt-5 flex justify-end">
           <button
             type="button"
@@ -127,5 +230,69 @@ export default function TxDetailsModal({ tx, onClose }: Props) {
         </div>
       </Card>
     </div>
+  );
+}
+
+/** آیکون کپی کوچک */
+function CopyIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className={className}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <rect
+        x="7"
+        y="3"
+        width="10"
+        height="12"
+        rx="2"
+        ry="2"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <rect
+        x="3"
+        y="7"
+        width="10"
+        height="10"
+        rx="2"
+        ry="2"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+    </svg>
+  );
+}
+
+/** آیکون تیک کوچک */
+function CheckIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className={className}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <circle
+        cx="10"
+        cy="10"
+        r="8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path
+        d="M6 10.5L8.5 13l5.5-6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
