@@ -221,7 +221,6 @@ export default function StakingPage() {
       ? parseFloat(selected.apy)
       : undefined;
 
-  // پوزیشن فعلی کاربر برای توکن انتخاب‌شده
   const currentPosition = useMemo(
     () =>
       selected ? positions.find((p) => p.sym === selected.sym) : undefined,

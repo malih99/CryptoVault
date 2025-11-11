@@ -1,5 +1,27 @@
 import Card from "../../components/ui/Card";
 
+type Props = {
+  sym: string;
+  staked: string;
+  value: string;
+  rewards: string;
+  apy: string;
+  lock?: string;
+  onStakeMore?: () => void;
+  onUnstake?: () => void;
+};
+
+function parseApy(apy: string): number {
+  return Number(apy.replace(/[^0-9.]/g, "")) || 0;
+}
+
+function apyLevel(apy: string): "normal" | "boosted" | "high" {
+  const n = parseApy(apy);
+  if (n >= 15) return "high";
+  if (n >= 10) return "boosted";
+  return "normal";
+}
+
 export default function StakePositionCard({
   sym,
   staked,
@@ -9,56 +31,77 @@ export default function StakePositionCard({
   lock = "Flexible",
   onStakeMore,
   onUnstake,
-}: {
-  sym: string;
-  staked: string;
-  value: string;
-  rewards: string;
-  apy: string;
-  lock?: string;
-  onStakeMore?: () => void;
-  onUnstake?: () => void;
-}) {
+}: Props) {
+  const level = apyLevel(apy);
+  const apyNumber = parseApy(apy);
+  // نرمال‌سازی برای progress bar (فرض max ~ 20%)
+  const yieldProgress = Math.max(8, Math.min((apyNumber / 20) * 100, 100));
+
   return (
     <Card className="p-5">
+      {/* Header row */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="grid h-8 w-8 place-items-center rounded-full bg-emerald-500 font-bold text-black/90">
+          <div className="grid h-9 w-9 place-items-center rounded-full bg-emerald-500 text-sm font-bold text-black/90">
             {sym[0]}
           </div>
-          <div className="truncate text-slate-900 dark:text-white">{sym}</div>
+          <div className="min-w-0">
+            <div className="truncate text-sm font-medium text-slate-900 dark:text-white">
+              {sym}
+            </div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">
+              Staking position
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="w-fit rounded-full bg-emerald-100 px-2 py-1 text-xs text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="w-fit rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300">
             {apy} APY
           </span>
-          <span className="w-fit rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+          <span className="w-fit rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-700 dark:bg-slate-800 dark:text-slate-300">
             {lock}
           </span>
+          {level !== "normal" && (
+            <span
+              className={
+                "w-fit rounded-full px-2.5 py-1 text-[11px] font-medium " +
+                (level === "high"
+                  ? "bg-amber-50 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                  : "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300")
+              }
+            >
+              {level === "high" ? "High APY" : "Boosted yield"}
+            </span>
+          )}
         </div>
       </div>
 
+      {/* Stats row */}
       <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-5">
         <div>
           <div className="text-xs text-slate-500 dark:text-slate-400">
             Staked
           </div>
-          <div className="text-slate-900 dark:text-white">{staked}</div>
+          <div className="mt-0.5 text-sm text-slate-900 dark:text-white">
+            {staked}
+          </div>
         </div>
 
         <div>
           <div className="text-xs text-slate-500 dark:text-slate-400">
             Value
           </div>
-          <div className="text-slate-900 dark:text-white">{value}</div>
+          <div className="mt-0.5 text-sm text-slate-900 dark:text-white">
+            {value}
+          </div>
         </div>
 
         <div>
           <div className="text-xs text-slate-500 dark:text-slate-400">
             Rewards
           </div>
-          <div className="text-emerald-600 dark:text-emerald-400">
+          <div className="mt-0.5 text-sm text-emerald-600 dark:text-emerald-400">
             {rewards}
           </div>
         </div>
@@ -67,67 +110,35 @@ export default function StakePositionCard({
           <button
             type="button"
             onClick={onStakeMore}
-            disabled={!onStakeMore}
-            className="inline-flex w-full items-center justify-center gap-1 rounded-xl
-                       bg-emerald-600 px-4 py-2 text-sm font-medium text-white
-                       hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
           >
-            <StakeIcon className="h-4 w-4" />
-            <span>Stake more</span>
+            Stake More
           </button>
           <button
             type="button"
             onClick={onUnstake}
-            disabled={!onUnstake}
-            className="inline-flex w-full items-center justify-center gap-1 rounded-xl
-                       border border-slate-200 px-4 py-2 text-sm text-slate-700
-                       hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60
-                       dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+            className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
           >
-            <UnstakeIcon className="h-4 w-4" />
-            <span>Unstake</span>
+            Unstake
           </button>
         </div>
       </div>
+
+      {/* Yield level bar */}
+      <div className="mt-4 flex items-center gap-3">
+        <span className="text-[11px] text-slate-500 dark:text-slate-400">
+          Yield level
+        </span>
+        <div className="h-1.5 flex-1 rounded-full bg-slate-100 dark:bg-slate-800">
+          <div
+            className="h-full rounded-full bg-emerald-500 dark:bg-emerald-400"
+            style={{ width: `${yieldProgress}%` }}
+          />
+        </div>
+        <span className="text-[11px] text-slate-500 dark:text-slate-400">
+          {apy}
+        </span>
+      </div>
     </Card>
-  );
-}
-
-function StakeIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 20 20"
-      className={className}
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path
-        d="M10 4v12M4 10h12"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function UnstakeIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 20 20"
-      className={className}
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path
-        d="M10 4v10M6.5 7.5L10 4l3.5 3.5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }

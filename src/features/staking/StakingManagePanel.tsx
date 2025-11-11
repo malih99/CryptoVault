@@ -31,16 +31,15 @@ export default function StakingManagePanel({
   }, [selected, mode]);
 
   const isStake = mode === "stake";
+  const safeCurrentAmount = currentStakedAmount ?? 0;
+  const hasStaked = !isStake && safeCurrentAmount > 0;
 
-  const numericAmount = Number(amount || 0);
-  const hasPosition =
-    !!selected &&
-    typeof currentStakedAmount === "number" &&
-    currentStakedAmount > 0;
-  const exceedsBalance =
-    !isStake && hasPosition && numericAmount > (currentStakedAmount ?? 0);
-
-  const canSubmit = !!amount && !exceedsBalance;
+  const handleQuickAmount = (ratio: number) => {
+    if (!hasStaked) return;
+    const raw = safeCurrentAmount * ratio;
+    const next = Number(raw.toFixed(4)); // تا ۴ رقم اعشار
+    setAmount(next ? String(next) : "");
+  };
 
   return (
     <Card className="p-5">
@@ -103,17 +102,20 @@ export default function StakingManagePanel({
                     ? "My positions"
                     : "Opportunity"}
                 </div>
-                {hasPosition && (
-                  <div className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                    Currently staked:{" "}
+
+                {/* نمایش مقدار قابل unstake */}
+                {hasStaked && (
+                  <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    Available to unstake:{" "}
                     <span className="font-medium text-slate-700 dark:text-slate-200">
-                      {currentStakedAmount} {selected.sym}
+                      {safeCurrentAmount} {selected.sym}
                     </span>
-                    {currentStakedValue != null && currentStakedValue > 0 && (
-                      <span className="ml-1 text-slate-400 dark:text-slate-500">
-                        (~${currentStakedValue.toLocaleString()})
-                      </span>
-                    )}
+                    {typeof currentStakedValue === "number" &&
+                      currentStakedValue > 0 && (
+                        <span className="ml-1 text-[11px] text-slate-400 dark:text-slate-500">
+                          (~${currentStakedValue.toLocaleString()})
+                        </span>
+                      )}
                   </div>
                 )}
               </div>
@@ -138,34 +140,41 @@ export default function StakingManagePanel({
                          focus:outline-none focus:ring-1 focus:ring-emerald-500/70
                          dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
-            {!isStake && hasPosition && (
-              <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-                <span>
-                  You can unstake up to{" "}
-                  <span className="font-medium text-slate-700 dark:text-slate-200">
-                    {currentStakedAmount} {selected.sym}
-                  </span>
-                  {currentStakedValue != null && currentStakedValue > 0 && (
-                    <span className="ml-1 text-slate-400 dark:text-slate-500">
-                      (~${currentStakedValue.toLocaleString()})
-                    </span>
-                  )}
-                </span>
-              </div>
-            )}
-            {!isStake && exceedsBalance && (
-              <p className="text-[11px] text-amber-600 dark:text-amber-400">
-                Amount exceeds your staked balance.
-              </p>
-            )}
           </label>
+
+          {/* Quick actions فقط برای Unstake */}
+          {hasStaked && (
+            <div className="mt-1 flex items-center justify-between">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                Quick amount
+              </span>
+              <div className="flex gap-1.5">
+                {[
+                  { label: "25%", ratio: 0.25 },
+                  { label: "50%", ratio: 0.5 },
+                  { label: "Max", ratio: 1 },
+                ].map((btn) => (
+                  <button
+                    key={btn.label}
+                    type="button"
+                    onClick={() => handleQuickAmount(btn.ratio)}
+                    className="rounded-full border border-slate-200 px-2 py-1 text-[11px]
+                               text-slate-600 hover:bg-slate-50
+                               dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                  >
+                    {btn.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <button
             type="button"
-            className="mt-1 inline-flex w-full items-center justify-center rounded-xl
+            className="mt-2 inline-flex w-full items-center justify-center rounded-xl
                        bg-emerald-600 px-4 py-2 text-sm font-medium text-white
                        hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
-            disabled={!canSubmit}
+            disabled={!amount}
           >
             {isStake ? "Confirm Stake" : "Confirm Unstake"}
           </button>
