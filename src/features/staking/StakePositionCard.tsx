@@ -1,4 +1,6 @@
 import Card from "../../components/ui/Card";
+import Button from "../../components/ui/Button";
+import { ArrowUpRight, Undo2 } from "lucide-react";
 
 type Props = {
   sym: string;
@@ -34,6 +36,7 @@ export default function StakePositionCard({
 }: Props) {
   const level = apyLevel(apy);
   const apyNumber = parseApy(apy);
+  // نرمال‌سازی برای progress bar (فرض max ~ 20%)
   const yieldProgress = Math.max(8, Math.min((apyNumber / 20) * 100, 100));
 
   return (
@@ -105,24 +108,25 @@ export default function StakePositionCard({
           </div>
         </div>
 
-        {/* Actions – کوچیک + آیکون‌دار */}
-        <div className="col-span-2 flex items-stretch gap-1.5 sm:col-span-2 sm:justify-end">
-          <button
-            type="button"
+        <div className="col-span-2 flex items-stretch gap-2 sm:col-span-2 sm:justify-end">
+          <Button
+            variant="secondary"
+            size="sm"
+            startIcon={<ArrowUpRight size={14} />}
             onClick={onStakeMore}
-            className="inline-flex min-w-[88px] items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-[11px] font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+            className="flex-1 sm:flex-none"
           >
-            <PlusIcon className="h-3.5 w-3.5" />
-            <span>Stake</span>
-          </button>
-          <button
-            type="button"
+            Stake
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            startIcon={<Undo2 size={14} />}
             onClick={onUnstake}
-            className="inline-flex min-w-[88px] items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-[11px] font-medium text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+            className="flex-1 sm:flex-none"
           >
-            <ArrowOutIcon className="h-3.5 w-3.5" />
-            <span>Unstake</span>
-          </button>
+            Unstake
+          </Button>
         </div>
       </div>
 
@@ -142,53 +146,5 @@ export default function StakePositionCard({
         </span>
       </div>
     </Card>
-  );
-}
-
-/* آیکون‌ها */
-
-function PlusIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 20 20"
-      className={className}
-      aria-hidden="true"
-      focusable="false"
-    >
-      <circle
-        cx="10"
-        cy="10"
-        r="8"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-      <path
-        d="M10 6v8M6 10h8"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function ArrowOutIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 20 20"
-      className={className}
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path
-        d="M5 15l8.5-8.5M9 5h6v6"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }
