@@ -1,10 +1,14 @@
 import Card from "../../components/ui/Card";
+import Button from "../../components/ui/Button";
 import { Send, Download, RefreshCcw, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import type { ReactNode } from "react";
+
+type ActionKey = "send" | "receive" | "swap" | "buy";
 
 type Action = {
-  key: "send" | "receive" | "swap" | "buy";
-  icon: JSX.Element;
+  key: ActionKey;
+  icon: ReactNode;
   labelKey: string;
   onClick?: () => void;
 };
@@ -15,23 +19,27 @@ export default function QuickActions() {
   const actions: Action[] = [
     {
       key: "send",
-      icon: <Send size={18} />,
+      icon: <Send size={16} />,
       labelKey: "dashboard.actions.send",
     },
     {
       key: "receive",
-      icon: <Download size={18} />,
+      icon: <Download size={16} />,
       labelKey: "dashboard.actions.receive",
     },
     {
       key: "swap",
-      icon: <RefreshCcw size={18} />,
+      icon: <RefreshCcw size={16} />,
       labelKey: "dashboard.actions.swap",
     },
-    { key: "buy", icon: <Plus size={18} />, labelKey: "dashboard.actions.buy" },
+    {
+      key: "buy",
+      icon: <Plus size={16} />,
+      labelKey: "dashboard.actions.buy",
+    },
   ];
 
-  const chipCls: Record<Action["key"], string> = {
+  const chipCls: Record<ActionKey, string> = {
     send:
       "text-rose-600 bg-rose-100 ring-rose-200 " +
       "dark:text-rose-300 dark:bg-rose-500/15 dark:ring-rose-500/20",
@@ -48,37 +56,34 @@ export default function QuickActions() {
 
   return (
     <Card className="p-5">
-      <div className="text-slate-900 dark:text-slate-100 font-medium mb-4">
+      <div className="mb-4 font-medium text-slate-900 dark:text-slate-100">
         {t("dashboard.quickActions")}
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      {/* دکمه‌های کامپکت، دو ستون */}
+      <div className="grid grid-cols-2 gap-2">
         {actions.map((a) => (
-          <button
+          <Button
             key={a.key}
+            variant="secondary"
+            size="sm"
             onClick={a.onClick}
-            className={[
-              "group h-[84px] rounded-2xl border inline-flex flex-col items-center justify-center gap-2 transition",
-              // Light
-              "bg-slate-50 border-slate-200 hover:bg-slate-100",
-              // Dark
-              "dark:bg-slate-800/40 dark:border-slate-700 dark:hover:bg-slate-800/60",
-              // Accessibility
-              "focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 dark:focus-visible:ring-emerald-500/40",
-            ].join(" ")}
+            className="flex w-full items-center justify-start gap-2"
+            startIcon={
+              <span
+                className={[
+                  "grid h-7 w-7 place-items-center rounded-lg ring-1 ring-inset text-[13px]",
+                  chipCls[a.key],
+                ].join(" ")}
+              >
+                {a.icon}
+              </span>
+            }
           >
-            <span
-              className={[
-                "grid place-items-center h-8 w-8 rounded-xl ring-1 ring-inset transition",
-                chipCls[a.key],
-              ].join(" ")}
-            >
-              {a.icon}
-            </span>
-            <span className="text-sm text-slate-700 dark:text-slate-200">
+            <span className="text-xs sm:text-[13px] text-slate-700 dark:text-slate-200">
               {t(a.labelKey)}
             </span>
-          </button>
+          </Button>
         ))}
       </div>
     </Card>

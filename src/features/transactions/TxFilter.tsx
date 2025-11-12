@@ -1,4 +1,5 @@
 import type { ChangeEvent } from "react";
+import { FileDown } from "lucide-react";
 
 type TxTypeFilter = "all" | "in" | "out" | "swap";
 type TxStatusFilter = "all" | "confirmed" | "pending";
@@ -119,14 +120,16 @@ export default function TxFilter({
         type="button"
         onClick={onExport}
         className="
-          w-full rounded-xl border border-slate-200 bg-white text-sm
-          px-3 py-2 font-medium text-slate-900
+          inline-flex w-full items-center justify-center gap-1.5
+          rounded-xl border border-slate-200 bg-white
+          px-2.5 py-1.5 text-xs font-medium text-slate-900
           hover:bg-slate-50 active:bg-slate-100
           dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100
           dark:hover:bg-slate-800
         "
       >
-        Export
+        <FileDown className="h-3.5 w-3.5" />
+        <span>Export</span>
       </button>
     </div>
   );

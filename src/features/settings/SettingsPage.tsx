@@ -1,4 +1,13 @@
 import { useState } from "react";
+import {
+  RotateCcw,
+  Eye,
+  KeyRound,
+  Download,
+  Trash2,
+  Plug,
+  Wallet,
+} from "lucide-react";
 import Toggle from "../../components/ui/Toggle";
 import SettingsSection from "./SettingsSection";
 import SettingRow from "./SettingRow";
@@ -151,13 +160,14 @@ export default function SettingsPage() {
           type="button"
           onClick={handleResetAll}
           className="
-            inline-flex items-center justify-center rounded-xl border
-            border-slate-300 px-3 py-1.5 text-xs sm:text-sm
+            inline-flex items-center justify-center gap-1.5 rounded-lg border
+            border-slate-300 px-2.5 py-1.5 text-xs sm:text-sm
             text-slate-700 hover:bg-slate-50
             dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800/60
           "
         >
-          Reset to defaults
+          <RotateCcw className="h-3.5 w-3.5" />
+          <span>Reset to defaults</span>
         </button>
       </div>
 
@@ -332,12 +342,13 @@ export default function SettingsPage() {
             type="button"
             onClick={handlePasswordUpdate}
             className="
-              mt-2 inline-flex items-center justify-center rounded-xl
-              px-4 py-2 text-sm font-medium
+              mt-2 inline-flex items-center justify-center gap-1.5 rounded-xl
+              px-3 py-1.5 text-xs sm:text-sm font-medium
               bg-emerald-600 text-white hover:bg-emerald-700
             "
           >
-            Update Password
+            <KeyRound className="h-4 w-4" />
+            <span>Update Password</span>
           </button>
         </div>
       </SettingsSection>
@@ -421,13 +432,14 @@ export default function SettingsPage() {
             type="button"
             onClick={handleAddWallet}
             className="
-              mt-1 inline-flex w-full items-center justify-center rounded-xl
+              mt-1 inline-flex w-full items-center justify-center gap-1.5 rounded-xl
               border border-dashed border-slate-300 dark:border-slate-700
-              px-4 py-2 text-sm text-slate-600 dark:text-slate-300
+              px-3 py-1.5 text-xs sm:text-sm text-slate-600 dark:text-slate-300
               hover:bg-slate-50 dark:hover:bg-slate-800/60
             "
           >
-            Add New Wallet
+            <Wallet className="h-4 w-4" />
+            <span>Add New Wallet</span>
           </button>
         </div>
       </SettingsSection>
@@ -437,6 +449,8 @@ export default function SettingsPage() {
         title="Backup & Recovery"
         description="Secure your account with recovery options."
       >
+        {/* View recovery phrase */}
+        {/* View recovery phrase */}
         <SettingRow
           label="Recovery Phrase"
           helper="View and backup your 12-word recovery phrase."
@@ -445,11 +459,14 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={handleViewRecoveryPhrase}
-            className="rounded-xl border px-3 py-1.5 text-xs sm:text-sm border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
+            className="inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs sm:text-sm border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
           >
-            View
+            <Eye className="h-3.5 w-3.5" />
+            <span>View</span>
           </button>
         </SettingRow>
+
+        {/* Export private key */}
         <SettingRow
           label="Export Private Key"
           helper="Download your private key (use with caution)."
@@ -457,11 +474,14 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={handleExportPrivateKey}
-            className="rounded-xl border px-3 py-1.5 text-xs sm:text-sm border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
+            className="inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs sm:text-sm border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
           >
-            Export
+            <KeyRound className="h-3.5 w-3.5" />
+            <span>Export</span>
           </button>
         </SettingRow>
+
+        {/* Backup data */}
         <SettingRow
           label="Backup Data"
           helper="Download all transaction and portfolio data."
@@ -469,9 +489,10 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={handleBackupData}
-            className="rounded-xl border px-3 py-1.5 text-xs sm:text-sm border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
+            className="inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs sm:text-sm border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
           >
-            Backup
+            <Download className="h-3.5 w-3.5" />
+            <span>Backup</span>
           </button>
         </SettingRow>
       </SettingsSection>
@@ -559,11 +580,17 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={handleClearTxHistory}
-            className="rounded-xl border px-3 py-1.5 text-xs sm:text-sm border-rose-300 text-rose-700 hover:bg-rose-100/80 dark:border-rose-500 dark:text-rose-300 dark:hover:bg-rose-900/60"
+            className="
+              inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5
+              text-xs sm:text-sm border-rose-300 text-rose-700
+              hover:bg-rose-100/80 dark:border-rose-500 dark:text-rose-300 dark:hover:bg-rose-900/60
+            "
           >
-            Clear
+            <Trash2 className="h-3.5 w-3.5" />
+            <span>Clear</span>
           </button>
         </SettingRow>
+
         <SettingRow
           label="Disconnect All Wallets"
           helper="Remove all connected wallet addresses."
@@ -571,11 +598,17 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={handleDisconnectWallets}
-            className="rounded-xl border px-3 py-1.5 text-xs sm:text-sm border-rose-300 text-rose-700 hover:bg-rose-100/80 dark:border-rose-500 dark:text-rose-300 dark:hover:bg-rose-900/60"
+            className="
+              inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5
+              text-xs sm:text-sm border-rose-300 text-rose-700
+              hover:bg-rose-100/80 dark:border-rose-500 dark:text-rose-300 dark:hover:bg-rose-900/60
+            "
           >
-            Disconnect
+            <Plug className="h-3.5 w-3.5" />
+            <span>Disconnect</span>
           </button>
         </SettingRow>
+
         <SettingRow
           label="Delete Account"
           helper="Permanently delete your account and all data."
@@ -583,9 +616,13 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={handleDeleteAccount}
-            className="rounded-xl px-3 py-1.5 text-xs sm:text-sm bg-rose-600 text-white hover:bg-rose-700"
+            className="
+              inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5
+              text-xs sm:text-sm bg-rose-600 text-white hover:bg-rose-700
+            "
           >
-            Delete
+            <Trash2 className="h-3.5 w-3.5" />
+            <span>Delete</span>
           </button>
         </SettingRow>
       </SettingsSection>

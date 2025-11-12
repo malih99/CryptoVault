@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Card from "../../components/ui/Card";
+import Button from "../../components/ui/Button";
 import type { SelectedPool } from "./types";
 
 type Props = {
@@ -214,16 +215,16 @@ export default function StakingManagePanel({
             </p>
           )}
 
-          <button
+          <Button
             type="button"
             onClick={handleSubmit}
-            className="mt-2 inline-flex w-full items-center justify-center rounded-xl
-                       bg-emerald-600 px-4 py-2 text-sm font-medium text-white
-                       hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+            variant="primary"
+            size="sm"
+            className="mt-2 w-full"
             disabled={!amount || !selected}
           >
             {isStake ? "Confirm Stake" : "Confirm Unstake"}
-          </button>
+          </Button>
 
           <p className="text-xs text-slate-500 dark:text-slate-400">
             This is a demo UI. No real blockchain transactions will be sent.
