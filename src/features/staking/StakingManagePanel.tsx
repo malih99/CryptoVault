@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Card from "../../components/ui/Card";
-import Button from "../../components/ui/Button";
+import { Button } from "../../components/ui/Button";
 import type { SelectedPool } from "./types";
 
 type Props = {

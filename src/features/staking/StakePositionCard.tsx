@@ -1,5 +1,5 @@
 import Card from "../../components/ui/Card";
-import Button from "../../components/ui/Button";
+import { Button } from "../../components/ui/Button";
 import { ArrowUpRight, Undo2 } from "lucide-react";
 
 type Props = {

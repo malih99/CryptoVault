@@ -6,9 +6,11 @@ import {
   Download,
   Trash2,
   Plug,
-  Wallet,
+  // Wallet,
 } from "lucide-react";
 import Toggle from "../../components/ui/Toggle";
+// import { IconButton } from "../../components/ui/IconButton";
+import { Button } from "../../components/ui/Button";
 import SettingsSection from "./SettingsSection";
 import SettingRow from "./SettingRow";
 import { fieldBase } from "./settingsFieldBase";
@@ -338,18 +340,14 @@ export default function SettingsPage() {
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
           </div>
-          <button
-            type="button"
+          <Button
+            variant="primary"
+            size="sm"
             onClick={handlePasswordUpdate}
-            className="
-              mt-2 inline-flex items-center justify-center gap-1.5 rounded-xl
-              px-3 py-1.5 text-xs sm:text-sm font-medium
-              bg-emerald-600 text-white hover:bg-emerald-700
-            "
+            leftIcon={<KeyRound className="h-4 w-4" />}
           >
-            <KeyRound className="h-4 w-4" />
-            <span>Update Password</span>
-          </button>
+            Update Password
+          </Button>
         </div>
       </SettingsSection>
 
@@ -428,19 +426,14 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={handleAddWallet}
-            className="
-              mt-1 inline-flex w-full items-center justify-center gap-1.5 rounded-xl
-              border border-dashed border-slate-300 dark:border-slate-700
-              px-3 py-1.5 text-xs sm:text-sm text-slate-600 dark:text-slate-300
-              hover:bg-slate-50 dark:hover:bg-slate-800/60
-            "
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleResetAll}
+            leftIcon={<RotateCcw className="h-3.5 w-3.5" />}
           >
-            <Wallet className="h-4 w-4" />
-            <span>Add New Wallet</span>
-          </button>
+            Reset to defaults
+          </Button>
         </div>
       </SettingsSection>
 
@@ -486,14 +479,14 @@ export default function SettingsPage() {
           label="Backup Data"
           helper="Download all transaction and portfolio data."
         >
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleBackupData}
-            className="inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs sm:text-sm border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800"
+            leftIcon={<Download className="h-3.5 w-3.5" />}
           >
-            <Download className="h-3.5 w-3.5" />
-            <span>Backup</span>
-          </button>
+            Backup
+          </Button>
         </SettingRow>
       </SettingsSection>
 
@@ -595,35 +588,28 @@ export default function SettingsPage() {
           label="Disconnect All Wallets"
           helper="Remove all connected wallet addresses."
         >
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleDisconnectWallets}
-            className="
-              inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5
-              text-xs sm:text-sm border-rose-300 text-rose-700
-              hover:bg-rose-100/80 dark:border-rose-500 dark:text-rose-300 dark:hover:bg-rose-900/60
-            "
+            leftIcon={<Plug className="h-3.5 w-3.5" />}
           >
-            <Plug className="h-3.5 w-3.5" />
-            <span>Disconnect</span>
-          </button>
+            Disconnect
+          </Button>
         </SettingRow>
 
         <SettingRow
           label="Delete Account"
           helper="Permanently delete your account and all data."
         >
-          <button
-            type="button"
+          <Button
+            variant="danger"
+            size="sm"
             onClick={handleDeleteAccount}
-            className="
-              inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5
-              text-xs sm:text-sm bg-rose-600 text-white hover:bg-rose-700
-            "
+            leftIcon={<Trash2 className="h-3.5 w-3.5" />}
           >
-            <Trash2 className="h-3.5 w-3.5" />
-            <span>Delete</span>
-          </button>
+            Delete
+          </Button>
         </SettingRow>
       </SettingsSection>
     </section>

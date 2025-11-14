@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { T, THEAD, TBODY, TR, TH, TD } from "../../components/ui/Table";
 import Card from "../../components/ui/Card";
+import { Button } from "../../components/ui/Button";
+import { IconButton } from "../../components/ui/IconButton";
 import type { TxRecord } from "../../features/transactions/types";
 import { Eye, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -294,20 +296,14 @@ export default function TxTable({
                   </TD>
                   {onSelectTx && (
                     <TD className="text-right">
-                      <button
-                        type="button"
+                      <Button
+                        variant="outline"
+                        size="xs"
                         onClick={() => onSelectTx(r)}
-                        className="
-                          inline-flex items-center gap-1.5 rounded-lg border
-                          border-slate-200 bg-white px-2.5 py-1.5 text-[11px] sm:text-xs
-                          text-slate-700 hover:bg-slate-50
-                          dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800
-                        "
-                        aria-label="View transaction details"
+                        leftIcon={<Eye className="h-3.5 w-3.5" />}
                       >
-                        <Eye className="h-3.5 w-3.5" />
                         <span className="hidden md:inline">View</span>
-                      </button>
+                      </Button>
                     </TD>
                   )}
                 </TR>
@@ -348,35 +344,25 @@ export default function TxTable({
           </select>
 
           <div className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-1 py-0.5 dark:border-slate-700">
-            <button
-              type="button"
+            <IconButton
+              size="xs"
+              variant="subtle"
               disabled={page === 1}
               onClick={() => onPageChange(page - 1)}
-              className="
-                inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-[11px]
-                disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-slate-800
-              "
               aria-label="Previous page"
             >
-              <ChevronLeft className="h-3 w-3" />
-              <span className="hidden sm:inline">Prev</span>
-            </button>
-            <span className="px-2 text-[11px] sm:text-xs">
-              Page {page} of {totalPages}
-            </span>
-            <button
-              type="button"
+              <ChevronLeft className="h-3.5 w-3.5" />
+            </IconButton>
+
+            <IconButton
+              size="xs"
+              variant="subtle"
               disabled={page === totalPages}
               onClick={() => onPageChange(page + 1)}
-              className="
-                inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-[11px]
-                disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-slate-800
-              "
               aria-label="Next page"
             >
-              <span className="hidden sm:inline">Next</span>
-              <ChevronRight className="h-3 w-3" />
-            </button>
+              <ChevronRight className="h-3.5 w-3.5" />
+            </IconButton>
           </div>
         </div>
       </div>

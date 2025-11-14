@@ -1,5 +1,5 @@
 import Card from "../../components/ui/Card";
-import Button from "../../components/ui/Button";
+import { Button } from "../../components/ui/Button";
 import { Send, Download, RefreshCcw, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { ReactNode } from "react";

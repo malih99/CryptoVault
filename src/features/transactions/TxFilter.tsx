@@ -1,5 +1,6 @@
 import type { ChangeEvent } from "react";
 import { Download } from "lucide-react";
+import { Button } from "../../components/ui/Button";
 
 type TxTypeFilter = "all" | "in" | "out" | "swap";
 type TxStatusFilter = "all" | "confirmed" | "pending";
@@ -115,22 +116,16 @@ export default function TxFilter({
         <option value="pending">Pending</option>
       </select>
 
-      <button
+      <Button
         type="button"
         onClick={onExport}
-        className="
-          inline-flex w-full items-center justify-center gap-1.5
-          rounded-lg border border-slate-200 bg-white
-          px-2.5 py-1.5 text-xs sm:text-sm font-medium
-          text-slate-700 hover:bg-slate-50 active:bg-slate-100
-          dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100
-          dark:hover:bg-slate-800
-        "
+        variant="outline"
+        size="sm"
+        leftIcon={<Download className="h-3.5 w-3.5" />}
       >
-        <Download className="h-3.5 w-3.5" />
         <span className="hidden sm:inline">Export CSV</span>
         <span className="sm:hidden">Export</span>
-      </button>
+      </Button>
     </div>
   );
 }
