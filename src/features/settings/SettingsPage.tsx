@@ -1,20 +1,13 @@
 import { useState } from "react";
-import {
-  RotateCcw,
-  Eye,
-  KeyRound,
-  Download,
-  Trash2,
-  Plug,
-  // Wallet,
-} from "lucide-react";
+import { RotateCcw, Eye, KeyRound, Download, Trash2, Plug } from "lucide-react";
 import Toggle from "../../components/ui/Toggle";
-// import { IconButton } from "../../components/ui/IconButton";
 import { Button } from "../../components/ui/Button";
 import SettingsSection from "./SettingsSection";
 import SettingRow from "./SettingRow";
 import { fieldBase } from "./settingsFieldBase";
 import { useSettings, type ThemePreference } from "./useSettings";
+import AlertModal from "../../components/ui/AlertModal";
+import ConfirmDialog from "../../components/ui/ConfirmDialog";
 
 export default function SettingsPage() {
   const { settings, update, resetToDefaults } = useSettings();
@@ -22,6 +15,14 @@ export default function SettingsPage() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [alert, setAlert] = useState<{
+    title?: string;
+    message: string;
+  } | null>(null);
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [confirmDisconnect, setConfirmDisconnect] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const handleThemeChange = (value: string) => {
     update("theme", value as ThemePreference);
@@ -53,20 +54,27 @@ export default function SettingsPage() {
 
   const handlePasswordUpdate = () => {
     if (!currentPassword || !newPassword || !confirmPassword) {
-      window.alert("Please fill all password fields.");
+      setAlert({
+        title: "Incomplete",
+        message: "Please fill all password fields.",
+      });
       return;
     }
     if (newPassword !== confirmPassword) {
-      window.alert("New password and confirmation do not match.");
+      setAlert({
+        title: "Mismatch",
+        message: "New password and confirmation do not match.",
+      });
       return;
     }
     if (newPassword.length < 8) {
-      window.alert("New password should be at least 8 characters.");
+      setAlert({
+        title: "Weak password",
+        message: "New password should be at least 8 characters.",
+      });
       return;
     }
-
-    window.alert("Password updated (demo).");
-
+    setAlert({ title: "Updated", message: "Password updated (demo)." });
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
@@ -108,33 +116,13 @@ export default function SettingsPage() {
   };
 
   const handleClearTxHistory = () => {
-    if (
-      window.confirm(
-        "Are you sure you want to clear all transaction history? This cannot be undone (demo)."
-      )
-    ) {
-      window.alert("Transaction history cleared (demo).");
-    }
+    setConfirmClear(true);
   };
-
   const handleDisconnectWallets = () => {
-    if (
-      window.confirm(
-        "Disconnect all wallets from this dashboard? (demo – no real wallets are disconnected)"
-      )
-    ) {
-      window.alert("All wallets disconnected (demo).");
-    }
+    setConfirmDisconnect(true);
   };
-
   const handleDeleteAccount = () => {
-    if (
-      window.confirm(
-        "This will permanently delete your account and all data (demo). Are you sure?"
-      )
-    ) {
-      window.alert("Account deletion flow would start here (demo).");
-    }
+    setConfirmDelete(true);
   };
 
   const handleResetAll = () => {
@@ -612,6 +600,69 @@ export default function SettingsPage() {
           </Button>
         </SettingRow>
       </SettingsSection>
+      {/* Alert */}
+      {alert && (
+        <AlertModal
+          open
+          title={alert.title}
+          message={alert.message}
+          onClose={() => setAlert(null)}
+        />
+      )}
+
+      {/* Confirm: Clear history */}
+      <ConfirmDialog
+        open={confirmClear}
+        title="Clear Transaction History"
+        description="This will remove all transaction records. This cannot be undone."
+        confirmText="Clear"
+        cancelText="Cancel"
+        tone="danger"
+        onConfirm={() => {
+          setConfirmClear(false);
+          setAlert({
+            title: "Done",
+            message: "Transaction history cleared (demo).",
+          });
+        }}
+        onCancel={() => setConfirmClear(false)}
+      />
+
+      {/* Confirm: Disconnect wallets */}
+      <ConfirmDialog
+        open={confirmDisconnect}
+        title="Disconnect All Wallets"
+        description="All connected wallets will be removed from this dashboard."
+        confirmText="Disconnect"
+        cancelText="Cancel"
+        tone="danger"
+        onConfirm={() => {
+          setConfirmDisconnect(false);
+          setAlert({
+            title: "Disconnected",
+            message: "All wallets disconnected (demo).",
+          });
+        }}
+        onCancel={() => setConfirmDisconnect(false)}
+      />
+
+      {/* Confirm: Delete account */}
+      <ConfirmDialog
+        open={confirmDelete}
+        title="Delete Account"
+        description="This will permanently delete your account and all data."
+        confirmText="Delete"
+        cancelText="Cancel"
+        tone="danger"
+        onConfirm={() => {
+          setConfirmDelete(false);
+          setAlert({
+            title: "Started",
+            message: "Account deletion flow would start here (demo).",
+          });
+        }}
+        onCancel={() => setConfirmDelete(false)}
+      />
     </section>
   );
 }
