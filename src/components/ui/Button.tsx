@@ -1,3 +1,4 @@
+// src/components/ui/Button.tsx
 import { ButtonHTMLAttributes, forwardRef, ReactNode } from "react";
 import { cn } from "../../lib/cn";
 
@@ -69,13 +70,13 @@ export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
       {...rest}
     >
       {leftIcon && (
-        <span className={cn(size === "xs" ? "h-3.5 w-3.5" : "h-4 w-4")}>
+        <span className={size === "xs" ? "h-3.5 w-3.5" : "h-4 w-4"}>
           {leftIcon}
         </span>
       )}
       {loading ? <span className="animate-pulse">Loading…</span> : children}
       {rightIcon && (
-        <span className={cn(size === "xs" ? "h-3.5 w-3.5" : "h-4 w-4")}>
+        <span className={size === "xs" ? "h-3.5 w-3.5" : "h-4 w-4"}>
           {rightIcon}
         </span>
       )}
