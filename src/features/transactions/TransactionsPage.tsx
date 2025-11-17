@@ -11,11 +11,38 @@ import {
   mockTxFeesByMonth,
 } from "../../lib/api/mock";
 import type { TxRecord } from "./types";
+import { formatCurrency } from "../../lib/format";
 import TxQuickFilters from "./TxQuickFilters";
 
 function parseUsd(value: string) {
   return Number(value.replace(/[$,]/g, "")) || 0;
 }
+
+function parseUsdString(input: string): number {
+  if (!input) return 0;
+  // حذف $ و کاما و فاصله
+  const n = Number(input.replace(/[$,\s]/g, ""));
+  return Number.isFinite(n) ? n : 0;
+}
+
+function parseAmountString(input: string): number {
+  if (!input) return 0;
+  const sign = input.trim().startsWith("-") ? -1 : 1;
+  const m = input.match(/-?\d+(\.\d+)?/);
+  if (!m) return 0;
+  return sign * parseFloat(m[0]);
+}
+
+const txRows: TxRecord[] = mockTx.map((t) => ({
+  type: t.type, // in | out | swap
+  token: t.token, // مثلا "USDT"
+  amount: parseAmountString(t.amount),
+  value: parseUsdString(t.value),
+  from: t.from,
+  hash: t.hash,
+  time: t.time,
+  status: t.status,
+}));
 
 type TxTypeFilter = "all" | "in" | "out" | "swap";
 type TxStatusFilter = "all" | "confirmed" | "pending";
