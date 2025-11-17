@@ -11,16 +11,12 @@ import {
   mockTxFeesByMonth,
 } from "../../lib/api/mock";
 import type { TxRecord } from "./types";
-import { formatCurrency } from "../../lib/format";
 import TxQuickFilters from "./TxQuickFilters";
+import { formatCurrency } from "../../lib/format";
 
-function parseUsd(value: string) {
-  return Number(value.replace(/[$,]/g, "")) || 0;
-}
-
+/** Parserها: تبدیل رشته به عدد */
 function parseUsdString(input: string): number {
   if (!input) return 0;
-  // حذف $ و کاما و فاصله
   const n = Number(input.replace(/[$,\s]/g, ""));
   return Number.isFinite(n) ? n : 0;
 }
@@ -32,17 +28,6 @@ function parseAmountString(input: string): number {
   if (!m) return 0;
   return sign * parseFloat(m[0]);
 }
-
-const txRows: TxRecord[] = mockTx.map((t) => ({
-  type: t.type, // in | out | swap
-  token: t.token, // مثلا "USDT"
-  amount: parseAmountString(t.amount),
-  value: parseUsdString(t.value),
-  from: t.from,
-  hash: t.hash,
-  time: t.time,
-  status: t.status,
-}));
 
 type TxTypeFilter = "all" | "in" | "out" | "swap";
 type TxStatusFilter = "all" | "confirmed" | "pending";
@@ -59,14 +44,31 @@ export default function TransactionsPage() {
 
   const [selectedTx, setSelectedTx] = useState<TxRecord | null>(null);
 
-  const availableTokens = useMemo(
-    () => Array.from(new Set(mockTx.map((t) => t.token))).sort(),
+  /** 1) داده‌های ماک را همین‌جا به نسخه‌ی عددی map می‌کنیم */
+  const mappedRows: TxRecord[] = useMemo(
+    () =>
+      mockTx.map((t) => ({
+        type: t.type,
+        token: t.token,
+        amount: parseAmountString(t.amount),
+        value: parseUsdString(t.value),
+        from: t.from,
+        hash: t.hash,
+        time: t.time,
+        status: t.status,
+      })),
     []
   );
 
+  const availableTokens = useMemo(
+    () => Array.from(new Set(mappedRows.map((t) => t.token))).sort(),
+    [mappedRows]
+  );
+
+  /** 2) فیلترها روی mappedRows اعمال می‌شوند */
   const filteredTx: TxRecord[] = useMemo(
     () =>
-      mockTx.filter((tx) => {
+      mappedRows.filter((tx) => {
         const q = search.trim().toLowerCase();
         if (
           q &&
@@ -92,20 +94,17 @@ export default function TransactionsPage() {
 
         return true;
       }),
-    [search, typeFilter, tokenFilter, statusFilter]
+    [mappedRows, search, typeFilter, tokenFilter, statusFilter]
   );
 
   useEffect(() => {
     setPage(1);
   }, [search, typeFilter, tokenFilter, statusFilter, pageSize]);
 
+  /** 3) KPIها بر پایه‌ی مقدار عددی */
   const totalTx = filteredTx.length;
-  const totalVolume = filteredTx.reduce(
-    (sum, tx) => sum + parseUsd(tx.value),
-    0
-  );
+  const totalVolume = filteredTx.reduce((sum, tx) => sum + tx.value, 0);
   const avgTx = totalTx ? totalVolume / totalTx : 0;
-
   const confirmed = filteredTx.filter((t) => t.status === "confirmed").length;
   const successRate = totalTx ? (confirmed / totalTx) * 100 : 0;
 
@@ -136,8 +135,8 @@ export default function TransactionsPage() {
       [
         tx.type,
         tx.token,
-        tx.amount,
-        tx.value,
+        String(tx.amount),
+        String(tx.value),
         tx.from,
         tx.hash,
         tx.time,
@@ -191,7 +190,7 @@ export default function TransactionsPage() {
               Total Volume
             </div>
             <div className="mt-1.5 text-xl font-semibold text-slate-900 dark:text-slate-50 sm:text-2xl">
-              ${totalVolume.toLocaleString()}
+              {formatCurrency(totalVolume, "USD")}
             </div>
           </Card>
 
@@ -200,7 +199,7 @@ export default function TransactionsPage() {
               Avg Transaction
             </div>
             <div className="mt-1.5 text-xl font-semibold text-slate-900 dark:text-slate-50 sm:text-2xl">
-              ${avgTx.toFixed(2)}
+              {formatCurrency(avgTx, "USD")}
             </div>
           </Card>
 
@@ -214,7 +213,7 @@ export default function TransactionsPage() {
           </Card>
         </div>
 
-        {/* Analytics row (breakdown, top tokens, fee analysis) */}
+        {/* Analytics row */}
         <TxAnalytics tx={filteredTx} feesByMonth={mockTxFeesByMonth} />
 
         {/* Filters */}
@@ -251,6 +250,7 @@ export default function TransactionsPage() {
           onSelectTx={setSelectedTx}
         />
       </section>
+
       {selectedTx && (
         <TxDetailsModal tx={selectedTx} onClose={() => setSelectedTx(null)} />
       )}

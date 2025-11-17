@@ -1,10 +1,8 @@
 import { useState } from "react";
-import { T, THEAD, TBODY, TR, TH, TD } from "../../components/ui/Table";
 import Card from "../../components/ui/Card";
-import { Button } from "../../components/ui/Button";
-import { IconButton } from "../../components/ui/IconButton";
+import { T, THEAD, TBODY, TR, TH, TD } from "../../components/ui/Table";
 import type { TxRecord } from "../../features/transactions/types";
-import { Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { formatCurrency } from "../../lib/format";
 
 type Props = {
   rows: TxRecord[];
@@ -28,7 +26,6 @@ export default function TxTable({
   onSelectTx,
 }: Props) {
   const isEmpty = rows.length === 0;
-
   const [copiedHash, setCopiedHash] = useState<string | null>(null);
 
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
@@ -91,6 +88,7 @@ export default function TxTable({
       <div className="grid gap-3 lg:hidden">
         {rows.map((r, i) => {
           const isCopied = copiedHash === r.hash;
+          const isOut = r.type === "out";
           return (
             <div
               key={i}
@@ -124,13 +122,14 @@ export default function TxTable({
                   className={`
                     text-sm font-medium
                     ${
-                      r.amount.startsWith("-")
+                      isOut
                         ? "text-rose-600 dark:text-rose-300"
                         : "text-emerald-600 dark:text-emerald-300"
                     }
                   `}
                 >
-                  {r.amount}
+                  {isOut ? "-" : "+"}
+                  {Math.abs(r.amount)}
                 </span>
               </div>
 
@@ -140,7 +139,7 @@ export default function TxTable({
                     Value
                   </div>
                   <div className="text-slate-900 dark:text-slate-50">
-                    {r.value}
+                    {formatCurrency(r.value, "USD")}
                   </div>
                 </div>
                 <div className="space-y-0.5">
@@ -202,14 +201,14 @@ export default function TxTable({
                     type="button"
                     onClick={() => onSelectTx(r)}
                     className="
-                      inline-flex items-center gap-1.5 rounded-lg border
+                      inline-flex items-center gap-1 rounded-lg border
                       border-slate-200 bg-white px-2 py-1 text-[11px] font-medium
                       text-slate-700 hover:bg-slate-50
                       dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800
                     "
                     aria-label="View transaction details"
                   >
-                    <Eye className="h-3.5 w-3.5" />
+                    <EyeIcon className="h-3.5 w-3.5" />
                     <span className="hidden xs:inline sm:inline">Details</span>
                   </button>
                 )}
@@ -238,6 +237,7 @@ export default function TxTable({
           <TBODY>
             {rows.map((r, i) => {
               const isCopied = copiedHash === r.hash;
+              const isOut = r.type === "out";
               return (
                 <TR key={i}>
                   <TD
@@ -254,14 +254,15 @@ export default function TxTable({
                   <TD>{r.token}</TD>
                   <TD
                     className={
-                      r.amount.startsWith("-")
+                      isOut
                         ? "text-rose-600 dark:text-rose-300"
                         : "text-emerald-600 dark:text-emerald-300"
                     }
                   >
-                    {r.amount}
+                    {isOut ? "-" : "+"}
+                    {Math.abs(r.amount)}
                   </TD>
-                  <TD>{r.value}</TD>
+                  <TD>{formatCurrency(r.value, "USD")}</TD>
                   <TD className="max-w-[280px] truncate">{r.from}</TD>
                   <TD className="max-w-[260px]">
                     <div className="flex items-center justify-between gap-2">
@@ -296,14 +297,20 @@ export default function TxTable({
                   </TD>
                   {onSelectTx && (
                     <TD className="text-right">
-                      <Button
-                        variant="outline"
-                        size="xs"
+                      <button
+                        type="button"
                         onClick={() => onSelectTx(r)}
-                        leftIcon={<Eye className="h-3.5 w-3.5" />}
+                        className="
+                          inline-flex items-center gap-1 rounded-lg border
+                          border-slate-200 bg-white px-2 py-1 text-xs
+                          text-slate-700 hover:bg-slate-50
+                          dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800
+                        "
+                        aria-label="View transaction details"
                       >
+                        <EyeIcon className="h-3.5 w-3.5" />
                         <span className="hidden md:inline">View</span>
-                      </Button>
+                      </button>
                     </TD>
                   )}
                 </TR>
@@ -344,25 +351,25 @@ export default function TxTable({
           </select>
 
           <div className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-1 py-0.5 dark:border-slate-700">
-            <IconButton
-              size="xs"
-              variant="subtle"
+            <button
+              type="button"
               disabled={page === 1}
               onClick={() => onPageChange(page - 1)}
-              aria-label="Previous page"
+              className="rounded-md px-2 py-1 text-[11px] disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-slate-800"
             >
-              <ChevronLeft className="h-3.5 w-3.5" />
-            </IconButton>
-
-            <IconButton
-              size="xs"
-              variant="subtle"
+              Prev
+            </button>
+            <span className="px-2 text-[11px] sm:text-xs">
+              Page {page} of {totalPages}
+            </span>
+            <button
+              type="button"
               disabled={page === totalPages}
               onClick={() => onPageChange(page + 1)}
-              aria-label="Next page"
+              className="rounded-md px-2 py-1 text-[11px] disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-slate-800"
             >
-              <ChevronRight className="h-3.5 w-3.5" />
-            </IconButton>
+              Next
+            </button>
           </div>
         </div>
       </div>
@@ -429,6 +436,33 @@ function CheckIcon() {
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/** آیکون چشم برای View details */
+function EyeIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M2.5 12c1.7-3.3 4.5-5.5 9.5-5.5S19.3 8.7 21 12c-1.7 3.3-4.5 5.5-9.5 5.5S4.2 15.3 2.5 12Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <circle
+        cx="12"
+        cy="12"
+        r="2.8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
       />
     </svg>
   );
