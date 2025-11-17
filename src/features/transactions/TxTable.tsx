@@ -34,7 +34,7 @@ export default function TxTable({
   const handleCopyHash = (hash: string) => {
     if (typeof navigator === "undefined") return;
 
-    const doSetCopied = () => {
+    const mark = () => {
       setCopiedHash(hash);
       setTimeout(() => {
         setCopiedHash((prev) => (prev === hash ? null : prev));
@@ -44,19 +44,19 @@ export default function TxTable({
     if ("clipboard" in navigator) {
       navigator.clipboard
         .writeText(hash)
-        .then(doSetCopied)
+        .then(mark)
         .catch(() => {});
     } else {
       try {
-        const textarea = document.createElement("textarea");
-        textarea.value = hash;
-        textarea.style.position = "fixed";
-        textarea.style.opacity = "0";
-        document.body.appendChild(textarea);
-        textarea.select();
+        const ta = document.createElement("textarea");
+        ta.value = hash;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
         document.execCommand("copy");
-        document.body.removeChild(textarea);
-        doSetCopied();
+        document.body.removeChild(ta);
+        mark();
       } catch {
         // ignore
       }
@@ -84,11 +84,12 @@ export default function TxTable({
         </div>
       </div>
 
-      {/* Mobile & Tablet: cards */}
+      {/* Mobile & Tablet */}
       <div className="grid gap-3 lg:hidden">
         {rows.map((r, i) => {
           const isCopied = copiedHash === r.hash;
           const isOut = r.type === "out";
+          const sign = isOut ? "-" : "+";
           return (
             <div
               key={i}
@@ -128,7 +129,7 @@ export default function TxTable({
                     }
                   `}
                 >
-                  {isOut ? "-" : "+"}
+                  {sign}
                   {Math.abs(r.amount)}
                 </span>
               </div>
@@ -218,7 +219,7 @@ export default function TxTable({
         })}
       </div>
 
-      {/* Desktop (lg+): full table */}
+      {/* Desktop */}
       <div className="hidden overflow-x-auto lg:block">
         <T>
           <THEAD>
@@ -238,6 +239,7 @@ export default function TxTable({
             {rows.map((r, i) => {
               const isCopied = copiedHash === r.hash;
               const isOut = r.type === "out";
+              const sign = isOut ? "-" : "+";
               return (
                 <TR key={i}>
                   <TD
@@ -259,7 +261,7 @@ export default function TxTable({
                         : "text-emerald-600 dark:text-emerald-300"
                     }
                   >
-                    {isOut ? "-" : "+"}
+                    {sign}
                     {Math.abs(r.amount)}
                   </TD>
                   <TD>{formatCurrency(r.value, "USD")}</TD>
@@ -377,7 +379,7 @@ export default function TxTable({
   );
 }
 
-/** آیکون کپی */
+/** Icons */
 function CopyIcon() {
   return (
     <svg
@@ -411,8 +413,6 @@ function CopyIcon() {
     </svg>
   );
 }
-
-/** آیکون تیک */
 function CheckIcon() {
   return (
     <svg
@@ -440,8 +440,6 @@ function CheckIcon() {
     </svg>
   );
 }
-
-/** آیکون چشم برای View details */
 function EyeIcon({ className = "" }: { className?: string }) {
   return (
     <svg

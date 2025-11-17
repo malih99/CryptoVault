@@ -14,13 +14,12 @@ import type { TxRecord } from "./types";
 import TxQuickFilters from "./TxQuickFilters";
 import { formatCurrency } from "../../lib/format";
 
-/** Parserها: تبدیل رشته به عدد */
+/** string -> number parsers */
 function parseUsdString(input: string): number {
   if (!input) return 0;
   const n = Number(input.replace(/[$,\s]/g, ""));
   return Number.isFinite(n) ? n : 0;
 }
-
 function parseAmountString(input: string): number {
   if (!input) return 0;
   const sign = input.trim().startsWith("-") ? -1 : 1;
@@ -38,13 +37,13 @@ export default function TransactionsPage() {
   const [tokenFilter, setTokenFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<TxStatusFilter>("all");
 
-  // 🔢 Pagination
+  // pagination
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
   const [selectedTx, setSelectedTx] = useState<TxRecord | null>(null);
 
-  /** 1) داده‌های ماک را همین‌جا به نسخه‌ی عددی map می‌کنیم */
+  // map mock -> numeric
   const mappedRows: TxRecord[] = useMemo(
     () =>
       mockTx.map((t) => ({
@@ -65,7 +64,7 @@ export default function TransactionsPage() {
     [mappedRows]
   );
 
-  /** 2) فیلترها روی mappedRows اعمال می‌شوند */
+  // filters
   const filteredTx: TxRecord[] = useMemo(
     () =>
       mappedRows.filter((tx) => {
@@ -79,19 +78,9 @@ export default function TransactionsPage() {
         ) {
           return false;
         }
-
-        if (typeFilter !== "all" && tx.type !== typeFilter) {
-          return false;
-        }
-
-        if (tokenFilter !== "all" && tx.token !== tokenFilter) {
-          return false;
-        }
-
-        if (statusFilter !== "all" && tx.status !== statusFilter) {
-          return false;
-        }
-
+        if (typeFilter !== "all" && tx.type !== typeFilter) return false;
+        if (tokenFilter !== "all" && tx.token !== tokenFilter) return false;
+        if (statusFilter !== "all" && tx.status !== statusFilter) return false;
         return true;
       }),
     [mappedRows, search, typeFilter, tokenFilter, statusFilter]
@@ -101,7 +90,7 @@ export default function TransactionsPage() {
     setPage(1);
   }, [search, typeFilter, tokenFilter, statusFilter, pageSize]);
 
-  /** 3) KPIها بر پایه‌ی مقدار عددی */
+  // KPIs
   const totalTx = filteredTx.length;
   const totalVolume = filteredTx.reduce((sum, tx) => sum + tx.value, 0);
   const avgTx = totalTx ? totalVolume / totalTx : 0;
@@ -109,7 +98,6 @@ export default function TransactionsPage() {
   const successRate = totalTx ? (confirmed / totalTx) * 100 : 0;
 
   const totalPages = Math.max(1, Math.ceil(totalTx / pageSize));
-
   const paginatedTx = useMemo(() => {
     const start = (page - 1) * pageSize;
     return filteredTx.slice(start, start + pageSize);
@@ -128,7 +116,6 @@ export default function TransactionsPage() {
       "time",
       "status",
     ];
-
     const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
 
     const rows = filteredTx.map((tx) =>
@@ -147,10 +134,7 @@ export default function TransactionsPage() {
     );
 
     const csv = [header.join(","), ...rows].join("\n");
-
-    const blob = new Blob([csv], {
-      type: "text/csv;charset=utf-8;",
-    });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -174,7 +158,7 @@ export default function TransactionsPage() {
           </p>
         </div>
 
-        {/* KPI cards */}
+        {/* KPIs */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card className="p-4 sm:p-5">
             <div className="text-xs text-slate-500 dark:text-slate-400">
@@ -213,7 +197,7 @@ export default function TransactionsPage() {
           </Card>
         </div>
 
-        {/* Analytics row */}
+        {/* Analytics */}
         <TxAnalytics tx={filteredTx} feesByMonth={mockTxFeesByMonth} />
 
         {/* Filters */}
