@@ -1,4 +1,10 @@
 import Card from "../../components/ui/Card";
+import {
+  formatCurrency,
+  formatCrypto,
+  formatNumber,
+  formatPercent,
+} from "../../lib/format";
 
 export default function HoldingsTable({
   rows,
@@ -56,22 +62,32 @@ export default function HoldingsTable({
                       </div>
                     </div>
                   </td>
-                  <td className="py-3 px-4">${r.price.toLocaleString()}</td>
-                  <td className="py-3 px-4">{r.qty.toFixed(4)}</td>
-                  <td className="py-3 px-4">${r.value.toLocaleString()}</td>
+                  <td className="py-3 px-4">
+                    {formatCurrency(r.price, "USD")}
+                  </td>
+                  <td className="py-3 px-4">
+                    {formatCrypto(r.qty, { minFrac: 4, maxFrac: 4 })}
+                  </td>
+                  <td className="py-3 px-4">
+                    {formatCurrency(r.value, "USD")}
+                  </td>
                   <td
                     className={`py-3 px-4 ${
                       r.change >= 0 ? "text-emerald-400" : "text-red-400"
                     }`}
                   >
-                    {r.change >= 0 ? "↗" : "↘"} {Math.abs(r.change).toFixed(2)}%
+                    {r.change >= 0 ? "↗" : "↘"}{" "}
+                    {formatPercent(Math.abs(r.change))}
                   </td>
                   <td
                     className={`py-3 px-4 ${
                       pos ? "text-emerald-400" : "text-red-400"
                     }`}
                   >
-                    {pos ? "+" : "-"}${Math.abs(pnlAbs).toFixed(0)}
+                    {pos ? "+" : "-"}
+                    {formatCurrency(Math.abs(pnlAbs), "USD", {
+                      maximumFractionDigits: 0,
+                    })}
                   </td>
                   <td className="py-3 px-4">
                     <div className="h-1.5 w-24 rounded-full bg-white/30 dark:bg-white/10">
@@ -81,7 +97,7 @@ export default function HoldingsTable({
                       />
                     </div>
                     <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                      {r.share}%
+                      {formatNumber(r.share, { maximumFractionDigits: 0 })}%
                     </div>
                   </td>
                 </tr>

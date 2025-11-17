@@ -9,12 +9,19 @@ import RecentActivity from "./RecentActivity";
 import QuickActions from "./QuickActions";
 import MarketOverview from "./MarketOverview";
 import NewsAlerts from "./NewsAlerts";
+import { formatCurrency, formatNumber, formatPercent } from "../../lib/format";
 
 type RangeKey = "7d" | "30d" | "90d";
 
 export default function DashboardPage() {
   const { t } = useTranslation();
   const [range, setRange] = useState<RangeKey>("30d");
+
+  // 🔢 نمونه اعداد (در آینده از API/State بیاد)
+  const totalValue = 24580;
+  const change24 = 4.2;
+  const assetsCount = 12;
+  const stakedUsd = 8320;
 
   const pillBase =
     "px-2 py-1 rounded-lg text-xs transition-colors " +
@@ -29,10 +36,26 @@ export default function DashboardPage() {
     <div className="mx-auto w-full max-w-[1280px] space-y-6 px-3 sm:px-0">
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <Stat label={t("dashboard.kpi.totalValue")} value="$24,580" right="$" />
-        <Stat label={t("dashboard.kpi.change24h")} value="+4.2%" right="📈" />
-        <Stat label={t("dashboard.kpi.assets")} value="12" right="📦" />
-        <Stat label={t("dashboard.kpi.staked")} value="$8,320" right="⛓" />
+        <Stat
+          label={t("dashboard.kpi.totalValue")}
+          value={formatCurrency(totalValue, "USD")}
+          right="$"
+        />
+        <Stat
+          label={t("dashboard.kpi.change24h")}
+          value={formatPercent(change24)}
+          right="📈"
+        />
+        <Stat
+          label={t("dashboard.kpi.assets")}
+          value={formatNumber(assetsCount)}
+          right="📦"
+        />
+        <Stat
+          label={t("dashboard.kpi.staked")}
+          value={formatCurrency(stakedUsd, "USD")}
+          right="⛓"
+        />
       </div>
 
       {/* Chart + Wallet */}
