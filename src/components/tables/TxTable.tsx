@@ -2,6 +2,15 @@ import { useState } from "react";
 import Card from "../../components/ui/Card";
 import { T, THEAD, TBODY, TR, TH, TD } from "../../components/ui/Table";
 import type { TxRecord } from "../../features/transactions/types";
+import { formatCurrency } from "../../lib/format";
+
+// --- helpers: runtime coercion to avoid crashes if data arrives as string
+function toNum(n: unknown): number {
+  if (typeof n === "number" && Number.isFinite(n)) return n;
+  const s = String(n ?? "").replace(/[$,\s]/g, "");
+  const v = Number(s);
+  return Number.isFinite(v) ? v : 0;
+}
 
 type Props = {
   rows: TxRecord[];
@@ -25,7 +34,6 @@ export default function TxTable({
   onSelectTx,
 }: Props) {
   const isEmpty = rows.length === 0;
-
   const [copiedHash, setCopiedHash] = useState<string | null>(null);
 
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
@@ -34,7 +42,7 @@ export default function TxTable({
   const handleCopyHash = (hash: string) => {
     if (typeof navigator === "undefined") return;
 
-    const doSetCopied = () => {
+    const mark = () => {
       setCopiedHash(hash);
       setTimeout(() => {
         setCopiedHash((prev) => (prev === hash ? null : prev));
@@ -44,22 +52,20 @@ export default function TxTable({
     if ("clipboard" in navigator) {
       navigator.clipboard
         .writeText(hash)
-        .then(doSetCopied)
+        .then(mark)
         .catch(() => {});
     } else {
       try {
-        const textarea = document.createElement("textarea");
-        textarea.value = hash;
-        textarea.style.position = "fixed";
-        textarea.style.opacity = "0";
-        document.body.appendChild(textarea);
-        textarea.select();
+        const ta = document.createElement("textarea");
+        ta.value = hash;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
         document.execCommand("copy");
-        document.body.removeChild(textarea);
-        doSetCopied();
-      } catch {
-        // ignore
-      }
+        document.body.removeChild(ta);
+        mark();
+      } catch {}
     }
   };
 
@@ -84,10 +90,14 @@ export default function TxTable({
         </div>
       </div>
 
-      {/* Mobile & Tablet: cards */}
+      {/* Mobile & Tablet */}
       <div className="grid gap-3 lg:hidden">
         {rows.map((r, i) => {
           const isCopied = copiedHash === r.hash;
+          const amt = toNum(r.amount);
+          const val = toNum(r.value);
+          const isOut = r.type === "out";
+          const sign = isOut ? "-" : "+";
           return (
             <div
               key={i}
@@ -121,13 +131,14 @@ export default function TxTable({
                   className={`
                     text-sm font-medium
                     ${
-                      r.amount.startsWith("-")
+                      isOut
                         ? "text-rose-600 dark:text-rose-300"
                         : "text-emerald-600 dark:text-emerald-300"
                     }
                   `}
                 >
-                  {r.amount}
+                  {sign}
+                  {Math.abs(amt)}
                 </span>
               </div>
 
@@ -137,7 +148,7 @@ export default function TxTable({
                     Value
                   </div>
                   <div className="text-slate-900 dark:text-slate-50">
-                    {r.value}
+                    {formatCurrency(val, "USD")}
                   </div>
                 </div>
                 <div className="space-y-0.5">
@@ -216,7 +227,7 @@ export default function TxTable({
         })}
       </div>
 
-      {/* Desktop (lg+): full table */}
+      {/* Desktop */}
       <div className="hidden overflow-x-auto lg:block">
         <T>
           <THEAD>
@@ -235,6 +246,10 @@ export default function TxTable({
           <TBODY>
             {rows.map((r, i) => {
               const isCopied = copiedHash === r.hash;
+              const amt = toNum(r.amount);
+              const val = toNum(r.value);
+              const isOut = r.type === "out";
+              const sign = isOut ? "-" : "+";
               return (
                 <TR key={i}>
                   <TD
@@ -251,14 +266,15 @@ export default function TxTable({
                   <TD>{r.token}</TD>
                   <TD
                     className={
-                      r.amount.startsWith("-")
+                      isOut
                         ? "text-rose-600 dark:text-rose-300"
                         : "text-emerald-600 dark:text-emerald-300"
                     }
                   >
-                    {r.amount}
+                    {sign}
+                    {Math.abs(amt)}
                   </TD>
-                  <TD>{r.value}</TD>
+                  <TD>{formatCurrency(val, "USD")}</TD>
                   <TD className="max-w-[280px] truncate">{r.from}</TD>
                   <TD className="max-w-[260px]">
                     <div className="flex items-center justify-between gap-2">
@@ -373,7 +389,7 @@ export default function TxTable({
   );
 }
 
-/** آیکون کپی */
+/** icons */
 function CopyIcon() {
   return (
     <svg
@@ -407,8 +423,6 @@ function CopyIcon() {
     </svg>
   );
 }
-
-/** آیکون تیک */
 function CheckIcon() {
   return (
     <svg
@@ -436,8 +450,6 @@ function CheckIcon() {
     </svg>
   );
 }
-
-/** آیکون چشم برای View details */
 function EyeIcon({ className = "" }: { className?: string }) {
   return (
     <svg

@@ -17,13 +17,14 @@ import { formatCurrency } from "../../lib/format";
 /** string -> number parsers */
 function parseUsdString(input: string): number {
   if (!input) return 0;
-  const n = Number(input.replace(/[$,\s]/g, ""));
+  const n = Number(String(input).replace(/[$,\s]/g, ""));
   return Number.isFinite(n) ? n : 0;
 }
 function parseAmountString(input: string): number {
   if (!input) return 0;
-  const sign = input.trim().startsWith("-") ? -1 : 1;
-  const m = input.match(/-?\d+(\.\d+)?/);
+  const s = String(input).trim();
+  const sign = s.startsWith("-") ? -1 : 1;
+  const m = s.match(/-?\d+(\.\d+)?/);
   if (!m) return 0;
   return sign * parseFloat(m[0]);
 }
@@ -37,10 +38,8 @@ export default function TransactionsPage() {
   const [tokenFilter, setTokenFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<TxStatusFilter>("all");
 
-  // pagination
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-
   const [selectedTx, setSelectedTx] = useState<TxRecord | null>(null);
 
   // map mock -> numeric
@@ -49,8 +48,8 @@ export default function TransactionsPage() {
       mockTx.map((t) => ({
         type: t.type,
         token: t.token,
-        amount: parseAmountString(t.amount),
-        value: parseUsdString(t.value),
+        amount: parseAmountString(t.amount as unknown as string),
+        value: parseUsdString(t.value as unknown as string),
         from: t.from,
         hash: t.hash,
         time: t.time,
@@ -64,7 +63,6 @@ export default function TransactionsPage() {
     [mappedRows]
   );
 
-  // filters
   const filteredTx: TxRecord[] = useMemo(
     () =>
       mappedRows.filter((tx) => {
@@ -90,7 +88,6 @@ export default function TransactionsPage() {
     setPage(1);
   }, [search, typeFilter, tokenFilter, statusFilter, pageSize]);
 
-  // KPIs
   const totalTx = filteredTx.length;
   const totalVolume = filteredTx.reduce((sum, tx) => sum + tx.value, 0);
   const avgTx = totalTx ? totalVolume / totalTx : 0;
@@ -148,7 +145,6 @@ export default function TransactionsPage() {
   return (
     <>
       <section className="mx-auto w-full max-w-[1280px] space-y-6 px-3 sm:px-0">
-        {/* Header */}
         <div>
           <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
             Transactions
@@ -158,7 +154,6 @@ export default function TransactionsPage() {
           </p>
         </div>
 
-        {/* KPIs */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card className="p-4 sm:p-5">
             <div className="text-xs text-slate-500 dark:text-slate-400">
@@ -197,10 +192,8 @@ export default function TransactionsPage() {
           </Card>
         </div>
 
-        {/* Analytics */}
         <TxAnalytics tx={filteredTx} feesByMonth={mockTxFeesByMonth} />
 
-        {/* Filters */}
         <TxFilter
           search={search}
           onSearchChange={setSearch}
