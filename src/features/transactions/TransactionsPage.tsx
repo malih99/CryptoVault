@@ -5,29 +5,14 @@ import TxTable from "../../components/tables/TxTable";
 import TxAnalytics from "./TxAnalytics";
 import TxMonthlySummary from "./TxMonthlySummary";
 import TxDetailsModal from "./TxDetailsModal";
-import {
-  mockTx,
-  mockTxMonthlySummary,
-  mockTxFeesByMonth,
-} from "../../lib/api/mock";
+import { mockTxMonthlySummary, mockTxFeesByMonth } from "../../lib/api/mock";
 import type { TxRecord } from "./types";
 import TxQuickFilters from "./TxQuickFilters";
 import { formatCurrency } from "../../lib/format";
+import { useTransactionsQuery } from "./api";
+import { KPICardSkeleton, TableSkeleton } from "../../components/ui/Skeleton";
 
-/** string -> number parsers */
-function parseUsdString(input: string): number {
-  if (!input) return 0;
-  const n = Number(String(input).replace(/[$,\s]/g, ""));
-  return Number.isFinite(n) ? n : 0;
-}
-function parseAmountString(input: string): number {
-  if (!input) return 0;
-  const s = String(input).trim();
-  const sign = s.startsWith("-") ? -1 : 1;
-  const m = s.match(/-?\d+(\.\d+)?/);
-  if (!m) return 0;
-  return sign * parseFloat(m[0]);
-}
+/** helpers */
 function toTimeMs(s: string): number {
   const t = Date.parse(s);
   return Number.isFinite(t) ? t : 0;
@@ -54,31 +39,21 @@ export default function TransactionsPage() {
 
   const [selectedTx, setSelectedTx] = useState<TxRecord | null>(null);
 
-  // map mock -> numeric
-  const mappedRows: TxRecord[] = useMemo(
-    () =>
-      mockTx.map((t) => ({
-        type: t.type,
-        token: t.token,
-        amount: parseAmountString(t.amount as unknown as string),
-        value: parseUsdString(t.value as unknown as string),
-        from: t.from,
-        hash: t.hash,
-        time: t.time,
-        status: t.status,
-      })),
-    []
-  );
+  // 🔌 fetch via TanStack Query
+  const { data, isLoading, isError, error, refetch, isFetching } =
+    useTransactionsQuery();
+
+  const rows = data ?? [];
 
   const availableTokens = useMemo(
-    () => Array.from(new Set(mappedRows.map((t) => t.token))).sort(),
-    [mappedRows]
+    () => Array.from(new Set(rows.map((t) => t.token))).sort(),
+    [rows]
   );
 
   // filters
   const filteredTx: TxRecord[] = useMemo(
     () =>
-      mappedRows.filter((tx) => {
+      rows.filter((tx) => {
         const q = search.trim().toLowerCase();
         if (
           q &&
@@ -94,10 +69,10 @@ export default function TransactionsPage() {
         if (statusFilter !== "all" && tx.status !== statusFilter) return false;
         return true;
       }),
-    [mappedRows, search, typeFilter, tokenFilter, statusFilter]
+    [rows, search, typeFilter, tokenFilter, statusFilter]
   );
 
-  // ✅ sort BEFORE paginate
+  // sort BEFORE paginate
   const sortedTx = useMemo(() => {
     const copy = [...filteredTx];
     copy.sort((a, b) => {
@@ -159,7 +134,7 @@ export default function TransactionsPage() {
     ];
     const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
 
-    const rows = sortedTx.map((tx) =>
+    const csvRows = sortedTx.map((tx) =>
       [
         tx.type,
         tx.token,
@@ -174,7 +149,7 @@ export default function TransactionsPage() {
         .join(",")
     );
 
-    const csv = [header.join(","), ...rows].join("\n");
+    const csv = [header.join(","), ...csvRows].join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -189,10 +164,9 @@ export default function TransactionsPage() {
   const onRequestSort = (key: SortKey) => {
     setSortKey((prevKey) => {
       if (prevKey !== key) {
-        setSortDir("desc"); // default for new key
+        setSortDir("desc");
         return key;
       }
-      // toggle
       setSortDir((d) => (d === "asc" ? "desc" : "asc"));
       return prevKey;
     });
@@ -203,7 +177,10 @@ export default function TransactionsPage() {
       <section className="mx-auto w-full max-w-[1280px] space-y-6 px-3 sm:px-0">
         <div>
           <h1 className="text-lg font-semibold text-slate-900 dark:text-slate-50">
-            Transactions
+            Transactions{" "}
+            {isFetching && (
+              <span className="ml-2 text-xs text-slate-400">(refreshing…)</span>
+            )}
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             View and manage your transaction history.
@@ -211,46 +188,82 @@ export default function TransactionsPage() {
         </div>
 
         {/* KPIs */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {isLoading ? (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <KPICardSkeleton />
+            <KPICardSkeleton />
+            <KPICardSkeleton />
+            <KPICardSkeleton />
+          </div>
+        ) : isError ? (
           <Card className="p-4 sm:p-5">
-            <div className="text-xs text-slate-500 dark:text-slate-400">
-              Total Transactions
+            <div className="text-sm font-medium text-rose-600 dark:text-rose-400">
+              Failed to load transactions
             </div>
-            <div className="mt-1.5 text-xl font-semibold text-slate-900 dark:text-slate-50 sm:text-2xl">
-              {totalTx}
-            </div>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              {(error as Error)?.message || "Unknown error"}
+            </p>
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="mt-3 inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              Retry
+            </button>
           </Card>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Card className="p-4 sm:p-5">
+              <div className="text-xs text-slate-500 dark:text-slate-400">
+                Total Transactions
+              </div>
+              <div className="mt-1.5 text-xl font-semibold text-slate-900 dark:text-slate-50 sm:text-2xl">
+                {totalTx}
+              </div>
+            </Card>
 
-          <Card className="p-4 sm:p-5">
-            <div className="text-xs text-slate-500 dark:text-slate-400">
-              Total Volume
-            </div>
-            <div className="mt-1.5 text-xl font-semibold text-slate-900 dark:text-slate-50 sm:text-2xl">
-              {formatCurrency(totalVolume, "USD")}
-            </div>
-          </Card>
+            <Card className="p-4 sm:p-5">
+              <div className="text-xs text-slate-500 dark:text-slate-400">
+                Total Volume
+              </div>
+              <div className="mt-1.5 text-xl font-semibold text-slate-900 dark:text-slate-50 sm:text-2xl">
+                {formatCurrency(totalVolume, "USD")}
+              </div>
+            </Card>
 
-          <Card className="p-4 sm:p-5">
-            <div className="text-xs text-slate-500 dark:text-slate-400">
-              Avg Transaction
-            </div>
-            <div className="mt-1.5 text-xl font-semibold text-slate-900 dark:text-slate-50 sm:text-2xl">
-              {formatCurrency(avgTx, "USD")}
-            </div>
-          </Card>
+            <Card className="p-4 sm:p-5">
+              <div className="text-xs text-slate-500 dark:text-slate-400">
+                Avg Transaction
+              </div>
+              <div className="mt-1.5 text-xl font-semibold text-slate-900 dark:text-slate-50 sm:text-2xl">
+                {formatCurrency(avgTx, "USD")}
+              </div>
+            </Card>
 
-          <Card className="p-4 sm:p-5">
-            <div className="text-xs text-slate-500 dark:text-slate-400">
-              Success Rate
-            </div>
-            <div className="mt-1.5 text-xl font-semibold text-emerald-600 dark:text-emerald-300 sm:text-2xl">
-              {successRate.toFixed(1)}%
-            </div>
-          </Card>
-        </div>
+            <Card className="p-4 sm:p-5">
+              <div className="text-xs text-slate-500 dark:text-slate-400">
+                Success Rate
+              </div>
+              <div className="mt-1.5 text-xl font-semibold text-emerald-600 dark:text-emerald-300 sm:text-2xl">
+                {successRate.toFixed(1)}%
+              </div>
+            </Card>
+          </div>
+        )}
 
         {/* Analytics */}
-        <TxAnalytics tx={sortedTx} feesByMonth={mockTxFeesByMonth} />
+        {!isLoading && !isError && (
+          <>
+            <TxAnalytics tx={sortedTx} feesByMonth={mockTxFeesByMonth} />
+            <TxQuickFilters
+              typeFilter={typeFilter}
+              statusFilter={statusFilter}
+              onTypeChange={setTypeFilter}
+              onStatusChange={setStatusFilter}
+            />
+            <TxMonthlySummary months={mockTxMonthlySummary} />
+          </>
+        )}
 
         {/* Filters */}
         <TxFilter
@@ -266,28 +279,24 @@ export default function TransactionsPage() {
           availableTokens={availableTokens}
         />
 
-        <TxQuickFilters
-          typeFilter={typeFilter}
-          statusFilter={statusFilter}
-          onTypeChange={setTypeFilter}
-          onStatusChange={setStatusFilter}
-        />
-
-        <TxMonthlySummary months={mockTxMonthlySummary} />
-
-        <TxTable
-          rows={paginatedTx}
-          page={page}
-          pageSize={pageSize}
-          total={totalTx}
-          totalPages={totalPages}
-          onPageChange={setPage}
-          onPageSizeChange={setPageSize}
-          onSelectTx={setSelectedTx}
-          sortKey={sortKey}
-          sortDir={sortDir}
-          onRequestSort={onRequestSort}
-        />
+        {/* Table */}
+        {isLoading ? (
+          <TableSkeleton rows={10} />
+        ) : isError ? null : (
+          <TxTable
+            rows={paginatedTx}
+            page={page}
+            pageSize={pageSize}
+            total={totalTx}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+            onSelectTx={setSelectedTx}
+            sortKey={sortKey}
+            sortDir={sortDir}
+            onRequestSort={onRequestSort}
+          />
+        )}
       </section>
 
       {selectedTx && (
