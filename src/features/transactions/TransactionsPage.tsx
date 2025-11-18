@@ -28,9 +28,15 @@ function parseAmountString(input: string): number {
   if (!m) return 0;
   return sign * parseFloat(m[0]);
 }
+function toTimeMs(s: string): number {
+  const t = Date.parse(s);
+  return Number.isFinite(t) ? t : 0;
+}
 
 type TxTypeFilter = "all" | "in" | "out" | "swap";
 type TxStatusFilter = "all" | "confirmed" | "pending";
+type SortKey = "time" | "amount" | "value";
+type SortDir = "asc" | "desc";
 
 export default function TransactionsPage() {
   const [search, setSearch] = useState("");
@@ -38,8 +44,14 @@ export default function TransactionsPage() {
   const [tokenFilter, setTokenFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<TxStatusFilter>("all");
 
+  // sorting
+  const [sortKey, setSortKey] = useState<SortKey>("time");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+
+  // pagination
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
   const [selectedTx, setSelectedTx] = useState<TxRecord | null>(null);
 
   // map mock -> numeric
@@ -63,6 +75,7 @@ export default function TransactionsPage() {
     [mappedRows]
   );
 
+  // filters
   const filteredTx: TxRecord[] = useMemo(
     () =>
       mappedRows.filter((tx) => {
@@ -84,24 +97,55 @@ export default function TransactionsPage() {
     [mappedRows, search, typeFilter, tokenFilter, statusFilter]
   );
 
+  // ✅ sort BEFORE paginate
+  const sortedTx = useMemo(() => {
+    const copy = [...filteredTx];
+    copy.sort((a, b) => {
+      let av = 0,
+        bv = 0;
+      if (sortKey === "amount") {
+        av = a.amount;
+        bv = b.amount;
+      } else if (sortKey === "value") {
+        av = a.value;
+        bv = b.value;
+      } else {
+        av = toTimeMs(a.time);
+        bv = toTimeMs(b.time);
+      }
+      const diff = av - bv;
+      return sortDir === "asc" ? diff : -diff;
+    });
+    return copy;
+  }, [filteredTx, sortKey, sortDir]);
+
   useEffect(() => {
     setPage(1);
-  }, [search, typeFilter, tokenFilter, statusFilter, pageSize]);
+  }, [
+    search,
+    typeFilter,
+    tokenFilter,
+    statusFilter,
+    pageSize,
+    sortKey,
+    sortDir,
+  ]);
 
-  const totalTx = filteredTx.length;
-  const totalVolume = filteredTx.reduce((sum, tx) => sum + tx.value, 0);
+  // KPIs
+  const totalTx = sortedTx.length;
+  const totalVolume = sortedTx.reduce((sum, tx) => sum + tx.value, 0);
   const avgTx = totalTx ? totalVolume / totalTx : 0;
-  const confirmed = filteredTx.filter((t) => t.status === "confirmed").length;
+  const confirmed = sortedTx.filter((t) => t.status === "confirmed").length;
   const successRate = totalTx ? (confirmed / totalTx) * 100 : 0;
 
   const totalPages = Math.max(1, Math.ceil(totalTx / pageSize));
   const paginatedTx = useMemo(() => {
     const start = (page - 1) * pageSize;
-    return filteredTx.slice(start, start + pageSize);
-  }, [filteredTx, page, pageSize]);
+    return sortedTx.slice(start, start + pageSize);
+  }, [sortedTx, page, pageSize]);
 
   const handleExport = () => {
-    if (!filteredTx.length) return;
+    if (!sortedTx.length) return;
 
     const header = [
       "type",
@@ -115,7 +159,7 @@ export default function TransactionsPage() {
     ];
     const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
 
-    const rows = filteredTx.map((tx) =>
+    const rows = sortedTx.map((tx) =>
       [
         tx.type,
         tx.token,
@@ -142,6 +186,18 @@ export default function TransactionsPage() {
     URL.revokeObjectURL(url);
   };
 
+  const onRequestSort = (key: SortKey) => {
+    setSortKey((prevKey) => {
+      if (prevKey !== key) {
+        setSortDir("desc"); // default for new key
+        return key;
+      }
+      // toggle
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+      return prevKey;
+    });
+  };
+
   return (
     <>
       <section className="mx-auto w-full max-w-[1280px] space-y-6 px-3 sm:px-0">
@@ -154,6 +210,7 @@ export default function TransactionsPage() {
           </p>
         </div>
 
+        {/* KPIs */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card className="p-4 sm:p-5">
             <div className="text-xs text-slate-500 dark:text-slate-400">
@@ -192,8 +249,10 @@ export default function TransactionsPage() {
           </Card>
         </div>
 
-        <TxAnalytics tx={filteredTx} feesByMonth={mockTxFeesByMonth} />
+        {/* Analytics */}
+        <TxAnalytics tx={sortedTx} feesByMonth={mockTxFeesByMonth} />
 
+        {/* Filters */}
         <TxFilter
           search={search}
           onSearchChange={setSearch}
@@ -225,6 +284,9 @@ export default function TransactionsPage() {
           onPageChange={setPage}
           onPageSizeChange={setPageSize}
           onSelectTx={setSelectedTx}
+          sortKey={sortKey}
+          sortDir={sortDir}
+          onRequestSort={onRequestSort}
         />
       </section>
 

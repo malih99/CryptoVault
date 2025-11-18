@@ -4,13 +4,15 @@ import { T, THEAD, TBODY, TR, TH, TD } from "../../components/ui/Table";
 import type { TxRecord } from "../../features/transactions/types";
 import { formatCurrency } from "../../lib/format";
 
-// --- helpers: runtime coercion to avoid crashes if data arrives as string
 function toNum(n: unknown): number {
   if (typeof n === "number" && Number.isFinite(n)) return n;
   const s = String(n ?? "").replace(/[$,\s]/g, "");
   const v = Number(s);
   return Number.isFinite(v) ? v : 0;
 }
+
+type SortKey = "time" | "amount" | "value";
+type SortDir = "asc" | "desc";
 
 type Props = {
   rows: TxRecord[];
@@ -21,6 +23,10 @@ type Props = {
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
   onSelectTx?: (tx: TxRecord) => void;
+  // sorting
+  sortKey: SortKey;
+  sortDir: SortDir;
+  onRequestSort: (key: SortKey) => void;
 };
 
 export default function TxTable({
@@ -32,6 +38,9 @@ export default function TxTable({
   onPageChange,
   onPageSizeChange,
   onSelectTx,
+  sortKey,
+  sortDir,
+  onRequestSort,
 }: Props) {
   const isEmpty = rows.length === 0;
   const [copiedHash, setCopiedHash] = useState<string | null>(null);
@@ -41,14 +50,12 @@ export default function TxTable({
 
   const handleCopyHash = (hash: string) => {
     if (typeof navigator === "undefined") return;
-
     const mark = () => {
       setCopiedHash(hash);
       setTimeout(() => {
         setCopiedHash((prev) => (prev === hash ? null : prev));
       }, 1500);
     };
-
     if ("clipboard" in navigator) {
       navigator.clipboard
         .writeText(hash)
@@ -67,6 +74,36 @@ export default function TxTable({
         mark();
       } catch {}
     }
+  };
+
+  const SortBtn = ({
+    label,
+    k,
+    className = "",
+  }: {
+    label: string;
+    k: SortKey;
+    className?: string;
+  }) => {
+    const active = sortKey === k;
+    const arrow = !active ? "↕" : sortDir === "asc" ? "↑" : "↓";
+    return (
+      <button
+        type="button"
+        onClick={() => onRequestSort(k)}
+        className={
+          "inline-flex items-center gap-1 hover:underline " +
+          (active ? "text-emerald-600 dark:text-emerald-300" : "") +
+          " " +
+          className
+        }
+        aria-label={`Sort by ${label}`}
+        title={`Sort by ${label}`}
+      >
+        <span>{label}</span>
+        <span aria-hidden>{arrow}</span>
+      </button>
+    );
   };
 
   if (isEmpty) {
@@ -234,11 +271,17 @@ export default function TxTable({
             <TR>
               <TH>Type</TH>
               <TH>Token</TH>
-              <TH>Amount</TH>
-              <TH>Value</TH>
+              <TH>
+                <SortBtn k="amount" label="Amount" />
+              </TH>
+              <TH>
+                <SortBtn k="value" label="Value" />
+              </TH>
               <TH>From/To</TH>
               <TH>Hash</TH>
-              <TH>Time</TH>
+              <TH>
+                <SortBtn k="time" label="Time" />
+              </TH>
               <TH>Status</TH>
               {onSelectTx && <TH className="text-right">Details</TH>}
             </TR>
