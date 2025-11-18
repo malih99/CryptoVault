@@ -1,9 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import type { UseQueryResult } from "@tanstack/react-query"; // ✅ type-only
-import { fetchJson } from "../../lib/api/client";
+import type { UseQueryResult } from "@tanstack/react-query";
 import type { TxRecord } from "./types";
-
-const ENDPOINT = "/api/transactions";
+import { mockTx } from "../../lib/api/mock";
 
 type RawTx = {
   type: "in" | "out" | "swap";
@@ -49,10 +47,9 @@ export function useTransactionsQuery(): UseQueryResult<TxRecord[]> {
   return useQuery({
     queryKey: ["transactions", "list"],
     queryFn: async () => {
-      const raw = await fetchJson<RawTx[]>(ENDPOINT);
-      return raw.map(adaptRawTx);
+      return (mockTx as RawTx[]).map(adaptRawTx);
     },
     staleTime: 30_000,
-    retry: 1,
+    retry: 0,
   });
 }
