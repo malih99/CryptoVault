@@ -4,13 +4,6 @@ import { T, THEAD, TBODY, TR, TH, TD } from "../../components/ui/Table";
 import type { TxRecord } from "../../features/transactions/types";
 import { formatCurrency } from "../../lib/format";
 
-function toNum(n: unknown): number {
-  if (typeof n === "number" && Number.isFinite(n)) return n;
-  const s = String(n ?? "").replace(/[$,\s]/g, "");
-  const v = Number(s);
-  return Number.isFinite(v) ? v : 0;
-}
-
 type SortKey = "time" | "amount" | "value";
 type SortDir = "asc" | "desc";
 
@@ -23,10 +16,11 @@ type Props = {
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
   onSelectTx?: (tx: TxRecord) => void;
-  // sorting
-  sortKey: SortKey;
-  sortDir: SortDir;
-  onRequestSort: (key: SortKey) => void;
+
+  // 🔽 سورتینگ
+  sortKey?: SortKey;
+  sortDir?: SortDir;
+  onRequestSort?: (key: SortKey) => void;
 };
 
 export default function TxTable({
@@ -38,8 +32,9 @@ export default function TxTable({
   onPageChange,
   onPageSizeChange,
   onSelectTx,
-  sortKey,
-  sortDir,
+
+  sortKey = "time",
+  sortDir = "desc",
   onRequestSort,
 }: Props) {
   const isEmpty = rows.length === 0;
@@ -50,7 +45,7 @@ export default function TxTable({
 
   const handleCopyHash = (hash: string) => {
     if (typeof navigator === "undefined") return;
-    const mark = () => {
+    const doSetCopied = () => {
       setCopiedHash(hash);
       setTimeout(() => {
         setCopiedHash((prev) => (prev === hash ? null : prev));
@@ -59,51 +54,23 @@ export default function TxTable({
     if ("clipboard" in navigator) {
       navigator.clipboard
         .writeText(hash)
-        .then(mark)
+        .then(doSetCopied)
         .catch(() => {});
     } else {
       try {
-        const ta = document.createElement("textarea");
-        ta.value = hash;
-        ta.style.position = "fixed";
-        ta.style.opacity = "0";
-        document.body.appendChild(ta);
-        ta.select();
+        const textarea = document.createElement("textarea");
+        textarea.value = hash;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
         document.execCommand("copy");
-        document.body.removeChild(ta);
-        mark();
-      } catch {}
+        document.body.removeChild(textarea);
+        doSetCopied();
+      } catch {
+        /* noop */
+      }
     }
-  };
-
-  const SortBtn = ({
-    label,
-    k,
-    className = "",
-  }: {
-    label: string;
-    k: SortKey;
-    className?: string;
-  }) => {
-    const active = sortKey === k;
-    const arrow = !active ? "↕" : sortDir === "asc" ? "↑" : "↓";
-    return (
-      <button
-        type="button"
-        onClick={() => onRequestSort(k)}
-        className={
-          "inline-flex items-center gap-1 hover:underline " +
-          (active ? "text-emerald-600 dark:text-emerald-300" : "") +
-          " " +
-          className
-        }
-        aria-label={`Sort by ${label}`}
-        title={`Sort by ${label}`}
-      >
-        <span>{label}</span>
-        <span aria-hidden>{arrow}</span>
-      </button>
-    );
   };
 
   if (isEmpty) {
@@ -119,6 +86,44 @@ export default function TxTable({
     );
   }
 
+  const SortButton = ({
+    label,
+    active,
+    dir,
+    onClick,
+    className = "",
+  }: {
+    label: string;
+    active: boolean;
+    dir: SortDir;
+    onClick?: () => void;
+    className?: string;
+  }) => (
+    <button
+      type="button"
+      onClick={onClick}
+      className={[
+        "inline-flex items-center gap-1.5 hover:underline underline-offset-4",
+        active
+          ? "text-slate-900 dark:text-slate-50"
+          : "text-slate-600 dark:text-slate-300",
+        className,
+      ].join(" ")}
+      aria-label={`Sort by ${label}`}
+    >
+      <span>{label}</span>
+      <span className="text-[10px]" aria-hidden>
+        {active ? (dir === "asc" ? "▲" : "▼") : "↕"}
+      </span>
+    </button>
+  );
+
+  const amountText = (r: TxRecord) => {
+    const isOut = r.type === "out";
+    const sign = isOut ? "-" : "+";
+    return `${sign}${Math.abs(r.amount)}`;
+  };
+
   return (
     <Card className="p-4 sm:p-5">
       <div className="mb-3 flex items-center justify-between">
@@ -127,14 +132,11 @@ export default function TxTable({
         </div>
       </div>
 
-      {/* Mobile & Tablet */}
+      {/* Mobile & Tablet: cards */}
       <div className="grid gap-3 lg:hidden">
         {rows.map((r, i) => {
           const isCopied = copiedHash === r.hash;
-          const amt = toNum(r.amount);
-          const val = toNum(r.value);
           const isOut = r.type === "out";
-          const sign = isOut ? "-" : "+";
           return (
             <div
               key={i}
@@ -174,8 +176,7 @@ export default function TxTable({
                     }
                   `}
                 >
-                  {sign}
-                  {Math.abs(amt)}
+                  {amountText(r)}
                 </span>
               </div>
 
@@ -185,7 +186,7 @@ export default function TxTable({
                     Value
                   </div>
                   <div className="text-slate-900 dark:text-slate-50">
-                    {formatCurrency(val, "USD")}
+                    {formatCurrency(r.value, "USD")}
                   </div>
                 </div>
                 <div className="space-y-0.5">
@@ -264,7 +265,7 @@ export default function TxTable({
         })}
       </div>
 
-      {/* Desktop */}
+      {/* Desktop (lg+): full table */}
       <div className="hidden overflow-x-auto lg:block">
         <T>
           <THEAD>
@@ -272,15 +273,30 @@ export default function TxTable({
               <TH>Type</TH>
               <TH>Token</TH>
               <TH>
-                <SortBtn k="amount" label="Amount" />
+                <SortButton
+                  label="Amount"
+                  active={sortKey === "amount"}
+                  dir={sortDir}
+                  onClick={() => onRequestSort?.("amount")}
+                />
               </TH>
               <TH>
-                <SortBtn k="value" label="Value" />
+                <SortButton
+                  label="Value"
+                  active={sortKey === "value"}
+                  dir={sortDir}
+                  onClick={() => onRequestSort?.("value")}
+                />
               </TH>
               <TH>From/To</TH>
               <TH>Hash</TH>
-              <TH>
-                <SortBtn k="time" label="Time" />
+              <TH className="whitespace-nowrap">
+                <SortButton
+                  label="Time"
+                  active={sortKey === "time"}
+                  dir={sortDir}
+                  onClick={() => onRequestSort?.("time")}
+                />
               </TH>
               <TH>Status</TH>
               {onSelectTx && <TH className="text-right">Details</TH>}
@@ -289,10 +305,7 @@ export default function TxTable({
           <TBODY>
             {rows.map((r, i) => {
               const isCopied = copiedHash === r.hash;
-              const amt = toNum(r.amount);
-              const val = toNum(r.value);
               const isOut = r.type === "out";
-              const sign = isOut ? "-" : "+";
               return (
                 <TR key={i}>
                   <TD
@@ -314,10 +327,9 @@ export default function TxTable({
                         : "text-emerald-600 dark:text-emerald-300"
                     }
                   >
-                    {sign}
-                    {Math.abs(amt)}
+                    {amountText(r)}
                   </TD>
-                  <TD>{formatCurrency(val, "USD")}</TD>
+                  <TD>{formatCurrency(r.value, "USD")}</TD>
                   <TD className="max-w-[280px] truncate">{r.from}</TD>
                   <TD className="max-w-[260px]">
                     <div className="flex items-center justify-between gap-2">
@@ -432,7 +444,7 @@ export default function TxTable({
   );
 }
 
-/** icons */
+/** آیکون کپی */
 function CopyIcon() {
   return (
     <svg
@@ -466,6 +478,8 @@ function CopyIcon() {
     </svg>
   );
 }
+
+/** آیکون تیک */
 function CheckIcon() {
   return (
     <svg
@@ -493,6 +507,7 @@ function CheckIcon() {
     </svg>
   );
 }
+
 function EyeIcon({ className = "" }: { className?: string }) {
   return (
     <svg
