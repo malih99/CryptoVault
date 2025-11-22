@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import type { UseQueryResult } from "@tanstack/react-query";
+import { fetchJson } from "../../lib/api/client";
 import type { TxRecord } from "./types";
 import { mockTx } from "../../lib/api/mock";
+
+const ENDPOINT = "/api/transactions";
 
 type RawTx = {
   type: "in" | "out" | "swap";
@@ -43,13 +45,38 @@ function adaptRawTx(raw: RawTx): TxRecord {
   };
 }
 
-export function useTransactionsQuery(): UseQueryResult<TxRecord[]> {
-  return useQuery({
+function adaptMockToRaw(): RawTx[] {
+  return mockTx.map((t) => ({
+    type: t.type,
+    token: t.token,
+    amount: t.amount, // ممکنه string باشه
+    value: t.value, // ممکنه string باشه
+    from: t.from,
+    hash: t.hash,
+    time: t.time,
+    status: t.status,
+  }));
+}
+
+export function useTransactionsQuery() {
+  return useQuery<TxRecord[]>({
     queryKey: ["transactions", "list"],
     queryFn: async () => {
-      return (mockTx as RawTx[]).map(adaptRawTx);
+      try {
+        const raw = await fetchJson<RawTx[]>(ENDPOINT);
+        return raw.map(adaptRawTx);
+      } catch (err) {
+        if (import.meta.env.DEV) {
+          console.warn(
+            "[transactions] Falling back to mock data because API failed:",
+            (err as Error)?.message
+          );
+        }
+        const raw = adaptMockToRaw();
+        return raw.map(adaptRawTx);
+      }
     },
     staleTime: 30_000,
-    retry: 0,
+    retry: 1,
   });
 }
