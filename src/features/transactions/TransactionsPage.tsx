@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Card from "../../components/ui/Card";
 import TxFilter from "./TxFilter";
 import TxTable from "../../components/tables/TxTable";
@@ -23,28 +24,56 @@ type TxStatusFilter = "all" | "confirmed" | "pending";
 type SortKey = "time" | "amount" | "value";
 type SortDir = "asc" | "desc";
 
+const clampPage = (v: number) =>
+  Number.isFinite(v) && v > 0 ? Math.floor(v) : 1;
+const clampSize = (v: number) => {
+  const n = Number.isFinite(v) ? Math.floor(v) : 10;
+  return [5, 10, 20, 50].includes(n) ? n : 10;
+};
+const ensureType = (v: string | null): TxTypeFilter =>
+  v === "in" || v === "out" || v === "swap" ? v : "all";
+const ensureStatus = (v: string | null): TxStatusFilter =>
+  v === "confirmed" || v === "pending" ? v : "all";
+const ensureSortKey = (v: string | null): SortKey =>
+  v === "amount" || v === "value" ? v : "time";
+const ensureSortDir = (v: string | null): SortDir =>
+  v === "asc" ? "asc" : "desc";
+
 export default function TransactionsPage() {
-  const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState<TxTypeFilter>("all");
-  const [tokenFilter, setTokenFilter] = useState<string>("all");
-  const [statusFilter, setStatusFilter] = useState<TxStatusFilter>("all");
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  // sorting
-  const [sortKey, setSortKey] = useState<SortKey>("time");
-  const [sortDir, setSortDir] = useState<SortDir>("desc");
-
-  // pagination
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  // --- initial state from URL
+  const [search, setSearch] = useState<string>(searchParams.get("q") ?? "");
+  const [typeFilter, setTypeFilter] = useState<TxTypeFilter>(
+    ensureType(searchParams.get("type"))
+  );
+  const [tokenFilter, setTokenFilter] = useState<string>(
+    searchParams.get("token") ?? "all"
+  );
+  const [statusFilter, setStatusFilter] = useState<TxStatusFilter>(
+    ensureStatus(searchParams.get("status"))
+  );
+  const [sortKey, setSortKey] = useState<SortKey>(
+    ensureSortKey(searchParams.get("sort"))
+  );
+  const [sortDir, setSortDir] = useState<SortDir>(
+    ensureSortDir(searchParams.get("dir"))
+  );
+  const [page, setPage] = useState<number>(
+    clampPage(Number(searchParams.get("page")))
+  );
+  const [pageSize, setPageSize] = useState<number>(
+    clampSize(Number(searchParams.get("size")))
+  );
 
   const [selectedTx, setSelectedTx] = useState<TxRecord | null>(null);
 
   // 🔌 fetch via TanStack Query
   const { data, isLoading, isError, error, refetch, isFetching } =
     useTransactionsQuery();
-
   const rows = data ?? [];
 
+  // available tokens
   const availableTokens = useMemo(
     () => Array.from(new Set(rows.map((t) => t.token))).sort(),
     [rows]
@@ -94,6 +123,7 @@ export default function TransactionsPage() {
     return copy;
   }, [filteredTx, sortKey, sortDir]);
 
+  // reset page when dependencies change
   useEffect(() => {
     setPage(1);
   }, [
@@ -119,9 +149,49 @@ export default function TransactionsPage() {
     return sortedTx.slice(start, start + pageSize);
   }, [sortedTx, page, pageSize]);
 
+  // 🔗 write state -> URL (replace to avoid history spam)
+  useEffect(() => {
+    const params: Record<string, string> = {};
+    if (search.trim()) params.q = search.trim();
+    if (typeFilter !== "all") params.type = typeFilter;
+    if (tokenFilter !== "all") params.token = tokenFilter;
+    if (statusFilter !== "all") params.status = statusFilter;
+    if (sortKey !== "time") params.sort = sortKey;
+    if (sortDir !== "desc") params.dir = sortDir;
+    if (page !== 1) params.page = String(page);
+    if (pageSize !== 10) params.size = String(pageSize);
+
+    // تنها در صورت تغییر واقعی، setSearchParams انجام شود
+    const current = Object.fromEntries(searchParams.entries());
+    const nextKeySet = new Set(Object.keys(params));
+    const currKeySet = new Set(Object.keys(current));
+    let changed = false;
+    if (nextKeySet.size !== currKeySet.size) {
+      changed = true;
+    } else {
+      for (const k of nextKeySet) {
+        if (current[k] !== params[k]) {
+          changed = true;
+          break;
+        }
+      }
+    }
+    if (changed) setSearchParams(params, { replace: true });
+  }, [
+    search,
+    typeFilter,
+    tokenFilter,
+    statusFilter,
+    sortKey,
+    sortDir,
+    page,
+    pageSize,
+    setSearchParams,
+    searchParams,
+  ]);
+
   const handleExport = () => {
     if (!sortedTx.length) return;
-
     const header = [
       "type",
       "token",
@@ -133,7 +203,6 @@ export default function TransactionsPage() {
       "status",
     ];
     const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
-
     const csvRows = sortedTx.map((tx) =>
       [
         tx.type,
@@ -148,7 +217,6 @@ export default function TransactionsPage() {
         .map(escape)
         .join(",")
     );
-
     const csv = [header.join(","), ...csvRows].join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -221,7 +289,6 @@ export default function TransactionsPage() {
                 {totalTx}
               </div>
             </Card>
-
             <Card className="p-4 sm:p-5">
               <div className="text-xs text-slate-500 dark:text-slate-400">
                 Total Volume
@@ -230,7 +297,6 @@ export default function TransactionsPage() {
                 {formatCurrency(totalVolume, "USD")}
               </div>
             </Card>
-
             <Card className="p-4 sm:p-5">
               <div className="text-xs text-slate-500 dark:text-slate-400">
                 Avg Transaction
@@ -239,7 +305,6 @@ export default function TransactionsPage() {
                 {formatCurrency(avgTx, "USD")}
               </div>
             </Card>
-
             <Card className="p-4 sm:p-5">
               <div className="text-xs text-slate-500 dark:text-slate-400">
                 Success Rate
