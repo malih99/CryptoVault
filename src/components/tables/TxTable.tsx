@@ -16,8 +16,7 @@ type Props = {
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
   onSelectTx?: (tx: TxRecord) => void;
-
-  // 🔽 سورتینگ
+  // NEW:
   sortKey?: SortKey;
   sortDir?: SortDir;
   onRequestSort?: (key: SortKey) => void;
@@ -32,9 +31,8 @@ export default function TxTable({
   onPageChange,
   onPageSizeChange,
   onSelectTx,
-
-  sortKey = "time",
-  sortDir = "desc",
+  sortKey,
+  sortDir,
   onRequestSort,
 }: Props) {
   const isEmpty = rows.length === 0;
@@ -67,10 +65,41 @@ export default function TxTable({
         document.execCommand("copy");
         document.body.removeChild(textarea);
         doSetCopied();
-      } catch {
-        /* noop */
-      }
+      } catch {}
     }
+  };
+
+  const SortButton = ({
+    label,
+    k,
+    alignRight,
+  }: {
+    label: string;
+    k: SortKey;
+    alignRight?: boolean;
+  }) => {
+    const active = sortKey === k;
+    const arrow = !active ? "↕" : sortDir === "asc" ? "▲" : "▼";
+    return (
+      <button
+        type="button"
+        onClick={() => onRequestSort?.(k)}
+        className={`inline-flex items-center gap-1 rounded-md px-1 py-0.5 text-xs
+          hover:bg-slate-100 dark:hover:bg-slate-800
+          ${alignRight ? "justify-end w-full" : ""}
+          ${
+            active
+              ? "text-emerald-600 dark:text-emerald-300"
+              : "text-slate-500 dark:text-slate-400"
+          }
+        `}
+        aria-label={`Sort by ${label}`}
+        title={`Sort by ${label}`}
+      >
+        <span>{label}</span>
+        <span aria-hidden="true">{arrow}</span>
+      </button>
+    );
   };
 
   if (isEmpty) {
@@ -86,44 +115,6 @@ export default function TxTable({
     );
   }
 
-  const SortButton = ({
-    label,
-    active,
-    dir,
-    onClick,
-    className = "",
-  }: {
-    label: string;
-    active: boolean;
-    dir: SortDir;
-    onClick?: () => void;
-    className?: string;
-  }) => (
-    <button
-      type="button"
-      onClick={onClick}
-      className={[
-        "inline-flex items-center gap-1.5 hover:underline underline-offset-4",
-        active
-          ? "text-slate-900 dark:text-slate-50"
-          : "text-slate-600 dark:text-slate-300",
-        className,
-      ].join(" ")}
-      aria-label={`Sort by ${label}`}
-    >
-      <span>{label}</span>
-      <span className="text-[10px]" aria-hidden>
-        {active ? (dir === "asc" ? "▲" : "▼") : "↕"}
-      </span>
-    </button>
-  );
-
-  const amountText = (r: TxRecord) => {
-    const isOut = r.type === "out";
-    const sign = isOut ? "-" : "+";
-    return `${sign}${Math.abs(r.amount)}`;
-  };
-
   return (
     <Card className="p-4 sm:p-5">
       <div className="mb-3 flex items-center justify-between">
@@ -132,33 +123,27 @@ export default function TxTable({
         </div>
       </div>
 
-      {/* Mobile & Tablet: cards */}
+      {/* Mobile cards (بدون سورت) */}
       <div className="grid gap-3 lg:hidden">
         {rows.map((r, i) => {
-          const isCopied = copiedHash === r.hash;
           const isOut = r.type === "out";
+          const isCopied = copiedHash === r.hash;
           return (
             <div
               key={i}
-              className="
-                grid grid-cols-1 gap-2 rounded-xl border
-                border-slate-200 bg-slate-50/80 px-3 py-3
-                dark:border-slate-800 dark:bg-slate-900
-              "
+              className="grid grid-cols-1 gap-2 rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-3 dark:border-slate-800 dark:bg-slate-900"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span
-                    className={`
-                      inline-flex h-7 w-7 items-center justify-center rounded-lg text-sm
-                      ${
-                        r.type === "in"
-                          ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300"
-                          : r.type === "swap"
-                          ? "bg-amber-50 text-amber-700 dark:bg-amber-900 dark:text-amber-300"
-                          : "bg-rose-50 text-rose-700 dark:bg-rose-900 dark:text-rose-300"
-                      }
-                    `}
+                    className={`inline-flex h-7 w-7 items-center justify-center rounded-lg text-sm
+                    ${
+                      r.type === "in"
+                        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300"
+                        : r.type === "swap"
+                        ? "bg-amber-50 text-amber-700 dark:bg-amber-900 dark:text-amber-300"
+                        : "bg-rose-50 text-rose-700 dark:bg-rose-900 dark:text-rose-300"
+                    }`}
                   >
                     {r.type === "in" ? "↙" : r.type === "swap" ? "⇄" : "↗"}
                   </span>
@@ -167,19 +152,16 @@ export default function TxTable({
                   </div>
                 </div>
                 <span
-                  className={`
-                    text-sm font-medium
-                    ${
-                      isOut
-                        ? "text-rose-600 dark:text-rose-300"
-                        : "text-emerald-600 dark:text-emerald-300"
-                    }
-                  `}
+                  className={`text-sm font-medium ${
+                    isOut
+                      ? "text-rose-600 dark:text-rose-300"
+                      : "text-emerald-600 dark:text-emerald-300"
+                  }`}
                 >
-                  {amountText(r)}
+                  {isOut ? "-" : "+"}
+                  {Math.abs(r.amount)}
                 </span>
               </div>
-
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="space-y-0.5">
                   <div className="text-slate-500 dark:text-slate-400">
@@ -228,32 +210,21 @@ export default function TxTable({
                   </div>
                 </div>
               </div>
-
               <div className="mt-1 flex items-center justify-between">
                 <span
-                  className={`
-                    rounded-full px-2 py-1 text-[11px]
-                    ${
-                      r.status === "confirmed"
-                        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/70 dark:text-emerald-300"
-                        : "bg-amber-50 text-amber-700 dark:bg-amber-900/70 dark:text-amber-300"
-                    }
-                  `}
+                  className={`rounded-full px-2 py-1 text-[11px] ${
+                    r.status === "confirmed"
+                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/70 dark:text-emerald-300"
+                      : "bg-amber-50 text-amber-700 dark:bg-amber-900/70 dark:text-amber-300"
+                  }`}
                 >
                   {r.status}
                 </span>
-
                 {onSelectTx && (
                   <button
                     type="button"
                     onClick={() => onSelectTx(r)}
-                    className="
-                      inline-flex items-center gap-1 rounded-lg border
-                      border-slate-200 bg-white px-2 py-1 text-[11px] font-medium
-                      text-slate-700 hover:bg-slate-50
-                      dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800
-                    "
-                    aria-label="View transaction details"
+                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                   >
                     <EyeIcon className="h-3.5 w-3.5" />
                     <span className="hidden xs:inline sm:inline">Details</span>
@@ -265,7 +236,7 @@ export default function TxTable({
         })}
       </div>
 
-      {/* Desktop (lg+): full table */}
+      {/* Desktop */}
       <div className="hidden overflow-x-auto lg:block">
         <T>
           <THEAD>
@@ -273,39 +244,23 @@ export default function TxTable({
               <TH>Type</TH>
               <TH>Token</TH>
               <TH>
-                <SortButton
-                  label="Amount"
-                  active={sortKey === "amount"}
-                  dir={sortDir}
-                  onClick={() => onRequestSort?.("amount")}
-                />
+                <SortButton label="Amount" k="amount" />
               </TH>
               <TH>
-                <SortButton
-                  label="Value"
-                  active={sortKey === "value"}
-                  dir={sortDir}
-                  onClick={() => onRequestSort?.("value")}
-                />
+                <SortButton label="Value" k="value" />
               </TH>
               <TH>From/To</TH>
               <TH>Hash</TH>
-              <TH className="whitespace-nowrap">
-                <SortButton
-                  label="Time"
-                  active={sortKey === "time"}
-                  dir={sortDir}
-                  onClick={() => onRequestSort?.("time")}
-                />
+              <TH className="text-right">
+                <SortButton label="Time" k="time" alignRight />
               </TH>
-              <TH>Status</TH>
               {onSelectTx && <TH className="text-right">Details</TH>}
             </TR>
           </THEAD>
           <TBODY>
             {rows.map((r, i) => {
-              const isCopied = copiedHash === r.hash;
               const isOut = r.type === "out";
+              const isCopied = copiedHash === r.hash;
               return (
                 <TR key={i}>
                   <TD
@@ -327,7 +282,8 @@ export default function TxTable({
                         : "text-emerald-600 dark:text-emerald-300"
                     }
                   >
-                    {amountText(r)}
+                    {isOut ? "-" : "+"}
+                    {Math.abs(r.amount)}
                   </TD>
                   <TD>{formatCurrency(r.value, "USD")}</TD>
                   <TD className="max-w-[280px] truncate">{r.from}</TD>
@@ -350,30 +306,13 @@ export default function TxTable({
                       </button>
                     </div>
                   </TD>
-                  <TD>{r.time}</TD>
-                  <TD>
-                    <span
-                      className={`rounded-full px-2 py-1 text-xs ${
-                        r.status === "confirmed"
-                          ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/70 dark:text-emerald-300"
-                          : "bg-amber-50 text-amber-700 dark:bg-amber-900/70 dark:text-amber-300"
-                      }`}
-                    >
-                      {r.status}
-                    </span>
-                  </TD>
+                  <TD className="text-right">{r.time}</TD>
                   {onSelectTx && (
                     <TD className="text-right">
                       <button
                         type="button"
                         onClick={() => onSelectTx(r)}
-                        className="
-                          inline-flex items-center gap-1 rounded-lg border
-                          border-slate-200 bg-white px-2 py-1 text-xs
-                          text-slate-700 hover:bg-slate-50
-                          dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800
-                        "
-                        aria-label="View transaction details"
+                        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                       >
                         <EyeIcon className="h-3.5 w-3.5" />
                         <span className="hidden md:inline">View</span>
@@ -387,7 +326,7 @@ export default function TxTable({
         </T>
       </div>
 
-      {/* Pagination footer */}
+      {/* Pagination */}
       <div className="mt-4 flex flex-col items-center justify-between gap-3 border-t border-slate-100 pt-3 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400 sm:flex-row">
         <div>
           Showing{" "}
@@ -404,7 +343,6 @@ export default function TxTable({
           </span>{" "}
           transactions
         </div>
-
         <div className="flex items-center gap-2">
           <select
             className="h-8 rounded-lg border border-slate-200 bg-white px-2 text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
@@ -416,7 +354,6 @@ export default function TxTable({
             <option value={20}>20 / page</option>
             <option value={50}>50 / page</option>
           </select>
-
           <div className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-1 py-0.5 dark:border-slate-700">
             <button
               type="button"
