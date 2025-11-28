@@ -14,7 +14,7 @@ export function useLocalStorage<T>(key: string, initial: T) {
     try {
       localStorage.setItem(key, JSON.stringify(value));
     } catch {
-      // ignore quota / privacy errors
+      // silently ignore (quota/privacy)
     }
   }, [key, value]);
 

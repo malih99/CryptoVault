@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom"; // ⬅️ NEW
+import { useSearchParams } from "react-router-dom";
 import Card from "../../components/ui/Card";
 import TxFilter from "./TxFilter";
 import TxTable from "../../components/tables/TxTable";
@@ -12,6 +12,7 @@ import TxQuickFilters from "./TxQuickFilters";
 import { formatCurrency } from "../../lib/format";
 import { useTransactionsQuery } from "./api";
 import { KPICardSkeleton, TableSkeleton } from "../../components/ui/Skeleton";
+import { useLocalStorage } from "../../lib/useLocalStorage";
 
 /** helpers */
 function toTimeMs(s: string): number {
@@ -35,56 +36,71 @@ const DEFAULTS = {
   pageSize: 10,
 };
 
+const LS_KEY = "tx:list:view";
+
 export default function TransactionsPage() {
   const [params, setParams] = useSearchParams();
 
-  // ---------- Read from URL once (with fallbacks)
+  // 1) snapshot از localStorage
+  const [persisted, setPersisted] = useLocalStorage(LS_KEY, {
+    search: DEFAULTS.search,
+    type: DEFAULTS.type,
+    token: DEFAULTS.token,
+    status: DEFAULTS.status,
+    sort: DEFAULTS.sort,
+    dir: DEFAULTS.dir,
+    page: DEFAULTS.page,
+    pageSize: DEFAULTS.pageSize,
+  });
+
+  // 2) Read from URL (با fallback به persisted)
   const initial = useMemo(() => {
     const get = (k: string) => params.get(k) || "";
+    const has = (k: string) => params.has(k);
     const num = (k: string, fallback: number) => {
       const n = Number(get(k));
       return Number.isFinite(n) && n > 0 ? n : fallback;
     };
 
-    const sort = ((): SortKey => {
-      const s = get("sort");
-      return s === "amount" || s === "value" || s === "time"
-        ? s
-        : DEFAULTS.sort;
-    })();
+    const sort: SortKey = has("sort")
+      ? ["amount", "value", "time"].includes(get("sort"))
+        ? (get("sort") as SortKey)
+        : DEFAULTS.sort
+      : (persisted.sort as SortKey);
 
-    const dir = ((): SortDir => {
-      const d = get("dir");
-      return d === "asc" || d === "desc" ? d : DEFAULTS.dir;
-    })();
+    const dir: SortDir = has("dir")
+      ? ["asc", "desc"].includes(get("dir"))
+        ? (get("dir") as SortDir)
+        : DEFAULTS.dir
+      : (persisted.dir as SortDir);
 
-    const type = ((): TxTypeFilter => {
-      const t = get("type");
-      return t === "in" || t === "out" || t === "swap" || t === "all"
-        ? t
-        : DEFAULTS.type;
-    })();
+    const type: TxTypeFilter = has("type")
+      ? ["in", "out", "swap", "all"].includes(get("type"))
+        ? (get("type") as TxTypeFilter)
+        : DEFAULTS.type
+      : (persisted.type as TxTypeFilter);
 
-    const status = ((): TxStatusFilter => {
-      const s = get("status");
-      return s === "confirmed" || s === "pending" || s === "all"
-        ? s
-        : DEFAULTS.status;
-    })();
+    const status: TxStatusFilter = has("status")
+      ? ["confirmed", "pending", "all"].includes(get("status"))
+        ? (get("status") as TxStatusFilter)
+        : DEFAULTS.status
+      : (persisted.status as TxStatusFilter);
 
     return {
-      search: get("search") || DEFAULTS.search,
+      search: has("search") ? get("search") : persisted.search,
       typeFilter: type,
-      tokenFilter: get("token") || DEFAULTS.token,
+      tokenFilter: has("token") ? get("token") : persisted.token,
       statusFilter: status,
       sortKey: sort,
       sortDir: dir,
-      page: num("page", DEFAULTS.page),
-      pageSize: num("pageSize", DEFAULTS.pageSize),
+      page: has("page") ? num("page", DEFAULTS.page) : persisted.page,
+      pageSize: has("pageSize")
+        ? num("pageSize", DEFAULTS.pageSize)
+        : persisted.pageSize,
     };
-  }, [params]);
+  }, [params, persisted]);
 
-  // ---------- Local states (start from URL)
+  // 3) Local states from initial
   const [search, setSearch] = useState(initial.search);
   const [typeFilter, setTypeFilter] = useState<TxTypeFilter>(
     initial.typeFilter
@@ -93,16 +109,13 @@ export default function TransactionsPage() {
   const [statusFilter, setStatusFilter] = useState<TxStatusFilter>(
     initial.statusFilter
   );
-
   const [sortKey, setSortKey] = useState<SortKey>(initial.sortKey);
   const [sortDir, setSortDir] = useState<SortDir>(initial.sortDir);
-
   const [page, setPage] = useState(initial.page);
   const [pageSize, setPageSize] = useState(initial.pageSize);
-
   const [selectedTx, setSelectedTx] = useState<TxRecord | null>(null);
 
-  // 🔌 fetch
+  // 4) Fetch (TanStack Query)
   const { data, isLoading, isError, error, refetch, isFetching } =
     useTransactionsQuery();
 
@@ -113,7 +126,7 @@ export default function TransactionsPage() {
     [rows]
   );
 
-  // ---------- Filters
+  // 5) Filters
   const filteredTx: TxRecord[] = useMemo(
     () =>
       rows.filter((tx) => {
@@ -124,9 +137,8 @@ export default function TransactionsPage() {
             tx.token.toLowerCase().includes(q) ||
             tx.hash.toLowerCase().includes(q)
           )
-        ) {
+        )
           return false;
-        }
         if (typeFilter !== "all" && tx.type !== typeFilter) return false;
         if (tokenFilter !== "all" && tx.token !== tokenFilter) return false;
         if (statusFilter !== "all" && tx.status !== statusFilter) return false;
@@ -135,7 +147,7 @@ export default function TransactionsPage() {
     [rows, search, typeFilter, tokenFilter, statusFilter]
   );
 
-  // ---------- Sort BEFORE paginate
+  // 6) Sort BEFORE paginate
   const sortedTx = useMemo(() => {
     const copy = [...filteredTx];
     copy.sort((a, b) => {
@@ -157,7 +169,7 @@ export default function TransactionsPage() {
     return copy;
   }, [filteredTx, sortKey, sortDir]);
 
-  // ---------- Reset page on filters/sort change
+  // 7) Reset page on filters/sort change
   useEffect(() => {
     setPage(1);
   }, [
@@ -170,24 +182,23 @@ export default function TransactionsPage() {
     sortDir,
   ]);
 
-  // ---------- KPIs
+  // 8) KPIs
   const totalTx = sortedTx.length;
   const totalVolume = sortedTx.reduce((sum, tx) => sum + tx.value, 0);
   const avgTx = totalTx ? totalVolume / totalTx : 0;
   const confirmed = sortedTx.filter((t) => t.status === "confirmed").length;
   const successRate = totalTx ? (confirmed / totalTx) * 100 : 0;
 
-  // ---------- Pagination
+  // 9) Pagination
   const totalPages = Math.max(1, Math.ceil(totalTx / pageSize));
   const paginatedTx = useMemo(() => {
     const start = (page - 1) * pageSize;
     return sortedTx.slice(start, start + pageSize);
   }, [sortedTx, page, pageSize]);
 
-  // ---------- Write state -> URL
+  // 10) Write state -> URL
   useEffect(() => {
     const next = new URLSearchParams();
-
     if (search) next.set("search", search);
     if (typeFilter !== "all") next.set("type", typeFilter);
     if (tokenFilter !== "all") next.set("token", tokenFilter);
@@ -197,9 +208,9 @@ export default function TransactionsPage() {
     if (page !== DEFAULTS.page) next.set("page", String(page));
     if (pageSize !== DEFAULTS.pageSize) next.set("pageSize", String(pageSize));
 
-    // فقط اگر واقعاً تغییر کرده، push کنیم
-    const changed = next.toString() !== params.toString();
-    if (changed) setParams(next, { replace: false });
+    if (next.toString() !== params.toString()) {
+      setParams(next, { replace: false });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     search,
@@ -212,7 +223,31 @@ export default function TransactionsPage() {
     pageSize,
   ]);
 
-  // ---------- Handle header sort clicks
+  // 11) Persist به localStorage
+  useEffect(() => {
+    setPersisted({
+      search,
+      type: typeFilter,
+      token: tokenFilter,
+      status: statusFilter,
+      sort: sortKey,
+      dir: sortDir,
+      page,
+      pageSize,
+    });
+  }, [
+    search,
+    typeFilter,
+    tokenFilter,
+    statusFilter,
+    sortKey,
+    sortDir,
+    page,
+    pageSize,
+    setPersisted,
+  ]);
+
+  // 12) Sort header handler
   const onRequestSort = (key: SortKey) => {
     setSortKey((prevKey) => {
       if (prevKey !== key) {
@@ -239,22 +274,24 @@ export default function TransactionsPage() {
     ];
     const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
 
-    const csvRows = sortedTx.map((tx) =>
-      [
-        tx.type,
-        tx.token,
-        String(tx.amount),
-        String(tx.value),
-        tx.from,
-        tx.hash,
-        tx.time,
-        tx.status,
-      ]
-        .map(escape)
-        .join(",")
-    );
+    const csvRows = sortedTx
+      .map((tx) =>
+        [
+          tx.type,
+          tx.token,
+          String(tx.amount),
+          String(tx.value),
+          tx.from,
+          tx.hash,
+          tx.time,
+          tx.status,
+        ]
+          .map(escape)
+          .join(",")
+      )
+      .join("\n");
 
-    const csv = [header.join(","), ...csvRows].join("\n");
+    const csv = [header.join(","), csvRows].join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -386,7 +423,6 @@ export default function TransactionsPage() {
             onPageChange={setPage}
             onPageSizeChange={setPageSize}
             onSelectTx={setSelectedTx}
-            // ⬇️ sortable props (already wired in previous step)
             sortKey={sortKey}
             sortDir={sortDir}
             onRequestSort={onRequestSort}
