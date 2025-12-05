@@ -1,9 +1,7 @@
 import type { ChangeEvent } from "react";
 import { Download } from "lucide-react";
 import { Button } from "../../components/ui/Button";
-
-type TxTypeFilter = "all" | "in" | "out" | "swap";
-type TxStatusFilter = "all" | "confirmed" | "pending";
+import type { TxTypeFilter, TxStatusFilter } from "./types";
 
 type Props = {
   search: string;

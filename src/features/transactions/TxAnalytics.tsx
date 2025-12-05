@@ -32,7 +32,10 @@ export default function TxAnalytics({ tx, feesByMonth }: Props) {
   const avgMonthlyFees = feesByMonth.length
     ? totalFees / feesByMonth.length
     : 0;
-  const maxFee = Math.max(...feesByMonth.map((f) => f.value), 1);
+  const maxFee =
+    feesByMonth.length > 0
+      ? Math.max(...feesByMonth.map((f) => f.value), 1)
+      : 1;
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">

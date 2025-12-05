@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { TxRecord } from "./types";
 import Card from "../../components/ui/Card";
+import { formatCurrency } from "../../lib/format";
 
 type Props = {
   tx: TxRecord;
@@ -133,7 +134,7 @@ export default function TxDetailsModal({ tx, onClose }: Props) {
               Value (USD)
             </div>
             <div className="mt-1 font-medium text-slate-900 dark:text-slate-50">
-              {tx.value}
+              {formatCurrency(tx.value, "USD")}
             </div>
           </div>
         </div>
@@ -142,7 +143,10 @@ export default function TxDetailsModal({ tx, onClose }: Props) {
         <div className="space-y-3 text-xs">
           {/* From / To */}
           <div>
-            <div className="mb-1 flex items-center justify-between">
+            <div
+              className="mb-1 flex items-center justify بین
+            "
+            >
               <span className="text-slate-500 dark:text-slate-400">
                 From / To
               </span>
