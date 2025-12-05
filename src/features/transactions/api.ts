@@ -1,19 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchJson } from "../../lib/api/client";
-import type { TxRecord } from "./types";
 import { mockTx } from "../../lib/api/mock";
+import type { TxRecord, TxType, TxStatus } from "./types";
 
 const ENDPOINT = "/api/transactions";
 
 type RawTx = {
-  type: "in" | "out" | "swap";
+  type: TxType;
   token: string;
   amount: string | number;
   value: string | number;
   from: string;
   hash: string;
   time: string;
-  status: "confirmed" | "pending";
+  status: TxStatus;
 };
 
 function parseUsdString(input: unknown): number {
@@ -49,8 +49,8 @@ function adaptMockToRaw(): RawTx[] {
   return mockTx.map((t) => ({
     type: t.type,
     token: t.token,
-    amount: t.amount, // ممکنه string باشه
-    value: t.value, // ممکنه string باشه
+    amount: t.amount,
+    value: t.value,
     from: t.from,
     hash: t.hash,
     time: t.time,
