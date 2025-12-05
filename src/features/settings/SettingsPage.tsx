@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { RotateCcw, Eye, KeyRound, Download, Trash2, Plug } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import Toggle from "../../components/ui/Toggle";
 import { Button } from "../../components/ui/Button";
 import SettingsSection from "./SettingsSection";
@@ -8,9 +9,14 @@ import { fieldBase } from "./settingsFieldBase";
 import { useSettings, type ThemePreference } from "./useSettings";
 import AlertModal from "../../components/ui/AlertModal";
 import ConfirmDialog from "../../components/ui/ConfirmDialog";
+import { useUI } from "../../store/ui.store";
+import { useWallet } from "../wallet/useWallet";
 
 export default function SettingsPage() {
   const { settings, update, resetToDefaults } = useSettings();
+  const { theme, locale, setTheme, setLocale } = useUI();
+  const { disconnect } = useWallet();
+  const queryClient = useQueryClient();
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -23,13 +29,18 @@ export default function SettingsPage() {
   const [confirmClear, setConfirmClear] = useState(false);
   const [confirmDisconnect, setConfirmDisconnect] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
 
   const handleThemeChange = (value: string) => {
-    update("theme", value as ThemePreference);
+    const pref = value as ThemePreference;
+    update("theme", pref);
+    setTheme(pref);
   };
 
   const handleLanguageChange = (value: string) => {
-    update("language", value === "fa" ? "fa" : "en");
+    const lang = value === "fa" ? "fa" : "en";
+    update("language", lang);
+    setLocale(lang);
   };
 
   const handleCurrencyChange = (value: string) => {
@@ -126,13 +137,7 @@ export default function SettingsPage() {
   };
 
   const handleResetAll = () => {
-    if (
-      window.confirm(
-        "Reset all settings to their default values? This won't affect your assets. "
-      )
-    ) {
-      resetToDefaults();
-    }
+    setConfirmReset(true);
   };
 
   return (
@@ -173,7 +178,7 @@ export default function SettingsPage() {
         >
           <select
             className={fieldBase}
-            value={settings.theme}
+            value={theme}
             onChange={(e) => handleThemeChange(e.target.value)}
           >
             <option value="dark">Dark</option>
@@ -185,7 +190,7 @@ export default function SettingsPage() {
         <SettingRow label="Language" helper="Set your preferred language.">
           <select
             className={fieldBase}
-            value={settings.language}
+            value={locale}
             onChange={(e) => handleLanguageChange(e.target.value)}
           >
             <option value="en">English</option>
@@ -417,10 +422,10 @@ export default function SettingsPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={handleResetAll}
-            leftIcon={<RotateCcw className="h-3.5 w-3.5" />}
+            onClick={handleAddWallet}
+            leftIcon={<Plug className="h-3.5 w-3.5" />}
           >
-            Reset to defaults
+            Add wallet
           </Button>
         </div>
       </SettingsSection>
@@ -430,7 +435,6 @@ export default function SettingsPage() {
         title="Backup & Recovery"
         description="Secure your account with recovery options."
       >
-        {/* View recovery phrase */}
         {/* View recovery phrase */}
         <SettingRow
           label="Recovery Phrase"
@@ -600,6 +604,7 @@ export default function SettingsPage() {
           </Button>
         </SettingRow>
       </SettingsSection>
+
       {/* Alert */}
       {alert && (
         <AlertModal
@@ -610,19 +615,47 @@ export default function SettingsPage() {
         />
       )}
 
+      {/* Confirm: Reset settings */}
+      <ConfirmDialog
+        open={confirmReset}
+        title="Reset all settings"
+        description="This will restore all preferences to their default values. It won't affect your assets."
+        confirmText="Reset"
+        cancelText="Cancel"
+        tone="default"
+        onConfirm={() => {
+          setConfirmReset(false);
+          resetToDefaults();
+          // keep in sync with defaultSettings
+          setTheme("dark");
+          setLocale("en");
+          setAlert({
+            title: "Settings reset",
+            message: "All preferences have been reset to their defaults.",
+          });
+        }}
+        onCancel={() => setConfirmReset(false)}
+      />
+
       {/* Confirm: Clear history */}
       <ConfirmDialog
         open={confirmClear}
         title="Clear Transaction History"
-        description="This will remove all transaction records. This cannot be undone."
+        description="This will remove all transaction records and local view preferences. This cannot be undone."
         confirmText="Clear"
         cancelText="Cancel"
         tone="danger"
         onConfirm={() => {
           setConfirmClear(false);
+          try {
+            window.localStorage.removeItem("tx:list:view");
+          } catch {
+            // ignore
+          }
+          queryClient.removeQueries({ queryKey: ["transactions", "list"] });
           setAlert({
             title: "Done",
-            message: "Transaction history cleared (demo).",
+            message: "Transaction history cleared (locally).",
           });
         }}
         onCancel={() => setConfirmClear(false)}
@@ -638,9 +671,10 @@ export default function SettingsPage() {
         tone="danger"
         onConfirm={() => {
           setConfirmDisconnect(false);
+          disconnect();
           setAlert({
             title: "Disconnected",
-            message: "All wallets disconnected (demo).",
+            message: "All wallets disconnected.",
           });
         }}
         onCancel={() => setConfirmDisconnect(false)}

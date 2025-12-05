@@ -59,32 +59,6 @@ const defaultSettings: SettingsState = {
   showTxHistory: true,
 };
 
-function applyTheme(theme: ThemePreference) {
-  if (typeof document === "undefined") return;
-  const root = document.documentElement;
-
-  const setDark = (isDark: boolean) => {
-    if (isDark) {
-      root.classList.add("dark");
-      root.dataset.theme = "dark";
-    } else {
-      root.classList.remove("dark");
-      root.dataset.theme = "light";
-    }
-  };
-
-  if (theme === "dark") {
-    setDark(true);
-  } else if (theme === "light") {
-    setDark(false);
-  } else {
-    const prefersDark = window.matchMedia?.(
-      "(prefers-color-scheme: dark)"
-    ).matches;
-    setDark(prefersDark);
-  }
-}
-
 export function useSettings() {
   const [settings, setSettings] = useState<SettingsState>(() => {
     if (typeof window === "undefined") {
@@ -100,7 +74,6 @@ export function useSettings() {
     }
   });
 
-  // ذخیره در localStorage
   useEffect(() => {
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
@@ -108,11 +81,6 @@ export function useSettings() {
       // ignore
     }
   }, [settings]);
-
-  // اعمال theme روی document
-  useEffect(() => {
-    applyTheme(settings.theme);
-  }, [settings.theme]);
 
   const update = <K extends keyof SettingsState>(
     key: K,
