@@ -1,8 +1,12 @@
 import { useState } from "react";
 import Card from "../../components/ui/Card";
 import { T, THEAD, TBODY, TR, TH, TD } from "../../components/ui/Table";
-import type { TxRecord } from "../../features/transactions/types";
 import { formatCurrency } from "../../lib/format";
+import type {
+  TxRecord,
+  TxSortKey,
+  TxSortDir,
+} from "../../features/transactions/types";
 
 type Props = {
   rows: TxRecord[];
@@ -13,6 +17,9 @@ type Props = {
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
   onSelectTx?: (tx: TxRecord) => void;
+  sortKey: TxSortKey;
+  sortDir: TxSortDir;
+  onRequestSort: (key: TxSortKey) => void;
 };
 
 export default function TxTable({
@@ -24,6 +31,9 @@ export default function TxTable({
   onPageChange,
   onPageSizeChange,
   onSelectTx,
+  sortKey,
+  sortDir,
+  onRequestSort,
 }: Props) {
   const isEmpty = rows.length === 0;
   const [copiedHash, setCopiedHash] = useState<string | null>(null);
@@ -226,11 +236,31 @@ export default function TxTable({
             <TR>
               <TH>Type</TH>
               <TH>Token</TH>
-              <TH>Amount</TH>
-              <TH>Value</TH>
+              <TH>
+                <SortableHeader
+                  label="Amount"
+                  active={sortKey === "amount"}
+                  dir={sortDir}
+                  onClick={() => onRequestSort("amount")}
+                />
+              </TH>
+              <TH>
+                <SortableHeader
+                  label="Value"
+                  active={sortKey === "value"}
+                  dir={sortDir}
+                  onClick={() => onRequestSort("value")}
+                />
+              </TH>
               <TH>From/To</TH>
-              <TH>Hash</TH>
-              <TH>Time</TH>
+              <TH>
+                <SortableHeader
+                  label="Time"
+                  active={sortKey === "time"}
+                  dir={sortDir}
+                  onClick={() => onRequestSort("time")}
+                />
+              </TH>
               <TH>Status</TH>
               {onSelectTx && <TH className="text-right">Details</TH>}
             </TR>
@@ -376,6 +406,36 @@ export default function TxTable({
         </div>
       </div>
     </Card>
+  );
+}
+
+/** Sortable header helper */
+function SortableHeader({
+  label,
+  active,
+  dir,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  dir: TxSortDir;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-50"
+    >
+      <span>{label}</span>
+      <span
+        className={`inline-block text-[10px] ${
+          active ? "opacity-100" : "opacity-40"
+        }`}
+      >
+        {dir === "asc" ? "↑" : "↓"}
+      </span>
+    </button>
   );
 }
 

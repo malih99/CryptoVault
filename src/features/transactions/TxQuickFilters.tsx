@@ -1,6 +1,4 @@
-import type { TxTypeFilter } from "./types";
-
-type TxStatusFilter = "all" | "confirmed" | "pending";
+import type { TxTypeFilter, TxStatusFilter } from "./types";
 
 type Props = {
   typeFilter: TxTypeFilter;
