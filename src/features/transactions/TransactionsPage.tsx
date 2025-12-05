@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import Card from "../../components/ui/Card";
 import TxFilter from "./TxFilter";
 import TxTable from "../../components/tables/TxTable";
@@ -7,12 +8,18 @@ import TxAnalytics from "./TxAnalytics";
 import TxMonthlySummary from "./TxMonthlySummary";
 import TxDetailsModal from "./TxDetailsModal";
 import { mockTxMonthlySummary, mockTxFeesByMonth } from "../../lib/api/mock";
-import type { TxRecord } from "./types";
 import TxQuickFilters from "./TxQuickFilters";
 import { formatCurrency } from "../../lib/format";
 import { useTransactionsQuery } from "./api";
 import { KPICardSkeleton, TableSkeleton } from "../../components/ui/Skeleton";
 import { useLocalStorage } from "../../lib/useLocalStorage";
+import type {
+  TxRecord,
+  TxTypeFilter,
+  TxStatusFilter,
+  TxSortKey,
+  TxSortDir,
+} from "./types";
 
 /** helpers */
 function toTimeMs(s: string): number {
@@ -20,18 +27,13 @@ function toTimeMs(s: string): number {
   return Number.isFinite(t) ? t : 0;
 }
 
-type TxTypeFilter = "all" | "in" | "out" | "swap";
-type TxStatusFilter = "all" | "confirmed" | "pending";
-type SortKey = "time" | "amount" | "value";
-type SortDir = "asc" | "desc";
-
 const DEFAULTS = {
   search: "",
   type: "all" as TxTypeFilter,
   token: "all",
   status: "all" as TxStatusFilter,
-  sort: "time" as SortKey,
-  dir: "desc" as SortDir,
+  sort: "time" as TxSortKey,
+  dir: "desc" as TxSortDir,
   page: 1,
   pageSize: 10,
 };
@@ -40,6 +42,7 @@ const LS_KEY = "tx:list:view";
 
 export default function TransactionsPage() {
   const [params, setParams] = useSearchParams();
+  const queryClient = useQueryClient();
 
   // 1) snapshot از localStorage
   const [persisted, setPersisted] = useLocalStorage(LS_KEY, {
@@ -62,28 +65,28 @@ export default function TransactionsPage() {
       return Number.isFinite(n) && n > 0 ? n : fallback;
     };
 
-    const sort: SortKey = has("sort")
-      ? ["amount", "value", "time"].includes(get("sort"))
-        ? (get("sort") as SortKey)
-        : DEFAULTS.sort
-      : (persisted.sort as SortKey);
+    const sort: TxSortKey = has("sort")
+      ? ((["amount", "value", "time"].includes(get("sort"))
+          ? get("sort")
+          : DEFAULTS.sort) as TxSortKey)
+      : (persisted.sort as TxSortKey);
 
-    const dir: SortDir = has("dir")
-      ? ["asc", "desc"].includes(get("dir"))
-        ? (get("dir") as SortDir)
-        : DEFAULTS.dir
-      : (persisted.dir as SortDir);
+    const dir: TxSortDir = has("dir")
+      ? ((["asc", "desc"].includes(get("dir"))
+          ? get("dir")
+          : DEFAULTS.dir) as TxSortDir)
+      : (persisted.dir as TxSortDir);
 
     const type: TxTypeFilter = has("type")
-      ? ["in", "out", "swap", "all"].includes(get("type"))
-        ? (get("type") as TxTypeFilter)
-        : DEFAULTS.type
+      ? ((["in", "out", "swap", "all"].includes(get("type"))
+          ? get("type")
+          : DEFAULTS.type) as TxTypeFilter)
       : (persisted.type as TxTypeFilter);
 
     const status: TxStatusFilter = has("status")
-      ? ["confirmed", "pending", "all"].includes(get("status"))
-        ? (get("status") as TxStatusFilter)
-        : DEFAULTS.status
+      ? ((["confirmed", "pending", "all"].includes(get("status"))
+          ? get("status")
+          : DEFAULTS.status) as TxStatusFilter)
       : (persisted.status as TxStatusFilter);
 
     return {
@@ -109,8 +112,8 @@ export default function TransactionsPage() {
   const [statusFilter, setStatusFilter] = useState<TxStatusFilter>(
     initial.statusFilter
   );
-  const [sortKey, setSortKey] = useState<SortKey>(initial.sortKey);
-  const [sortDir, setSortDir] = useState<SortDir>(initial.sortDir);
+  const [sortKey, setSortKey] = useState<TxSortKey>(initial.sortKey);
+  const [sortDir, setSortDir] = useState<TxSortDir>(initial.sortDir);
   const [page, setPage] = useState(initial.page);
   const [pageSize, setPageSize] = useState(initial.pageSize);
   const [selectedTx, setSelectedTx] = useState<TxRecord | null>(null);
@@ -151,8 +154,8 @@ export default function TransactionsPage() {
   const sortedTx = useMemo(() => {
     const copy = [...filteredTx];
     copy.sort((a, b) => {
-      let av = 0,
-        bv = 0;
+      let av = 0;
+      let bv = 0;
       if (sortKey === "amount") {
         av = a.amount;
         bv = b.amount;
@@ -248,7 +251,7 @@ export default function TransactionsPage() {
   ]);
 
   // 12) Sort header handler
-  const onRequestSort = (key: SortKey) => {
+  const onRequestSort = (key: TxSortKey) => {
     setSortKey((prevKey) => {
       if (prevKey !== key) {
         setSortDir("desc");
