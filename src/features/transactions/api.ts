@@ -22,6 +22,11 @@ type RawTx = {
   status: "confirmed" | "pending";
 };
 
+type ApiResponseRaw = {
+  items: RawTx[];
+  total: number;
+};
+
 export type TransactionsQueryInput = {
   search: string;
   type: TxTypeFilter;
@@ -29,6 +34,13 @@ export type TransactionsQueryInput = {
   status: TxStatusFilter;
   sort: TxSortKey;
   dir: TxSortDir;
+  page: number;
+  pageSize: number;
+};
+
+export type TransactionsResponse = {
+  items: TxRecord[];
+  total: number;
 };
 
 function parseUsdString(input: unknown): number {
@@ -73,10 +85,57 @@ function adaptMockToRaw(): RawTx[] {
   }));
 }
 
-/**
- * ساخت query string برای API
- * (فعلاً فقط فیلترها و سورت؛ پیجینیشن هنوز سمت کلاینته)
- */
+function toTimeMs(s: string): number {
+  const t = Date.parse(s);
+  return Number.isFinite(t) ? t : 0;
+}
+
+function applyFiltersAndSorting(
+  all: TxRecord[],
+  input: TransactionsQueryInput
+): TxRecord[] {
+  const { search, type, token, status, sort, dir } = input;
+
+  const q = search.trim().toLowerCase();
+
+  const filtered = all.filter((tx) => {
+    if (
+      q &&
+      !(tx.token.toLowerCase().includes(q) || tx.hash.toLowerCase().includes(q))
+    ) {
+      return false;
+    }
+
+    if (type !== "all" && tx.type !== type) return false;
+    if (token !== "all" && tx.token !== token) return false;
+    if (status !== "all" && tx.status !== status) return false;
+
+    return true;
+  });
+
+  const sorted = [...filtered];
+  sorted.sort((a, b) => {
+    let av = 0;
+    let bv = 0;
+
+    if (sort === "amount") {
+      av = a.amount;
+      bv = b.amount;
+    } else if (sort === "value") {
+      av = a.value;
+      bv = b.value;
+    } else {
+      av = toTimeMs(a.time);
+      bv = toTimeMs(b.time);
+    }
+
+    const diff = av - bv;
+    return dir === "asc" ? diff : -diff;
+  });
+
+  return sorted;
+}
+
 function buildQueryString(input: TransactionsQueryInput): string {
   const params = new URLSearchParams();
 
@@ -100,19 +159,25 @@ function buildQueryString(input: TransactionsQueryInput): string {
     params.set("dir", input.dir);
   }
 
+  // پیجینیشن همیشه ست می‌شود
+  params.set("page", String(input.page));
+  params.set("pageSize", String(input.pageSize));
+
   return params.toString();
 }
 
 export function useTransactionsQuery(input: TransactionsQueryInput) {
-  return useQuery<TxRecord[]>({
+  return useQuery<TransactionsResponse>({
     queryKey: ["transactions", "list", input],
     queryFn: async () => {
       const qs = buildQueryString(input);
       const url = qs ? `${ENDPOINT}?${qs}` : ENDPOINT;
 
       try {
-        const raw = await fetchJson<RawTx[]>(url);
-        return raw.map(adaptRawTx);
+        const raw = await fetchJson<ApiResponseRaw>(url);
+        const items = (raw.items ?? []).map(adaptRawTx);
+        const total = typeof raw.total === "number" ? raw.total : items.length;
+        return { items, total };
       } catch (err) {
         if (import.meta.env.DEV) {
           console.warn(
@@ -120,8 +185,17 @@ export function useTransactionsQuery(input: TransactionsQueryInput) {
             (err as Error)?.message
           );
         }
+
         const raw = adaptMockToRaw();
-        return raw.map(adaptRawTx);
+        const all = raw.map(adaptRawTx);
+
+        const sorted = applyFiltersAndSorting(all, input);
+        const total = sorted.length;
+
+        const start = (input.page - 1) * input.pageSize;
+        const items = sorted.slice(start, start + input.pageSize);
+
+        return { items, total };
       }
     },
     staleTime: 30_000,
