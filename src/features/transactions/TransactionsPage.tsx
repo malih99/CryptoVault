@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
 import Card from "../../components/ui/Card";
 import TxFilter from "./TxFilter";
 import TxTable from "../../components/tables/TxTable";
@@ -42,7 +41,6 @@ const LS_KEY = "tx:list:view";
 
 export default function TransactionsPage() {
   const [params, setParams] = useSearchParams();
-  const queryClient = useQueryClient();
 
   // 1) snapshot از localStorage
   const [persisted, setPersisted] = useLocalStorage(LS_KEY, {
@@ -118,9 +116,16 @@ export default function TransactionsPage() {
   const [pageSize, setPageSize] = useState(initial.pageSize);
   const [selectedTx, setSelectedTx] = useState<TxRecord | null>(null);
 
-  // 4) Fetch (TanStack Query)
+  // 4) Fetch (TanStack Query) — متصل به فیلترها و سورت
   const { data, isLoading, isError, error, refetch, isFetching } =
-    useTransactionsQuery();
+    useTransactionsQuery({
+      search,
+      type: typeFilter,
+      token: tokenFilter,
+      status: statusFilter,
+      sort: sortKey,
+      dir: sortDir,
+    });
 
   const rows = data ?? [];
 
@@ -129,7 +134,7 @@ export default function TransactionsPage() {
     [rows]
   );
 
-  // 5) Filters
+  // 5) Filters (سمت کلاینت؛ در کنار فیلتر سروری)
   const filteredTx: TxRecord[] = useMemo(
     () =>
       rows.filter((tx) => {
@@ -192,7 +197,7 @@ export default function TransactionsPage() {
   const confirmed = sortedTx.filter((t) => t.status === "confirmed").length;
   const successRate = totalTx ? (confirmed / totalTx) * 100 : 0;
 
-  // 9) Pagination
+  // 9) Pagination (سمت کلاینت)
   const totalPages = Math.max(1, Math.ceil(totalTx / pageSize));
   const paginatedTx = useMemo(() => {
     const start = (page - 1) * pageSize;
