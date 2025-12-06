@@ -20,12 +20,6 @@ import type {
   TxSortDir,
 } from "./types";
 
-/** helpers */
-function toTimeMs(s: string): number {
-  const t = Date.parse(s);
-  return Number.isFinite(t) ? t : 0;
-}
-
 const DEFAULTS = {
   search: "",
   type: "all" as TxTypeFilter,
@@ -116,7 +110,7 @@ export default function TransactionsPage() {
   const [pageSize, setPageSize] = useState(initial.pageSize);
   const [selectedTx, setSelectedTx] = useState<TxRecord | null>(null);
 
-  // 4) Fetch (TanStack Query) — متصل به فیلترها و سورت
+  // 4) Fetch (TanStack Query) — متصل به فیلترها، سورت و پیجینیشن
   const { data, isLoading, isError, error, refetch, isFetching } =
     useTransactionsQuery({
       search,
@@ -125,86 +119,33 @@ export default function TransactionsPage() {
       status: statusFilter,
       sort: sortKey,
       dir: sortDir,
+      page,
+      pageSize,
     });
 
-  const rows = data ?? [];
+  const rows = data?.items ?? [];
+  const totalTx = data?.total ?? rows.length;
 
   const availableTokens = useMemo(
     () => Array.from(new Set(rows.map((t) => t.token))).sort(),
     [rows]
   );
 
-  // 5) Filters (سمت کلاینت؛ در کنار فیلتر سروری)
-  const filteredTx: TxRecord[] = useMemo(
-    () =>
-      rows.filter((tx) => {
-        const q = search.trim().toLowerCase();
-        if (
-          q &&
-          !(
-            tx.token.toLowerCase().includes(q) ||
-            tx.hash.toLowerCase().includes(q)
-          )
-        )
-          return false;
-        if (typeFilter !== "all" && tx.type !== typeFilter) return false;
-        if (tokenFilter !== "all" && tx.token !== tokenFilter) return false;
-        if (statusFilter !== "all" && tx.status !== statusFilter) return false;
-        return true;
-      }),
-    [rows, search, typeFilter, tokenFilter, statusFilter]
-  );
-
-  // 6) Sort BEFORE paginate
-  const sortedTx = useMemo(() => {
-    const copy = [...filteredTx];
-    copy.sort((a, b) => {
-      let av = 0;
-      let bv = 0;
-      if (sortKey === "amount") {
-        av = a.amount;
-        bv = b.amount;
-      } else if (sortKey === "value") {
-        av = a.value;
-        bv = b.value;
-      } else {
-        av = toTimeMs(a.time);
-        bv = toTimeMs(b.time);
-      }
-      const diff = av - bv;
-      return sortDir === "asc" ? diff : -diff;
-    });
-    return copy;
-  }, [filteredTx, sortKey, sortDir]);
-
-  // 7) Reset page on filters/sort change
+  // 5) Reset page on filters/sort change
   useEffect(() => {
     setPage(1);
-  }, [
-    search,
-    typeFilter,
-    tokenFilter,
-    statusFilter,
-    pageSize,
-    sortKey,
-    sortDir,
-  ]);
+  }, [search, typeFilter, tokenFilter, statusFilter, sortKey, sortDir]);
 
-  // 8) KPIs
-  const totalTx = sortedTx.length;
-  const totalVolume = sortedTx.reduce((sum, tx) => sum + tx.value, 0);
-  const avgTx = totalTx ? totalVolume / totalTx : 0;
-  const confirmed = sortedTx.filter((t) => t.status === "confirmed").length;
-  const successRate = totalTx ? (confirmed / totalTx) * 100 : 0;
+  // 6) KPIs (بر اساس آیتم‌های صفحه فعلی؛ totalTx از سرور)
+  const totalVolume = rows.reduce((sum, tx) => sum + tx.value, 0);
+  const avgTx = rows.length ? totalVolume / rows.length : 0;
+  const confirmed = rows.filter((t) => t.status === "confirmed").length;
+  const successRate = rows.length ? (confirmed / rows.length) * 100 : 0;
 
-  // 9) Pagination (سمت کلاینت)
+  // 7) Pagination meta (نمایش در footer)
   const totalPages = Math.max(1, Math.ceil(totalTx / pageSize));
-  const paginatedTx = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    return sortedTx.slice(start, start + pageSize);
-  }, [sortedTx, page, pageSize]);
 
-  // 10) Write state -> URL
+  // 8) Write state -> URL
   useEffect(() => {
     const next = new URLSearchParams();
     if (search) next.set("search", search);
@@ -231,7 +172,7 @@ export default function TransactionsPage() {
     pageSize,
   ]);
 
-  // 11) Persist به localStorage
+  // 9) Persist به localStorage
   useEffect(() => {
     setPersisted({
       search,
@@ -255,7 +196,7 @@ export default function TransactionsPage() {
     setPersisted,
   ]);
 
-  // 12) Sort header handler
+  // 10) Sort header handler
   const onRequestSort = (key: TxSortKey) => {
     setSortKey((prevKey) => {
       if (prevKey !== key) {
@@ -268,7 +209,7 @@ export default function TransactionsPage() {
   };
 
   const handleExport = () => {
-    if (!sortedTx.length) return;
+    if (!rows.length) return;
 
     const header = [
       "type",
@@ -282,7 +223,7 @@ export default function TransactionsPage() {
     ];
     const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
 
-    const csvRows = sortedTx
+    const csvRows = rows
       .map((tx) =>
         [
           tx.type,
@@ -363,7 +304,7 @@ export default function TransactionsPage() {
 
             <Card className="p-4 sm:p-5">
               <div className="text-xs text-slate-500 dark:text-slate-400">
-                Total Volume
+                Total Volume (current page)
               </div>
               <div className="mt-1.5 text-xl font-semibold text-slate-900 dark:text-slate-50 sm:text-2xl">
                 {formatCurrency(totalVolume, "USD")}
@@ -372,7 +313,7 @@ export default function TransactionsPage() {
 
             <Card className="p-4 sm:p-5">
               <div className="text-xs text-slate-500 dark:text-slate-400">
-                Avg Transaction
+                Avg Transaction (current page)
               </div>
               <div className="mt-1.5 text-xl font-semibold text-slate-900 dark:text-slate-50 sm:text-2xl">
                 {formatCurrency(avgTx, "USD")}
@@ -381,10 +322,10 @@ export default function TransactionsPage() {
 
             <Card className="p-4 sm:p-5">
               <div className="text-xs text-slate-500 dark:text-slate-400">
-                Success Rate
+                Success Rate (current page)
               </div>
               <div className="mt-1.5 text-xl font-semibold text-emerald-600 dark:text-emerald-300 sm:text-2xl">
-                {successRate.toFixed(1)}%
+                {rows.length ? successRate.toFixed(1) + "%" : "–"}
               </div>
             </Card>
           </div>
@@ -393,7 +334,8 @@ export default function TransactionsPage() {
         {/* Analytics */}
         {!isLoading && !isError && (
           <>
-            <TxAnalytics tx={sortedTx} feesByMonth={mockTxFeesByMonth} />
+            {/* آنالیتیکس بر اساس آیتم‌های صفحه فعلی */}
+            <TxAnalytics tx={rows} feesByMonth={mockTxFeesByMonth} />
             <TxQuickFilters
               typeFilter={typeFilter}
               statusFilter={statusFilter}
@@ -423,7 +365,7 @@ export default function TransactionsPage() {
           <TableSkeleton rows={10} />
         ) : isError ? null : (
           <TxTable
-            rows={paginatedTx}
+            rows={rows}
             page={page}
             pageSize={pageSize}
             total={totalTx}
