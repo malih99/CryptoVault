@@ -1,3 +1,5 @@
+// src/features/transactions/types.ts
+
 export type TxType = "in" | "out" | "swap";
 export type TxStatus = "confirmed" | "pending";
 
@@ -12,8 +14,10 @@ export type TxRecord = {
   status: TxStatus;
 };
 
-export type TxTypeFilter = "all" | TxType;
-export type TxStatusFilter = "all" | TxStatus;
+/** UI filters */
+export type TxTypeFilter = TxType | "all";
+export type TxStatusFilter = TxStatus | "all";
 
+/** Sorting */
 export type TxSortKey = "time" | "amount" | "value";
 export type TxSortDir = "asc" | "desc";
