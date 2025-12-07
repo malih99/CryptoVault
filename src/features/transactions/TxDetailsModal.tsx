@@ -22,8 +22,17 @@ function typeColor(type: TxRecord["type"]) {
   return "bg-amber-50 text-amber-700 dark:bg-amber-900/60 dark:text-amber-300";
 }
 
+type CopiedField = "from" | "hash" | "json";
+
 export default function TxDetailsModal({ tx, onClose }: Props) {
-  const [copied, setCopied] = useState<null | "from" | "hash">(null);
+  const [copied, setCopied] = useState<CopiedField | null>(null);
+
+  const formattedAmount = new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: 8,
+  }).format(tx.amount);
+
+  // برای دمو؛ بعداً می‌تونی براساس network کاستومایز کنی
+  const explorerUrl = getExplorerUrl(tx.hash);
 
   // ESC برای بستن
   useEffect(() => {
@@ -38,7 +47,7 @@ export default function TxDetailsModal({ tx, onClose }: Props) {
     };
   }, [onClose]);
 
-  const handleCopy = (value: string, field: "from" | "hash") => {
+  const handleCopy = (value: string, field: CopiedField) => {
     if (typeof navigator === "undefined") return;
 
     const doSetCopied = () => {
@@ -70,6 +79,21 @@ export default function TxDetailsModal({ tx, onClose }: Props) {
     }
   };
 
+  const handleCopyJson = () => {
+    const payload = {
+      type: tx.type,
+      token: tx.token,
+      amount: tx.amount,
+      value: tx.value,
+      from: tx.from,
+      hash: tx.hash,
+      time: tx.time,
+      status: tx.status,
+    };
+
+    handleCopy(JSON.stringify(payload, null, 2), "json");
+  };
+
   return (
     <div
       className="
@@ -98,7 +122,7 @@ export default function TxDetailsModal({ tx, onClose }: Props) {
               </span>
             </div>
             <div className="mt-2 text-base font-semibold text-slate-900 dark:text-slate-50">
-              {tx.token} · {tx.amount}
+              {tx.token} · {formattedAmount}
             </div>
             <div className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               {tx.time}
@@ -126,7 +150,7 @@ export default function TxDetailsModal({ tx, onClose }: Props) {
               Amount
             </div>
             <div className="mt-1 font-medium text-slate-900 dark:text-slate-50">
-              {tx.amount}
+              {formattedAmount} {tx.token}
             </div>
           </div>
           <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-900">
@@ -143,10 +167,7 @@ export default function TxDetailsModal({ tx, onClose }: Props) {
         <div className="space-y-3 text-xs">
           {/* From / To */}
           <div>
-            <div
-              className="mb-1 flex items-center justify بین
-            "
-            >
+            <div className="mb-1 flex items-center justify-between">
               <span className="text-slate-500 dark:text-slate-400">
                 From / To
               </span>
@@ -161,6 +182,9 @@ export default function TxDetailsModal({ tx, onClose }: Props) {
                       : "text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
                   }
                 `}
+                aria-label={
+                  copied === "from" ? "Address copied" : "Copy address"
+                }
               >
                 {copied === "from" ? (
                   <>
@@ -197,6 +221,11 @@ export default function TxDetailsModal({ tx, onClose }: Props) {
                       : "text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
                   }
                 `}
+                aria-label={
+                  copied === "hash"
+                    ? "Transaction hash copied"
+                    : "Copy transaction hash"
+                }
               >
                 {copied === "hash" ? (
                   <>
@@ -218,23 +247,79 @@ export default function TxDetailsModal({ tx, onClose }: Props) {
         </div>
 
         {/* Footer */}
-        <div className="mt-5 flex justify-end">
-          <button
-            type="button"
-            onClick={onClose}
-            className="
-              inline-flex items-center justify-center rounded-xl
-              border border-slate-200 px-4 py-2 text-sm
-              text-slate-700 hover:bg-slate-50
-              dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800
-            "
-          >
-            Close
-          </button>
+        <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+            Transaction details as recorded in your dashboard. Use explorer to
+            verify on-chain data.
+          </p>
+
+          <div className="flex flex-wrap justify-end gap-2">
+            <button
+              type="button"
+              onClick={handleCopyJson}
+              className={`
+                inline-flex items-center gap-1 rounded-xl border px-3 py-1.5 text-xs
+                border-slate-200 text-slate-700 hover:bg-slate-50
+                dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800
+              `}
+              aria-label={
+                copied === "json"
+                  ? "Transaction JSON copied"
+                  : "Copy transaction JSON"
+              }
+            >
+              {copied === "json" ? (
+                <>
+                  <CheckIcon className="h-3.5 w-3.5" />
+                  <span>JSON copied</span>
+                </>
+              ) : (
+                <>
+                  <CopyIcon className="h-3.5 w-3.5" />
+                  <span>Copy JSON</span>
+                </>
+              )}
+            </button>
+
+            {explorerUrl && (
+              <a
+                href={explorerUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="
+                  inline-flex items-center justify-center rounded-xl
+                  bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white
+                  hover:bg-emerald-700
+                "
+                aria-label="View transaction on explorer"
+              >
+                View on Explorer
+              </a>
+            )}
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="
+                inline-flex items-center justify-center rounded-xl
+                border border-slate-200 px-3 py-1.5 text-xs
+                text-slate-700 hover:bg-slate-50
+                dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800
+              "
+            >
+              Close
+            </button>
+          </div>
         </div>
       </Card>
     </div>
   );
+}
+
+function getExplorerUrl(hash: string): string {
+  if (!hash) return "";
+  // TODO: replace with real explorer base URL depending on network
+  return `https://explorer.example.com/tx/${encodeURIComponent(hash)}`;
 }
 
 /** آیکون کپی کوچک */
