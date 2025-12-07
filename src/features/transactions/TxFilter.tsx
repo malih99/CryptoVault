@@ -1,7 +1,9 @@
 import type { ChangeEvent } from "react";
 import { Download } from "lucide-react";
 import { Button } from "../../components/ui/Button";
-import type { TxTypeFilter, TxStatusFilter } from "./types";
+
+type TxTypeFilter = "all" | "in" | "out" | "swap";
+type TxStatusFilter = "all" | "confirmed" | "pending";
 
 type Props = {
   search: string;
@@ -14,6 +16,8 @@ type Props = {
   onStatusChange: (value: TxStatusFilter) => void;
   onExport: () => void;
   availableTokens: string[];
+  onResetFilters: () => void;
+  hasActiveFilters: boolean;
 };
 
 export default function TxFilter({
@@ -27,6 +31,8 @@ export default function TxFilter({
   onStatusChange,
   onExport,
   availableTokens,
+  onResetFilters,
+  hasActiveFilters,
 }: Props) {
   const handleTypeChange = (e: ChangeEvent<HTMLSelectElement>) =>
     onTypeChange(e.target.value as TxTypeFilter);
@@ -114,16 +120,36 @@ export default function TxFilter({
         <option value="pending">Pending</option>
       </select>
 
-      <Button
-        type="button"
-        onClick={onExport}
-        variant="outline"
-        size="sm"
-        leftIcon={<Download className="h-3.5 w-3.5" />}
-      >
-        <span className="hidden sm:inline">Export CSV</span>
-        <span className="sm:hidden">Export</span>
-      </Button>
+      {/* Actions: Reset + Export */}
+      <div className="flex items-center justify-end gap-2">
+        <button
+          type="button"
+          onClick={hasActiveFilters ? onResetFilters : undefined}
+          disabled={!hasActiveFilters}
+          className={`
+            inline-flex items-center rounded-xl border px-3 py-1.5 text-xs
+            ${
+              hasActiveFilters
+                ? "border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                : "border-slate-100 text-slate-300 dark:border-slate-800 dark:text-slate-600 cursor-not-allowed"
+            }
+          `}
+          aria-disabled={!hasActiveFilters}
+        >
+          Clear filters
+        </button>
+
+        <Button
+          type="button"
+          onClick={onExport}
+          variant="outline"
+          size="sm"
+          leftIcon={<Download className="h-3.5 w-3.5" />}
+        >
+          <span className="hidden sm:inline">Export CSV</span>
+          <span className="sm:hidden">Export</span>
+        </Button>
+      </div>
     </div>
   );
 }
