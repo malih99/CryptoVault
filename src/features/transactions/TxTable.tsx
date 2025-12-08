@@ -18,7 +18,7 @@ type Props = {
   onPageSizeChange: (size: number) => void;
   onSelectTx?: (tx: TxRecord) => void;
 
-  // 🔽 جدید
+  // سورت کنترل‌شده از بیرون
   sortKey: TxSortKey;
   sortDir: TxSortDir;
   onRequestSort: (key: TxSortKey) => void;
@@ -88,11 +88,7 @@ export default function TxTable({
     );
   }
 
-  const renderSortableHeader = (
-    label: string,
-    key: TxSortKey,
-    alignRight = false
-  ) => {
+  const renderSortableHeader = (label: string, key: TxSortKey) => {
     const active = sortKey === key;
     const ariaSort = !active
       ? "none"
@@ -105,10 +101,9 @@ export default function TxTable({
         <button
           type="button"
           onClick={() => onRequestSort(key)}
-          className={`
+          className="
             group inline-flex items-center gap-1 text-xs font-medium
-            ${alignRight ? "justify-end w-full" : ""}
-          `}
+          "
         >
           <span>{label}</span>
           <span
@@ -278,8 +273,8 @@ export default function TxTable({
         <T>
           <THEAD>
             <TR>
-              {renderSortableHeader("Type", "time")}
-              {renderSortableHeader("Token", "time")}
+              <TH>Type</TH>
+              <TH>Token</TH>
               {renderSortableHeader("Amount", "amount")}
               {renderSortableHeader("Value", "value")}
               <TH>From/To</TH>
