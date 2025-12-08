@@ -1,12 +1,12 @@
 import { useState } from "react";
 import Card from "../../components/ui/Card";
 import { T, THEAD, TBODY, TR, TH, TD } from "../../components/ui/Table";
-import { formatCurrency } from "../../lib/format";
 import type {
   TxRecord,
   TxSortKey,
   TxSortDir,
 } from "../../features/transactions/types";
+import { formatCurrency } from "../../lib/format";
 
 type Props = {
   rows: TxRecord[];
@@ -17,6 +17,8 @@ type Props = {
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
   onSelectTx?: (tx: TxRecord) => void;
+
+  // 🔽 جدید
   sortKey: TxSortKey;
   sortDir: TxSortDir;
   onRequestSort: (key: TxSortKey) => void;
@@ -85,6 +87,48 @@ export default function TxTable({
       </Card>
     );
   }
+
+  const renderSortableHeader = (
+    label: string,
+    key: TxSortKey,
+    alignRight = false
+  ) => {
+    const active = sortKey === key;
+    const ariaSort = !active
+      ? "none"
+      : sortDir === "asc"
+      ? "ascending"
+      : "descending";
+
+    return (
+      <TH aria-sort={ariaSort as "none" | "ascending" | "descending"}>
+        <button
+          type="button"
+          onClick={() => onRequestSort(key)}
+          className={`
+            group inline-flex items-center gap-1 text-xs font-medium
+            ${alignRight ? "justify-end w-full" : ""}
+          `}
+        >
+          <span>{label}</span>
+          <span
+            className={`
+              inline-flex h-4 w-4 items-center justify-center rounded
+              text-[10px] leading-none
+              ${
+                active
+                  ? "bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-100"
+                  : "text-slate-400 group-hover:text-slate-600 dark:text-slate-500 dark:group-hover:text-slate-300"
+              }
+            `}
+            aria-hidden="true"
+          >
+            {active ? (sortDir === "asc" ? "↑" : "↓") : "↕"}
+          </span>
+        </button>
+      </TH>
+    );
+  };
 
   return (
     <Card className="p-4 sm:p-5">
@@ -234,33 +278,13 @@ export default function TxTable({
         <T>
           <THEAD>
             <TR>
-              <TH>Type</TH>
-              <TH>Token</TH>
-              <TH>
-                <SortableHeader
-                  label="Amount"
-                  active={sortKey === "amount"}
-                  dir={sortDir}
-                  onClick={() => onRequestSort("amount")}
-                />
-              </TH>
-              <TH>
-                <SortableHeader
-                  label="Value"
-                  active={sortKey === "value"}
-                  dir={sortDir}
-                  onClick={() => onRequestSort("value")}
-                />
-              </TH>
+              {renderSortableHeader("Type", "time")}
+              {renderSortableHeader("Token", "time")}
+              {renderSortableHeader("Amount", "amount")}
+              {renderSortableHeader("Value", "value")}
               <TH>From/To</TH>
-              <TH>
-                <SortableHeader
-                  label="Time"
-                  active={sortKey === "time"}
-                  dir={sortDir}
-                  onClick={() => onRequestSort("time")}
-                />
-              </TH>
+              <TH>Hash</TH>
+              {renderSortableHeader("Time", "time")}
               <TH>Status</TH>
               {onSelectTx && <TH className="text-right">Details</TH>}
             </TR>
@@ -409,36 +433,6 @@ export default function TxTable({
   );
 }
 
-/** Sortable header helper */
-function SortableHeader({
-  label,
-  active,
-  dir,
-  onClick,
-}: {
-  label: string;
-  active: boolean;
-  dir: TxSortDir;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="inline-flex items-center gap-1 text-xs font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-50"
-    >
-      <span>{label}</span>
-      <span
-        className={`inline-block text-[10px] ${
-          active ? "opacity-100" : "opacity-40"
-        }`}
-      >
-        {dir === "asc" ? "↑" : "↓"}
-      </span>
-    </button>
-  );
-}
-
 /** Icons */
 function CopyIcon() {
   return (
@@ -473,6 +467,7 @@ function CopyIcon() {
     </svg>
   );
 }
+
 function CheckIcon() {
   return (
     <svg
@@ -500,6 +495,7 @@ function CheckIcon() {
     </svg>
   );
 }
+
 function EyeIcon({ className = "" }: { className?: string }) {
   return (
     <svg
