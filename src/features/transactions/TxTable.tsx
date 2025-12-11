@@ -197,14 +197,21 @@ export default function TxTable({
                     {r.time}
                   </div>
                 </div>
+
                 <div className="col-span-2 space-y-0.5">
-                  <div className="text-slate-500 dark:text-slate-400">
-                    From/To
-                  </div>
+                  <div className="text-slate-500 dark:text-slate-400">From</div>
                   <div className="truncate text-slate-900 dark:text-slate-50">
                     {r.from}
                   </div>
                 </div>
+
+                <div className="col-span-2 space-y-0.5">
+                  <div className="text-slate-500 dark:text-slate-400">To</div>
+                  <div className="truncate text-slate-900 dark:text-slate-50">
+                    {r.to}
+                  </div>
+                </div>
+
                 <div className="col-span-2 space-y-0.5">
                   <div className="flex items-center justify-between">
                     <div className="text-slate-500 dark:text-slate-400">
@@ -276,7 +283,7 @@ export default function TxTable({
               <TH>Token</TH>
               {renderSortableHeader("Amount", "amount")}
               {renderSortableHeader("Value", "value")}
-              <TH>From/To</TH>
+              <TH>From / To</TH>
               <TH>Hash</TH>
               {renderSortableHeader("Time", "time")}
               <TH>Status</TH>
@@ -313,7 +320,16 @@ export default function TxTable({
                     {Math.abs(r.amount)}
                   </TD>
                   <TD>{formatCurrency(r.value, "USD")}</TD>
-                  <TD className="max-w-[280px] truncate">{r.from}</TD>
+                  <TD className="max-w-[280px]">
+                    <div className="space-y-0.5">
+                      <div className="truncate text-slate-900 dark:text-slate-50">
+                        From: {r.from}
+                      </div>
+                      <div className="truncate text-slate-500 dark:text-slate-400">
+                        To: {r.to}
+                      </div>
+                    </div>
+                  </TD>
                   <TD className="max-w-[260px]">
                     <div className="flex items-center justify-between gap-2">
                       <span className="truncate">{r.hash}</span>
@@ -461,7 +477,6 @@ function CopyIcon() {
     </svg>
   );
 }
-
 function CheckIcon() {
   return (
     <svg
@@ -489,7 +504,6 @@ function CheckIcon() {
     </svg>
   );
 }
-
 function EyeIcon({ className = "" }: { className?: string }) {
   return (
     <svg
