@@ -18,7 +18,6 @@ type Props = {
   onPageSizeChange: (size: number) => void;
   onSelectTx?: (tx: TxRecord) => void;
 
-  // سورت کنترل‌شده از بیرون
   sortKey: TxSortKey;
   sortDir: TxSortDir;
   onRequestSort: (key: TxSortKey) => void;
