@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { TxRecord } from "./types";
 import Card from "../../components/ui/Card";
 import { formatCurrency } from "../../lib/format";
+import { useSettings } from "../settings/useSettings";
 
 type Props = {
   tx: TxRecord;
@@ -22,8 +23,22 @@ function typeColor(type: TxRecord["type"]) {
   return "bg-amber-50 text-amber-700 dark:bg-amber-900/60 dark:text-amber-300";
 }
 
+function getExplorerUrl(
+  network: "sol-mainnet" | "eth-mainnet",
+  hash: string
+): string {
+  if (!hash) return "";
+  if (network === "eth-mainnet") {
+    return `https://etherscan.io/tx/${hash}`;
+  }
+  // sol-mainnet
+  return `https://solscan.io/tx/${hash}`;
+}
+
 export default function TxDetailsModal({ tx, onClose }: Props) {
   const [copied, setCopied] = useState<null | "from" | "to" | "hash">(null);
+  const { settings } = useSettings();
+  const explorerUrl = getExplorerUrl(settings.defaultNetwork, tx.hash);
 
   // ESC برای بستن
   useEffect(() => {
@@ -209,36 +224,51 @@ export default function TxDetailsModal({ tx, onClose }: Props) {
             </div>
           </div>
 
-          {/* Hash */}
+          {/* Hash + Explorer */}
           <div>
             <div className="mb-1 flex items-center justify-between">
               <span className="text-slate-500 dark:text-slate-400">
                 Transaction Hash
               </span>
-              <button
-                type="button"
-                onClick={() => handleCopy(tx.hash, "hash")}
-                className={`
-                  inline-flex items-center gap-1 rounded-lg px-2 py-1
-                  ${
-                    copied === "hash"
-                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
-                      : "text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
-                  }
-                `}
-              >
-                {copied === "hash" ? (
-                  <>
-                    <CheckIcon className="h-3.5 w-3.5" />
-                    <span>Copied</span>
-                  </>
-                ) : (
-                  <>
-                    <CopyIcon className="h-3.5 w-3.5" />
-                    <span>Copy</span>
-                  </>
+              <div className="flex items-center gap-2">
+                {explorerUrl && (
+                  <a
+                    href={explorerUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="
+                      text-[11px] font-medium text-emerald-600 hover:underline
+                      dark:text-emerald-300
+                    "
+                  >
+                    View on explorer
+                  </a>
                 )}
-              </button>
+                <button
+                  type="button"
+                  onClick={() => handleCopy(tx.hash, "hash")}
+                  className={`
+                    inline-flex items-center gap-1 rounded-lg px-2 py-1
+                    ${
+                      copied === "hash"
+                        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
+                        : "text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+                    }
+                  `}
+                >
+                  {copied === "hash" ? (
+                    <>
+                      <CheckIcon className="h-3.5 w-3.5" />
+                      <span>Copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <CopyIcon className="h-3.5 w-3.5" />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
             <div className="rounded-xl bg-slate-50 px-3 py-2 font-mono text-[11px] text-slate-900 dark:bg-slate-900 dark:text-slate-50">
               {tx.hash}
