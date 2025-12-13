@@ -12,7 +12,6 @@ import { formatCurrency } from "../../lib/format";
 import { useTransactionsQuery } from "./api";
 import { KPICardSkeleton, TableSkeleton } from "../../components/ui/Skeleton";
 import { useLocalStorage } from "../../lib/useLocalStorage";
-import { useDebouncedValue } from "../../lib/useDebouncedValue";
 import type {
   TxRecord,
   TxTypeFilter,
@@ -111,13 +110,10 @@ export default function TransactionsPage() {
   const [pageSize, setPageSize] = useState(initial.pageSize);
   const [selectedTx, setSelectedTx] = useState<TxRecord | null>(null);
 
-  // 3.5) debounce روی سرچ برای کم‌کردن ریکوئست‌ها
-  const debouncedSearch = useDebouncedValue(search, 300);
-
   // 4) Fetch (TanStack Query) — متصل به فیلترها، سورت و پیجینیشن
   const { data, isLoading, isError, error, refetch, isFetching } =
     useTransactionsQuery({
-      search: debouncedSearch,
+      search,
       type: typeFilter,
       token: tokenFilter,
       status: statusFilter,
@@ -135,30 +131,10 @@ export default function TransactionsPage() {
     [rows]
   );
 
-  // تعداد فیلترهای فعال (برای badge و دکمه Reset)
-  const activeFiltersCount = useMemo(() => {
-    let count = 0;
-    if (search.trim()) count += 1;
-    if (typeFilter !== "all") count += 1;
-    if (tokenFilter !== "all") count += 1;
-    if (statusFilter !== "all") count += 1;
-    if (sortKey !== DEFAULTS.sort || sortDir !== DEFAULTS.dir) count += 1;
-    return count;
-  }, [search, typeFilter, tokenFilter, statusFilter, sortKey, sortDir]);
-
-  const hasActiveFilters = activeFiltersCount > 0;
-
   // 5) Reset page on filters/sort change
   useEffect(() => {
     setPage(1);
-  }, [
-    debouncedSearch,
-    typeFilter,
-    tokenFilter,
-    statusFilter,
-    sortKey,
-    sortDir,
-  ]);
+  }, [search, typeFilter, tokenFilter, statusFilter, sortKey, sortDir]);
 
   // 6) KPIs (بر اساس آیتم‌های صفحه فعلی؛ totalTx از سرور)
   const totalVolume = rows.reduce((sum, tx) => sum + tx.value, 0);
@@ -169,7 +145,26 @@ export default function TransactionsPage() {
   // 7) Pagination meta (نمایش در footer)
   const totalPages = Math.max(1, Math.ceil(totalTx / pageSize));
 
-  // 8) Write state -> URL
+  // 8) تعداد فیلترهای فعال (برای نشان دادن کنار Reset filters)
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (search.trim()) count += 1;
+    if (typeFilter !== DEFAULTS.type) count += 1;
+    if (tokenFilter !== DEFAULTS.token) count += 1;
+    if (statusFilter !== DEFAULTS.status) count += 1;
+    return count;
+  }, [search, typeFilter, tokenFilter, statusFilter]);
+
+  // 9) Reset filters handler
+  const handleResetFilters = () => {
+    setSearch(DEFAULTS.search);
+    setTypeFilter(DEFAULTS.type);
+    setTokenFilter(DEFAULTS.token);
+    setStatusFilter(DEFAULTS.status);
+    setPage(DEFAULTS.page);
+  };
+
+  // 10) Write state -> URL
   useEffect(() => {
     const next = new URLSearchParams();
     if (search) next.set("search", search);
@@ -196,7 +191,7 @@ export default function TransactionsPage() {
     pageSize,
   ]);
 
-  // 9) Persist به localStorage
+  // 11) Persist به localStorage
   useEffect(() => {
     setPersisted({
       search,
@@ -220,7 +215,7 @@ export default function TransactionsPage() {
     setPersisted,
   ]);
 
-  // 10) Sort header handler
+  // 12) Sort header handler
   const onRequestSort = (key: TxSortKey) => {
     setSortKey((prevKey) => {
       if (prevKey !== key) {
@@ -274,17 +269,6 @@ export default function TransactionsPage() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  };
-
-  const handleResetFilters = () => {
-    setSearch(DEFAULTS.search);
-    setTypeFilter(DEFAULTS.type);
-    setTokenFilter(DEFAULTS.token);
-    setStatusFilter(DEFAULTS.status);
-    setSortKey(DEFAULTS.sort);
-    setSortDir(DEFAULTS.dir);
-    setPage(DEFAULTS.page);
-    setPageSize(DEFAULTS.pageSize);
   };
 
   return (
@@ -369,21 +353,14 @@ export default function TransactionsPage() {
         {/* Analytics */}
         {!isLoading && !isError && (
           <>
+            {/* آنالیتیکس بر اساس آیتم‌های صفحه فعلی */}
             <TxAnalytics tx={rows} feesByMonth={mockTxFeesByMonth} />
-            <div className="space-y-1">
-              <TxQuickFilters
-                typeFilter={typeFilter}
-                statusFilter={statusFilter}
-                onTypeChange={setTypeFilter}
-                onStatusChange={setStatusFilter}
-              />
-              {hasActiveFilters && (
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {activeFiltersCount} active{" "}
-                  {activeFiltersCount === 1 ? "filter" : "filters"}
-                </p>
-              )}
-            </div>
+            <TxQuickFilters
+              typeFilter={typeFilter}
+              statusFilter={statusFilter}
+              onTypeChange={setTypeFilter}
+              onStatusChange={setStatusFilter}
+            />
             <TxMonthlySummary months={mockTxMonthlySummary} />
           </>
         )}
@@ -401,7 +378,7 @@ export default function TransactionsPage() {
           onExport={handleExport}
           availableTokens={availableTokens}
           onResetFilters={handleResetFilters}
-          hasActiveFilters={hasActiveFilters}
+          activeFiltersCount={activeFiltersCount}
         />
 
         {/* Table */}

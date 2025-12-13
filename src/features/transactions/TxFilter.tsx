@@ -1,5 +1,5 @@
 import type { ChangeEvent } from "react";
-import { Download } from "lucide-react";
+import { Download, RotateCcw } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 
 type TxTypeFilter = "all" | "in" | "out" | "swap";
@@ -17,7 +17,7 @@ type Props = {
   onExport: () => void;
   availableTokens: string[];
   onResetFilters: () => void;
-  hasActiveFilters: boolean;
+  activeFiltersCount: number;
 };
 
 export default function TxFilter({
@@ -32,7 +32,7 @@ export default function TxFilter({
   onExport,
   availableTokens,
   onResetFilters,
-  hasActiveFilters,
+  activeFiltersCount,
 }: Props) {
   const handleTypeChange = (e: ChangeEvent<HTMLSelectElement>) =>
     onTypeChange(e.target.value as TxTypeFilter);
@@ -42,6 +42,8 @@ export default function TxFilter({
 
   const handleStatusChange = (e: ChangeEvent<HTMLSelectElement>) =>
     onStatusChange(e.target.value as TxStatusFilter);
+
+  const hasActiveFilters = activeFiltersCount > 0;
 
   return (
     <div
@@ -120,24 +122,26 @@ export default function TxFilter({
         <option value="pending">Pending</option>
       </select>
 
-      {/* Actions: Reset + Export */}
+      {/* Actions: Reset filters + Export */}
       <div className="flex items-center justify-end gap-2">
-        <button
-          type="button"
-          onClick={hasActiveFilters ? onResetFilters : undefined}
-          disabled={!hasActiveFilters}
-          className={`
-            inline-flex items-center rounded-xl border px-3 py-1.5 text-xs
-            ${
-              hasActiveFilters
-                ? "border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-                : "border-slate-100 text-slate-300 dark:border-slate-800 dark:text-slate-600 cursor-not-allowed"
-            }
-          `}
-          aria-disabled={!hasActiveFilters}
-        >
-          Clear filters
-        </button>
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={onResetFilters}
+            className="
+              inline-flex items-center gap-1 rounded-full border
+              border-slate-200 bg-white px-3 py-1.5 text-xs
+              text-slate-600 hover:bg-slate-50
+              dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800
+            "
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            <span>Clear filters</span>
+            <span className="rounded-full bg-slate-100 px-1.5 text-[10px] font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+              {activeFiltersCount}
+            </span>
+          </button>
+        )}
 
         <Button
           type="button"
