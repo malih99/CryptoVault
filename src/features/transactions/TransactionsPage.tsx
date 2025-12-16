@@ -19,6 +19,7 @@ import type {
   TxSortKey,
   TxSortDir,
 } from "./types";
+import { useSettings } from "../settings/useSettings";
 
 const DEFAULTS = {
   search: "",
@@ -35,6 +36,10 @@ const LS_KEY = "tx:list:view";
 
 export default function TransactionsPage() {
   const [params, setParams] = useSearchParams();
+
+  // settings (for display currency)
+  const { settings } = useSettings();
+  const displayCurrency = settings.currency === "usd" ? "USD" : "EUR";
 
   // 1) snapshot از localStorage
   const [persisted, setPersisted] = useLocalStorage(LS_KEY, {
@@ -145,26 +150,7 @@ export default function TransactionsPage() {
   // 7) Pagination meta (نمایش در footer)
   const totalPages = Math.max(1, Math.ceil(totalTx / pageSize));
 
-  // 8) تعداد فیلترهای فعال (برای نشان دادن کنار Reset filters)
-  const activeFiltersCount = useMemo(() => {
-    let count = 0;
-    if (search.trim()) count += 1;
-    if (typeFilter !== DEFAULTS.type) count += 1;
-    if (tokenFilter !== DEFAULTS.token) count += 1;
-    if (statusFilter !== DEFAULTS.status) count += 1;
-    return count;
-  }, [search, typeFilter, tokenFilter, statusFilter]);
-
-  // 9) Reset filters handler
-  const handleResetFilters = () => {
-    setSearch(DEFAULTS.search);
-    setTypeFilter(DEFAULTS.type);
-    setTokenFilter(DEFAULTS.token);
-    setStatusFilter(DEFAULTS.status);
-    setPage(DEFAULTS.page);
-  };
-
-  // 10) Write state -> URL
+  // 8) Write state -> URL
   useEffect(() => {
     const next = new URLSearchParams();
     if (search) next.set("search", search);
@@ -191,7 +177,7 @@ export default function TransactionsPage() {
     pageSize,
   ]);
 
-  // 11) Persist به localStorage
+  // 9) Persist به localStorage
   useEffect(() => {
     setPersisted({
       search,
@@ -215,7 +201,7 @@ export default function TransactionsPage() {
     setPersisted,
   ]);
 
-  // 12) Sort header handler
+  // 10) Sort header handler
   const onRequestSort = (key: TxSortKey) => {
     setSortKey((prevKey) => {
       if (prevKey !== key) {
@@ -326,7 +312,7 @@ export default function TransactionsPage() {
                 Total Volume (current page)
               </div>
               <div className="mt-1.5 text-xl font-semibold text-slate-900 dark:text-slate-50 sm:text-2xl">
-                {formatCurrency(totalVolume, "USD")}
+                {formatCurrency(totalVolume, displayCurrency)}
               </div>
             </Card>
 
@@ -335,7 +321,7 @@ export default function TransactionsPage() {
                 Avg Transaction (current page)
               </div>
               <div className="mt-1.5 text-xl font-semibold text-slate-900 dark:text-slate-50 sm:text-2xl">
-                {formatCurrency(avgTx, "USD")}
+                {formatCurrency(avgTx, displayCurrency)}
               </div>
             </Card>
 
@@ -353,8 +339,12 @@ export default function TransactionsPage() {
         {/* Analytics */}
         {!isLoading && !isError && (
           <>
-            {/* آنالیتیکس بر اساس آیتم‌های صفحه فعلی */}
-            <TxAnalytics tx={rows} feesByMonth={mockTxFeesByMonth} />
+            {/* Analytics based on current page items */}
+            <TxAnalytics
+              tx={rows}
+              feesByMonth={mockTxFeesByMonth}
+              currency={displayCurrency}
+            />
             <TxQuickFilters
               typeFilter={typeFilter}
               statusFilter={statusFilter}
@@ -377,8 +367,6 @@ export default function TransactionsPage() {
           onStatusChange={setStatusFilter}
           onExport={handleExport}
           availableTokens={availableTokens}
-          onResetFilters={handleResetFilters}
-          activeFiltersCount={activeFiltersCount}
         />
 
         {/* Table */}
@@ -397,12 +385,17 @@ export default function TransactionsPage() {
             sortKey={sortKey}
             sortDir={sortDir}
             onRequestSort={onRequestSort}
+            currency={displayCurrency}
           />
         )}
       </section>
 
       {selectedTx && (
-        <TxDetailsModal tx={selectedTx} onClose={() => setSelectedTx(null)} />
+        <TxDetailsModal
+          tx={selectedTx}
+          onClose={() => setSelectedTx(null)}
+          currency={displayCurrency}
+        />
       )}
     </>
   );
