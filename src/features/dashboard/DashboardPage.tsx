@@ -10,12 +10,19 @@ import QuickActions from "./QuickActions";
 import MarketOverview from "./MarketOverview";
 import NewsAlerts from "./NewsAlerts";
 import { formatCurrency, formatNumber, formatPercent } from "../../lib/format";
+import { useSettings } from "../../features/settings/useSettings";
 
 type RangeKey = "7d" | "30d" | "90d";
 
 export default function DashboardPage() {
   const { t } = useTranslation();
   const [range, setRange] = useState<RangeKey>("30d");
+  const { settings } = useSettings();
+
+  // تبدیل تنظیمات داخلی به کد استاندارد ارز
+  const displayCurrency: "USD" | "EUR" =
+    settings.currency === "eur" ? "EUR" : "USD";
+  const currencySymbol = displayCurrency === "EUR" ? "€" : "$";
 
   // 🔢 نمونه اعداد (در آینده از API/State بیاد)
   const totalValue = 24580;
@@ -35,11 +42,11 @@ export default function DashboardPage() {
   return (
     <div className="mx-auto w-full max-w-[1280px] space-y-6 px-3 sm:px-0">
       {/* KPI row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Stat
           label={t("dashboard.kpi.totalValue")}
-          value={formatCurrency(totalValue, "USD")}
-          right="$"
+          value={formatCurrency(totalValue, displayCurrency)}
+          right={currencySymbol}
         />
         <Stat
           label={t("dashboard.kpi.change24h")}
@@ -53,16 +60,16 @@ export default function DashboardPage() {
         />
         <Stat
           label={t("dashboard.kpi.staked")}
-          value={formatCurrency(stakedUsd, "USD")}
-          right="⛓"
+          value={formatCurrency(stakedUsd, displayCurrency)}
+          right={currencySymbol}
         />
       </div>
 
       {/* Chart + Wallet */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <Card className="p-5 xl:col-span-2">
-          <div className="flex items-center justify-between mb-3">
-            <div className="text-slate-900 dark:text-slate-100 font-medium">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="font-medium text-slate-900 dark:text-slate-100">
               {t("dashboard.portfolioValue")}
             </div>
             <div className="flex gap-2">
@@ -95,23 +102,23 @@ export default function DashboardPage() {
               </button>
             </div>
           </div>
-          <PortfolioLine range={range} />
+          <PortfolioLine range={range} currency={displayCurrency} />
         </Card>
 
-        <Card className="p-5 grid place-items-center text-slate-500 dark:text-slate-400">
+        <Card className="grid place-items-center p-5 text-slate-500 dark:text-slate-400">
           <WalletSummary />
         </Card>
       </div>
 
       {/* Row: Recent / Quick Actions / Market */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
         <RecentActivity />
         <QuickActions />
         <MarketOverview />
       </div>
 
       {/* Row: Assets table + News */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <div className="xl:col-span-2">
           <AssetsTable />
         </div>
