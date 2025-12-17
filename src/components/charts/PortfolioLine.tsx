@@ -1,3 +1,4 @@
+// src/components/charts/PortfolioLine.tsx
 import { useEffect, useMemo, useState } from "react";
 import {
   ResponsiveContainer,
@@ -9,11 +10,13 @@ import {
   CartesianGrid,
 } from "recharts";
 import { mockLine } from "../../lib/api/mock";
+import type { CurrencyCode } from "../../lib/format";
 
 type RangeKey = "7d" | "30d" | "90d";
 
 function useDark() {
   const [isDark, set] = useState(false);
+
   useEffect(() => {
     const el = document.documentElement;
     const apply = () => set(el.classList.contains("dark"));
@@ -22,10 +25,17 @@ function useDark() {
     obs.observe(el, { attributes: true, attributeFilter: ["class"] });
     return () => obs.disconnect();
   }, []);
+
   return isDark;
 }
 
-export function PortfolioLine({ range }: { range: RangeKey }) {
+export function PortfolioLine({
+  range,
+  currency,
+}: {
+  range: RangeKey;
+  currency: CurrencyCode;
+}) {
   const isDark = useDark();
 
   const data = useMemo(() => {
@@ -41,6 +51,9 @@ export function PortfolioLine({ range }: { range: RangeKey }) {
     // 90d یا هر مقدار دیگر → فعلاً کل دیتا
     return mockLine;
   }, [range]);
+
+  const currencySymbol =
+    currency === "EUR" ? "€" : currency === "IRR" ? "﷼" : "$";
 
   return (
     <div className="h-56 sm:h-64 xl:h-[280px]">
@@ -68,7 +81,9 @@ export function PortfolioLine({ range }: { range: RangeKey }) {
             width={44}
             tick={{ fill: "#64748B", fontSize: 11 }}
             tickFormatter={(v: number) =>
-              v >= 1000 ? `$${Math.round(v / 1000)}k` : `$${v}`
+              v >= 1000
+                ? `${currencySymbol}${Math.round(v / 1000)}k`
+                : `${currencySymbol}${v}`
             }
             axisLine={false}
             tickLine={false}
