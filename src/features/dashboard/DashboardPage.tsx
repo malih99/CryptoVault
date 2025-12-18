@@ -11,6 +11,7 @@ import MarketOverview from "./MarketOverview";
 import NewsAlerts from "./NewsAlerts";
 import { formatCurrency, formatNumber, formatPercent } from "../../lib/format";
 import { useDashboardQuery } from "../../features/dashboard/api";
+import { KPICardSkeleton } from "../../components/ui/Skeleton"; // ✅ دوباره اضافه شد
 
 type RangeKey = "7d" | "30d" | "90d";
 
@@ -73,10 +74,10 @@ export default function DashboardPage() {
       {/* KPI row */}
       {isLoading ? (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <Stat.Skeleton />
-          <Stat.Skeleton />
-          <Stat.Skeleton />
-          <Stat.Skeleton />
+          <KPICardSkeleton />
+          <KPICardSkeleton />
+          <KPICardSkeleton />
+          <KPICardSkeleton />
         </div>
       ) : isError ? (
         <Card className="p-4 sm:p-5">
