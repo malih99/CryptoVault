@@ -1,7 +1,7 @@
 import Card from "../../components/ui/Card";
-import { mockRecentActivity } from "../../lib/api/mock";
 import { ArrowDownLeft, ArrowUpRight, RefreshCcw } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import type { ActivityRow } from "../../features/dashboard/api";
 
 function Icon({ type }: { type: "receive" | "send" | "swap" }) {
   const map = {
@@ -12,27 +12,31 @@ function Icon({ type }: { type: "receive" | "send" | "swap" }) {
   return map[type];
 }
 
-export default function RecentActivity() {
+type Props = {
+  items: ActivityRow[];
+};
+
+export default function RecentActivity({ items }: Props) {
   const { t, i18n } = useTranslation();
 
   return (
     <Card className="p-5">
-      <div className="text-slate-900 dark:text-slate-100 font-medium mb-4">
+      <div className="mb-4 font-medium text-slate-900 dark:text-slate-100">
         {t("dashboard.recentActivity")}
       </div>
 
       <ul className="space-y-4">
-        {mockRecentActivity.map((row) => (
+        {items.map((row) => (
           <li key={row.id} className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div
                 className={
-                  "h-9 w-9 rounded-xl grid place-items-center border " +
+                  "grid h-9 w-9 place-items-center rounded-xl border " +
                   (row.type === "send"
-                    ? "bg-rose-500/10 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300 dark:border-rose-500/20"
+                    ? "bg-rose-500/10 text-rose-600 dark:border-rose-500/20 dark:bg-rose-500/15 dark:text-rose-300"
                     : row.type === "swap"
-                    ? "bg-cyan-500/10 text-cyan-600 dark:bg-cyan-500/15 dark:text-cyan-300 dark:border-cyan-500/20"
-                    : "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/20")
+                    ? "bg-cyan-500/10 text-cyan-600 dark:border-cyan-500/20 dark:bg-cyan-500/15 dark:text-cyan-300"
+                    : "bg-emerald-500/10 text-emerald-600 dark:border-emerald-500/20 dark:bg-emerald-500/15 dark:text-emerald-300")
                 }
               >
                 <Icon type={row.type} />

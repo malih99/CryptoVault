@@ -1,22 +1,26 @@
 import Card from "../../components/ui/Card";
-import { mockMarket } from "../../lib/api/mock";
 import { TrendingUp, TrendingDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import type { MarketRow } from "../../features/dashboard/api";
 
-export default function MarketOverview() {
+type Props = {
+  items: MarketRow[];
+};
+
+export default function MarketOverview({ items }: Props) {
   const { t, i18n } = useTranslation();
 
   return (
     <Card className="p-5">
-      <div className="text-slate-900 dark:text-slate-100 font-medium mb-4">
+      <div className="mb-4 font-medium text-slate-900 dark:text-slate-100">
         {t("dashboard.marketOverview")}
       </div>
 
       <ul className="space-y-4">
-        {mockMarket.map((m) => (
+        {items.map((m) => (
           <li key={m.sym} className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 rounded-full bg-emerald-500 grid place-items-center text-sm font-bold text-white">
+              <div className="grid h-9 w-9 place-items-center rounded-full bg-emerald-500 text-sm font-bold text-white">
                 {m.sym[0]}
               </div>
               <div>
@@ -38,7 +42,7 @@ export default function MarketOverview() {
               </div>
               <div
                 className={
-                  "text-xs inline-flex items-center gap-1 " +
+                  "inline-flex items-center gap-1 text-xs " +
                   (m.change >= 0
                     ? "text-emerald-600 dark:text-emerald-400"
                     : "text-rose-600 dark:text-rose-400")

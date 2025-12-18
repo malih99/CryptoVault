@@ -1,4 +1,3 @@
-// src/components/charts/PortfolioLine.tsx
 import { useEffect, useMemo, useState } from "react";
 import {
   ResponsiveContainer,
@@ -9,14 +8,12 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
-import { mockLine } from "../../lib/api/mock";
-import type { CurrencyCode } from "../../lib/format";
+import type { PortfolioPoint } from "../../features/dashboard/api";
 
 type RangeKey = "7d" | "30d" | "90d";
 
 function useDark() {
   const [isDark, set] = useState(false);
-
   useEffect(() => {
     const el = document.documentElement;
     const apply = () => set(el.classList.contains("dark"));
@@ -25,41 +22,37 @@ function useDark() {
     obs.observe(el, { attributes: true, attributeFilter: ["class"] });
     return () => obs.disconnect();
   }, []);
-
   return isDark;
 }
 
 export function PortfolioLine({
   range,
-  currency,
+  data,
 }: {
   range: RangeKey;
-  currency: CurrencyCode;
+  data: PortfolioPoint[];
 }) {
   const isDark = useDark();
 
-  const data = useMemo(() => {
-    const total = mockLine.length;
+  const visibleData = useMemo(() => {
+    const total = data.length;
 
     if (range === "7d") {
-      return mockLine.slice(Math.max(0, total - 7));
+      return data.slice(Math.max(0, total - 7));
     }
     if (range === "30d") {
-      return mockLine.slice(Math.max(0, total - 30));
+      return data.slice(Math.max(0, total - 30));
     }
 
     // 90d یا هر مقدار دیگر → فعلاً کل دیتا
-    return mockLine;
-  }, [range]);
-
-  const currencySymbol =
-    currency === "EUR" ? "€" : currency === "IRR" ? "﷼" : "$";
+    return data;
+  }, [range, data]);
 
   return (
     <div className="h-56 sm:h-64 xl:h-[280px]">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
-          data={data}
+          data={visibleData}
           margin={{ top: 12, right: 12, bottom: 8, left: 0 }}
         >
           <CartesianGrid
@@ -81,9 +74,7 @@ export function PortfolioLine({
             width={44}
             tick={{ fill: "#64748B", fontSize: 11 }}
             tickFormatter={(v: number) =>
-              v >= 1000
-                ? `${currencySymbol}${Math.round(v / 1000)}k`
-                : `${currencySymbol}${v}`
+              v >= 1000 ? `$${Math.round(v / 1000)}k` : `$${v}`
             }
             axisLine={false}
             tickLine={false}

@@ -1,7 +1,7 @@
 import Card from "../../components/ui/Card";
-import { mockNews } from "../../lib/api/mock";
 import { TrendingUp, Info, AlertTriangle } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import type { NewsRow } from "../../features/dashboard/api";
 
 function Badge({ kind }: { kind: "trend" | "info" | "alert" }) {
   const map = {
@@ -20,34 +20,37 @@ function Badge({ kind }: { kind: "trend" | "info" | "alert" }) {
   } as const;
   const { Icon, cls } = map[kind];
   return (
-    <div className={`h-8 w-8 rounded-xl grid place-items-center border ${cls}`}>
+    <div className={`grid h-8 w-8 place-items-center rounded-xl border ${cls}`}>
       <Icon size={16} />
     </div>
   );
 }
 
-export default function NewsAlerts() {
+type Props = {
+  items: NewsRow[];
+};
+
+export default function NewsAlerts({ items }: Props) {
   const { t } = useTranslation();
 
   return (
     <Card className="p-5">
-      <div className="flex items-center justify-between mb-4">
-        <div className="text-slate-900 dark:text-slate-100 font-medium">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="font-medium text-slate-900 dark:text-slate-100">
           {t("dashboard.newsAlerts")}
         </div>
         <span
-          className="text-xs px-2 py-0.5 rounded-full
-                         bg-emerald-100 text-emerald-700 border border-emerald-200
-                         dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/20"
+          className="rounded-full border border-emerald-200 bg-emerald-100 px-2 py-0.5 text-xs
+                     text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/15 dark:text-emerald-300"
         >
-          3 {t("dashboard.new")}
+          {items.length} {t("dashboard.new")}
         </span>
       </div>
 
       <ul className="space-y-4">
-        {mockNews.map((n) => (
+        {items.map((n) => (
           <li key={n.id} className="flex items-start gap-3">
-            <Badge kind={n.kind as any} />
+            <Badge kind={n.kind as "trend" | "info" | "alert"} />
             <div>
               <div className="text-slate-800 dark:text-slate-100">
                 {n.title}
@@ -55,7 +58,7 @@ export default function NewsAlerts() {
               <div className="text-xs text-slate-600 dark:text-slate-400">
                 {n.desc}
               </div>
-              <div className="text-xs text-slate-500 mt-1">{n.time}</div>
+              <div className="mt-1 text-xs text-slate-500">{n.time}</div>
             </div>
           </li>
         ))}
