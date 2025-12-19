@@ -1,9 +1,22 @@
 import Card from "../../components/ui/Card";
 import { TrendingUp, Info, AlertTriangle } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import type { NewsRow } from "../../features/dashboard/api";
 
-function Badge({ kind }: { kind: "trend" | "info" | "alert" }) {
+type NewsKind = "trend" | "info" | "alert";
+
+type NewsItem = {
+  id: string;
+  kind: NewsKind;
+  title: string;
+  desc: string;
+  time: string;
+};
+
+type Props = {
+  items: NewsItem[];
+};
+
+function Badge({ kind }: { kind: NewsKind }) {
   const map = {
     trend: {
       Icon: TrendingUp,
@@ -18,17 +31,15 @@ function Badge({ kind }: { kind: "trend" | "info" | "alert" }) {
       cls: "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/20",
     },
   } as const;
+
   const { Icon, cls } = map[kind];
+
   return (
-    <div className={`grid h-8 w-8 place-items-center rounded-xl border ${cls}`}>
+    <div className={`h-8 w-8 rounded-xl grid place-items-center border ${cls}`}>
       <Icon size={16} />
     </div>
   );
 }
-
-type Props = {
-  items: NewsRow[];
-};
 
 export default function NewsAlerts({ items }: Props) {
   const { t } = useTranslation();
@@ -39,30 +50,39 @@ export default function NewsAlerts({ items }: Props) {
         <div className="font-medium text-slate-900 dark:text-slate-100">
           {t("dashboard.newsAlerts")}
         </div>
-        <span
-          className="rounded-full border border-emerald-200 bg-emerald-100 px-2 py-0.5 text-xs
-                     text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/15 dark:text-emerald-300"
-        >
-          {items.length} {t("dashboard.new")}
-        </span>
+        {!!items.length && (
+          <span
+            className="rounded-full border border-emerald-200 bg-emerald-100
+                       px-2 py-0.5 text-xs text-emerald-700
+                       dark:border-emerald-500/20 dark:bg-emerald-500/15 dark:text-emerald-300"
+          >
+            {items.length} {t("dashboard.new")}
+          </span>
+        )}
       </div>
 
-      <ul className="space-y-4">
-        {items.map((n) => (
-          <li key={n.id} className="flex items-start gap-3">
-            <Badge kind={n.kind as "trend" | "info" | "alert"} />
-            <div>
-              <div className="text-slate-800 dark:text-slate-100">
-                {n.title}
+      {!items.length ? (
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          {t("dashboard.newsEmpty", "No news or alerts at the moment.")}
+        </p>
+      ) : (
+        <ul className="space-y-4">
+          {items.map((n) => (
+            <li key={n.id} className="flex items-start gap-3">
+              <Badge kind={n.kind} />
+              <div>
+                <div className="text-slate-800 dark:text-slate-100">
+                  {n.title}
+                </div>
+                <div className="text-xs text-slate-600 dark:text-slate-400">
+                  {n.desc}
+                </div>
+                <div className="mt-1 text-xs text-slate-500">{n.time}</div>
               </div>
-              <div className="text-xs text-slate-600 dark:text-slate-400">
-                {n.desc}
-              </div>
-              <div className="mt-1 text-xs text-slate-500">{n.time}</div>
-            </div>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      )}
     </Card>
   );
 }
