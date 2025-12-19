@@ -8,34 +8,42 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
-import type { PortfolioPoint } from "../../features/dashboard/api";
 
 type RangeKey = "7d" | "30d" | "90d";
 
+type Point = {
+  day: string;
+  value: number;
+};
+
 function useDark() {
   const [isDark, set] = useState(false);
+
   useEffect(() => {
     const el = document.documentElement;
     const apply = () => set(el.classList.contains("dark"));
     apply();
+
     const obs = new MutationObserver(apply);
     obs.observe(el, { attributes: true, attributeFilter: ["class"] });
+
     return () => obs.disconnect();
   }, []);
+
   return isDark;
 }
 
-export function PortfolioLine({
-  range,
-  data,
-}: {
+type Props = {
   range: RangeKey;
-  data: PortfolioPoint[];
-}) {
+  data: Point[];
+};
+
+export function PortfolioLine({ range, data }: Props) {
   const isDark = useDark();
 
-  const visibleData = useMemo(() => {
+  const filtered = useMemo(() => {
     const total = data.length;
+    if (!total) return [];
 
     if (range === "7d") {
       return data.slice(Math.max(0, total - 7));
@@ -44,15 +52,24 @@ export function PortfolioLine({
       return data.slice(Math.max(0, total - 30));
     }
 
-    // 90d یا هر مقدار دیگر → فعلاً کل دیتا
+    // 90d و دیگر مقادیر → فعلاً کل دیتا
     return data;
-  }, [range, data]);
+  }, [data, range]);
+
+  // اگر دیتایی نداریم، اسکلت ساده
+  if (!filtered.length) {
+    return (
+      <div className="flex h-56 items-center justify-center text-xs text-slate-400 sm:h-64 xl:h-[280px]">
+        No data for the selected range.
+      </div>
+    );
+  }
 
   return (
     <div className="h-56 sm:h-64 xl:h-[280px]">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
-          data={visibleData}
+          data={filtered}
           margin={{ top: 12, right: 12, bottom: 8, left: 0 }}
         >
           <CartesianGrid
