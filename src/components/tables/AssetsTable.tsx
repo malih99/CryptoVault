@@ -1,34 +1,57 @@
 import Card from "../ui/Card";
 import { T, THEAD, TBODY, TR, TH, TD } from "../ui/Table";
 import { useTranslation } from "react-i18next";
-import type { HoldingRow } from "../../features/dashboard/api";
+
+type AssetRow = {
+  sym: string;
+  name: string;
+  price: number;
+  qty: number;
+  value: number;
+  change: number;
+};
 
 type Props = {
-  rows: HoldingRow[];
+  rows: AssetRow[];
 };
 
 export default function AssetsTable({ rows }: Props) {
   const { t, i18n } = useTranslation();
 
+  const locale = i18n.language === "fa" ? "fa-IR" : "en-US";
+
+  if (!rows.length) {
+    return (
+      <Card className="p-5">
+        <div className="mb-2 text-slate-900 dark:text-slate-100 font-medium">
+          {t("dashboard.assets")}
+        </div>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          {t("dashboard.assetsEmpty", "No assets to display yet.")}
+        </p>
+      </Card>
+    );
+  }
+
   return (
     <Card className="p-5">
-      <div className="mb-3 font-medium text-slate-900 dark:text-slate-100">
+      <div className="text-slate-900 dark:text-slate-100 font-medium mb-3">
         {t("dashboard.assets")}
       </div>
 
       {/* Mobile (cards) */}
-      <ul className="space-y-3 sm:hidden">
+      <ul className="sm:hidden space-y-3">
         {rows.map((r) => (
           <li
             key={r.sym}
-            className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+            className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm p-3"
           >
             <div className="flex items-center gap-3">
-              <div className="grid h-8 w-8 place-items-center rounded-full bg-emerald-500 text-xs font-bold text-white">
+              <div className="h-8 w-8 rounded-full bg-emerald-500 grid place-items-center text-xs font-bold text-white">
                 {r.sym[0]}
               </div>
               <div className="flex-1">
-                <div className="font-medium text-slate-900 dark:text-slate-100">
+                <div className="text-slate-900 dark:text-slate-100 font-medium">
                   {r.sym}
                 </div>
                 <div className="text-xs text-slate-500 dark:text-slate-400">
@@ -46,36 +69,28 @@ export default function AssetsTable({ rows }: Props) {
             </div>
 
             <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
-              <div className="rounded-lg bg-slate-50 p-2 dark:bg-slate-800/60">
+              <div className="rounded-lg bg-slate-50 dark:bg-slate-800/60 p-2">
                 <div className="text-xs text-slate-500 dark:text-slate-400">
                   {t("dashboard.price")}
                 </div>
                 <div className="text-slate-800 dark:text-slate-100">
-                  $
-                  {r.price.toLocaleString(
-                    i18n.language === "fa" ? "fa-IR" : "en-US"
-                  )}
+                  ${r.price.toLocaleString(locale)}
                 </div>
               </div>
-              <div className="rounded-lg bg-slate-50 p-2 dark:bg-slate-800/60">
+              <div className="rounded-lg bg-slate-50 dark:bg-slate-800/60 p-2">
                 <div className="text-xs text-slate-500 dark:text-slate-400">
                   {t("dashboard.holdings")}
                 </div>
                 <div className="text-slate-800 dark:text-slate-100">
-                  {r.qty.toLocaleString(
-                    i18n.language === "fa" ? "fa-IR" : "en-US"
-                  )}
+                  {r.qty.toLocaleString(locale)}
                 </div>
               </div>
-              <div className="col-span-2 rounded-lg bg-slate-50 p-2 dark:bg-slate-800/60">
+              <div className="rounded-lg bg-slate-50 dark:bg-slate-800/60 p-2 col-span-2">
                 <div className="text-xs text-slate-500 dark:text-slate-400">
                   {t("dashboard.value")}
                 </div>
                 <div className="text-slate-800 dark:text-slate-100">
-                  $
-                  {r.value.toLocaleString(
-                    i18n.language === "fa" ? "fa-IR" : "en-US"
-                  )}
+                  ${r.value.toLocaleString(locale)}
                 </div>
               </div>
             </div>
@@ -84,7 +99,7 @@ export default function AssetsTable({ rows }: Props) {
       </ul>
 
       {/* Desktop (table) */}
-      <div className="hidden overflow-x-auto sm:block">
+      <div className="hidden sm:block overflow-x-auto">
         <T className="min-w-[720px]">
           <THEAD>
             <TR>
@@ -92,7 +107,7 @@ export default function AssetsTable({ rows }: Props) {
               <TH>{t("dashboard.price")}</TH>
               <TH>{t("dashboard.holdings")}</TH>
               <TH>{t("dashboard.value")}</TH>
-              <TH className="pr-2 text-right">{t("dashboard.change")}</TH>
+              <TH className="text-right pr-2">{t("dashboard.change")}</TH>
             </TR>
           </THEAD>
           <TBODY>
@@ -100,11 +115,11 @@ export default function AssetsTable({ rows }: Props) {
               <TR key={r.sym}>
                 <TD className="pl-2">
                   <div className="flex items-center gap-3">
-                    <div className="grid h-7 w-7 place-items-center rounded-full bg-emerald-500 text-xs font-bold text-white">
+                    <div className="h-7 w-7 rounded-full bg-emerald-500 grid place-items-center text-xs font-bold text-white">
                       {r.sym[0]}
                     </div>
                     <div>
-                      <div className="font-medium text-slate-900 dark:text-slate-100">
+                      <div className="text-slate-900 dark:text-slate-100 font-medium">
                         {r.sym}
                       </div>
                       <div className="text-xs text-slate-500 dark:text-slate-400">
@@ -113,24 +128,10 @@ export default function AssetsTable({ rows }: Props) {
                     </div>
                   </div>
                 </TD>
-                <TD>
-                  $
-                  {r.price.toLocaleString(
-                    i18n.language === "fa" ? "fa-IR" : "en-US"
-                  )}
-                </TD>
-                <TD>
-                  {r.qty.toLocaleString(
-                    i18n.language === "fa" ? "fa-IR" : "en-US"
-                  )}
-                </TD>
-                <TD>
-                  $
-                  {r.value.toLocaleString(
-                    i18n.language === "fa" ? "fa-IR" : "en-US"
-                  )}
-                </TD>
-                <TD className="pr-2 text-right">
+                <TD>${r.price.toLocaleString(locale)}</TD>
+                <TD>{r.qty.toLocaleString(locale)}</TD>
+                <TD>${r.value.toLocaleString(locale)}</TD>
+                <TD className="text-right pr-2">
                   <span
                     className={
                       r.change >= 0 ? "text-emerald-600" : "text-rose-500"
