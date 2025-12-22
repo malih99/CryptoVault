@@ -20,6 +20,9 @@ type RawTx = {
   hash: string;
   time: string;
   status: "confirmed" | "pending";
+
+  network?: string;
+  explorer_url?: string;
 };
 
 type ApiResponseRaw = {
@@ -59,16 +62,51 @@ function parseAmountString(input: unknown): number {
   return sign * parseFloat(m[0]);
 }
 
+function getDefaultExplorerBase(network?: string): string {
+  const n = (network || "ethereum").toLowerCase();
+
+  switch (n) {
+    case "ethereum":
+    case "mainnet":
+      return "https://etherscan.io/tx/";
+    case "polygon":
+    case "matic":
+      return "https://polygonscan.com/tx/";
+    case "bsc":
+    case "binance":
+      return "https://bscscan.com/tx/";
+    case "arbitrum":
+      return "https://arbiscan.io/tx/";
+    case "optimism":
+      return "https://optimistic.etherscan.io/tx/";
+    default:
+      return "https://etherscan.io/tx/";
+  }
+}
+
 function adaptRawTx(raw: RawTx): TxRecord {
+  const amount = parseAmountString(raw.amount);
+  const value = parseUsdString(raw.value);
+  const network = raw.network || "ethereum";
+
+  // اگر بک‌اند explorer_url داده بود، از همون استفاده می‌کنیم،
+  // وگرنه با توجه به network لینک می‌سازیم
+  const explorerUrl =
+    raw.explorer_url && raw.explorer_url.trim().length > 0
+      ? raw.explorer_url
+      : `${getDefaultExplorerBase(network)}${raw.hash}`;
+
   return {
     type: raw.type,
     token: raw.token,
-    amount: parseAmountString(raw.amount),
-    value: parseUsdString(raw.value),
+    amount,
+    value,
     from: raw.from,
     hash: raw.hash,
     time: raw.time,
     status: raw.status,
+    network,
+    explorerUrl,
   };
 }
 
