@@ -6,7 +6,6 @@ import { formatCurrency } from "../../lib/format";
 type Props = {
   tx: TxRecord;
   onClose: () => void;
-  currency: "USD" | "EUR";
 };
 
 function typeLabel(type: TxRecord["type"]) {
@@ -23,7 +22,7 @@ function typeColor(type: TxRecord["type"]) {
   return "bg-amber-50 text-amber-700 dark:bg-amber-900/60 dark:text-amber-300";
 }
 
-export default function TxDetailsModal({ tx, onClose, currency }: Props) {
+export default function TxDetailsModal({ tx, onClose }: Props) {
   const [copied, setCopied] = useState<null | "from" | "hash">(null);
 
   // ESC برای بستن
@@ -71,6 +70,8 @@ export default function TxDetailsModal({ tx, onClose, currency }: Props) {
     }
   };
 
+  const hasExplorer = !!tx.explorerUrl;
+
   return (
     <div
       className="
@@ -96,6 +97,7 @@ export default function TxDetailsModal({ tx, onClose, currency }: Props) {
               </span>
               <span className="text-xs text-slate-500 dark:text-slate-400">
                 {tx.status === "confirmed" ? "Confirmed" : "Pending"}
+                {tx.network && ` · ${tx.network}`}
               </span>
             </div>
             <div className="mt-2 text-base font-semibold text-slate-900 dark:text-slate-50">
@@ -132,10 +134,10 @@ export default function TxDetailsModal({ tx, onClose, currency }: Props) {
           </div>
           <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-900">
             <div className="text-xs text-slate-500 dark:text-slate-400">
-              Value ({currency})
+              Value (USD)
             </div>
             <div className="mt-1 font-medium text-slate-900 dark:text-slate-50">
-              {formatCurrency(tx.value, currency)}
+              {formatCurrency(tx.value, "USD")}
             </div>
           </div>
         </div>
@@ -212,6 +214,21 @@ export default function TxDetailsModal({ tx, onClose, currency }: Props) {
             <div className="rounded-xl bg-slate-50 px-3 py-2 font-mono text-[11px] text-slate-900 dark:bg-slate-900 dark:text-slate-50">
               {tx.hash}
             </div>
+
+            {/* 🔗 لینک بلاک‌اکسپلورر */}
+            {hasExplorer && (
+              <div className="mt-2">
+                <a
+                  href={tx.explorerUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 hover:text-emerald-500 dark:text-emerald-300 dark:hover:text-emerald-200"
+                >
+                  View on block explorer
+                  <ExternalLinkIcon className="h-3.5 w-3.5" />
+                </a>
+              </div>
+            )}
           </div>
         </div>
 
@@ -289,6 +306,43 @@ function CheckIcon({ className = "" }: { className?: string }) {
       />
       <path
         d="M6 10.5L8.5 13l5.5-6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/** آیکون لینک خارجی کوچک */
+function ExternalLinkIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className={className}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path
+        d="M11 3h6v6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9 11l7-7"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M7 5H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-3"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.5"
