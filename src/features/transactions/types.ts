@@ -3,7 +3,6 @@ export type TxStatus = "confirmed" | "pending";
 
 export type TxTypeFilter = "all" | TxType;
 export type TxStatusFilter = "all" | TxStatus;
-
 export type TxSortKey = "time" | "amount" | "value";
 export type TxSortDir = "asc" | "desc";
 
@@ -18,5 +17,6 @@ export type TxRecord = {
   status: TxStatus;
 
   network?: string;
+
   explorerUrl?: string;
 };

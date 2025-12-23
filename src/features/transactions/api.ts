@@ -111,15 +111,15 @@ function adaptRawTx(raw: RawTx): TxRecord {
 }
 
 function adaptMockToRaw(): RawTx[] {
-  return mockTx.map((t) => ({
-    type: t.type,
+  return (mockTx as any[]).map((t) => ({
+    type: (t.type ?? "in") as RawTx["type"],
     token: t.token,
     amount: t.amount,
     value: t.value,
     from: t.from,
     hash: t.hash,
     time: t.time,
-    status: t.status,
+    status: (t.status ?? "confirmed") as RawTx["status"],
   }));
 }
 
