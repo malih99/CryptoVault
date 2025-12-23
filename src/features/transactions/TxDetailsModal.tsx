@@ -70,8 +70,6 @@ export default function TxDetailsModal({ tx, onClose }: Props) {
     }
   };
 
-  const hasExplorer = !!tx.explorerUrl;
-
   return (
     <div
       className="
@@ -87,7 +85,7 @@ export default function TxDetailsModal({ tx, onClose }: Props) {
         {/* Header */}
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span
                 className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${typeColor(
                   tx.type
@@ -97,8 +95,15 @@ export default function TxDetailsModal({ tx, onClose }: Props) {
               </span>
               <span className="text-xs text-slate-500 dark:text-slate-400">
                 {tx.status === "confirmed" ? "Confirmed" : "Pending"}
-                {tx.network && ` · ${tx.network}`}
               </span>
+              {tx.network && (
+                <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                  Network:{" "}
+                  <span className="ml-1 font-medium text-slate-800 dark:text-slate-100">
+                    {tx.network}
+                  </span>
+                </span>
+              )}
             </div>
             <div className="mt-2 text-base font-semibold text-slate-900 dark:text-slate-50">
               {tx.token} · {tx.amount}
@@ -215,19 +220,21 @@ export default function TxDetailsModal({ tx, onClose }: Props) {
               {tx.hash}
             </div>
 
-            {/* 🔗 لینک بلاک‌اکسپلورر */}
-            {hasExplorer && (
-              <div className="mt-2">
-                <a
-                  href={tx.explorerUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600 hover:text-emerald-500 dark:text-emerald-300 dark:hover:text-emerald-200"
-                >
-                  View on block explorer
-                  <ExternalLinkIcon className="h-3.5 w-3.5" />
-                </a>
-              </div>
+            {tx.explorerUrl && (
+              <a
+                href={tx.explorerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="
+                  mt-2 inline-flex items-center gap-1 rounded-lg
+                  border border-slate-200 px-3 py-1.5 text-xs font-medium
+                  text-slate-700 hover:bg-slate-50
+                  dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800
+                "
+              >
+                <ExternalLinkIcon className="h-3.5 w-3.5" />
+                <span>View on explorer</span>
+              </a>
             )}
           </div>
         </div>
@@ -316,7 +323,7 @@ function CheckIcon({ className = "" }: { className?: string }) {
   );
 }
 
-/** آیکون لینک خارجی کوچک */
+/** آیکون لینک خارجی (Explorer) */
 function ExternalLinkIcon({ className = "" }: { className?: string }) {
   return (
     <svg
@@ -326,7 +333,7 @@ function ExternalLinkIcon({ className = "" }: { className?: string }) {
       focusable="false"
     >
       <path
-        d="M11 3h6v6"
+        d="M8 4h8v8"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.5"
@@ -334,20 +341,23 @@ function ExternalLinkIcon({ className = "" }: { className?: string }) {
         strokeLinejoin="round"
       />
       <path
-        d="M9 11l7-7"
+        d="M9.5 10.5 16 4"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <path
-        d="M7 5H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-3"
+      <rect
+        x="4"
+        y="4"
+        width="8"
+        height="8"
+        rx="2"
+        ry="2"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
       />
     </svg>
   );
